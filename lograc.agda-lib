@@ -1,0 +1,5 @@
+name: lograc
+include:
+  agda-stdlib/src
+  agda-categories/src
+  project
