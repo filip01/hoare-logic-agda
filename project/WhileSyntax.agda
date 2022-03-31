@@ -1,38 +1,45 @@
+open import Data.Integer
+
 module WhileSyntax (L : Set) where
 
-open import Data.Nat
-
-infixl 4 -ₚ_
-infix 3 Intₚ
-infix 3 Locₚ
-infixl 5 _+ₚ_
-
 -- Arithemtic expressions
-data AExprₚ : Set where
-    Intₚ : ℕ → AExprₚ
-    Locₚ : L → AExprₚ
-    -ₚ_ : AExprₚ → AExprₚ
-    _+ₚ_ : AExprₚ → AExprₚ → AExprₚ
 
-test = (Intₚ 10) +ₚ (Intₚ 20)
+infixl 4 -ₕ_
+infix 3 intₕ
+infix 3 locₕ
+infixl 5 _+ₕ_
 
-infixl 4 ¬ₚ_ 
-infixl 5 _∧ₚ_
-infixl 6 _∨ₚ_
+data AExprₕ : Set where
+    intₕ : ℤ → AExprₕ
+    locₕ : L → AExprₕ
+    -ₕ_ : AExprₕ → AExprₕ
+    _+ₕ_ : AExprₕ → AExprₕ → AExprₕ
 
-data BExprₚ : Set where
-    Trueₚ : BExprₚ
-    Falseₚ : BExprₚ
-    ¬ₚ_ : BExprₚ → BExprₚ
-    _∧ₚ_ : BExprₚ → BExprₚ → BExprₚ
-    _∨ₚ_ : BExprₚ → BExprₚ → BExprₚ
-    _<ₚ_ : AExprₚ → AExprₚ → BExprₚ
+test = (intₕ (+ 10)) +ₕ (intₕ (+ 20))
 
-data Cmdₚ : Set where
-    Passₚ : Cmdₚ
-    _|ₚ_ : Cmdₚ → Cmdₚ → Cmdₚ
-    Ifₚ_Then_Else_ : BExprₚ → Cmdₚ → Cmdₚ → Cmdₚ
+-- Boolean expressions
 
-test' = Passₚ |ₚ Passₚ
-test'' = Ifₚ Trueₚ Then Passₚ Else Passₚ
+infixl 4 ¬ₕ_ 
+infixl 5 _∧ₕ_
+infixl 6 _∨ₕ_
 
+data BExprₕ : Set where
+    trueₕ : BExprₕ
+    falseₕ : BExprₕ
+    ¬ₕ_ : BExprₕ → BExprₕ
+    _∧ₕ_ : BExprₕ → BExprₕ → BExprₕ
+    _∨ₕ_ : BExprₕ → BExprₕ → BExprₕ
+    _≤ₕ_ : AExprₕ → AExprₕ → BExprₕ
+
+-- Commands
+
+data Cmdₕ : Set where
+    passₕ : Cmdₕ
+    _|ₕ_ : Cmdₕ → Cmdₕ → Cmdₕ
+    _:=ₕ_ : L → AExprₕ → Cmdₕ
+    ifₕ_then_else_ : BExprₕ → Cmdₕ → Cmdₕ → Cmdₕ
+    forₕ_doo_ : AExprₕ → Cmdₕ → Cmdₕ
+    _orₕ_ : Cmdₕ → Cmdₕ → Cmdₕ  
+
+test' = passₕ |ₕ passₕ
+test'' = ifₕ trueₕ then passₕ else passₕ 
