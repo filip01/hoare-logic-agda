@@ -16,11 +16,12 @@ module PQSemantics (AtomicFormula : Set) where
 open import Data.Product
 
 import Relation.Binary.PropositionalEquality as Eq
-open Eq renaming ([_] to [|_|])
-open Eq.≡-Reasoning
+open Eq using (_≡_; refl; sym; trans; cong; cong₂; subst; inspect) renaming ([_] to [|_|])
+open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; step-≡˘; _∎)
 
 open import Data.Nat using (ℕ ; suc ; _≟_) renaming (_<ᵇ_ to _ℕ<ᵇ_)
 open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_∣ to abs; _≟_ to _≟ℤ_)
+open import Data.Bool
 
 {-
    Importing the deeply embedded propositional logic together with its
@@ -93,15 +94,22 @@ State = L → ℤ
 postulate ⟦_⟧ₑ : AExprₚ → State → ℤ
 
 _=ₑₕ_ : ℤ → ℤ → HProp
-x =ₑₕ y = {!   !}
+x =ₑₕ y = ⟨ x ≡ y , (λ {refl refl → refl}) ⟩
 
 _<ₑₕ_ : ℤ → ℤ → HProp
-x <ₑₕ y = {!   !}
+x <ₑₕ y = ⟨ (x ≤ᵇ y) ≡ true , ≤ᵇ≡true-is-prop x y ⟩
+   where
+      ≤ᵇ≡true-is-prop : (x y : ℤ) → is-proposition ((x ≤ᵇ y) ≡ true)
+      ≤ᵇ≡true-is-prop x y p q with x ≤ᵇ y
+      ≤ᵇ≡true-is-prop x y refl refl | true = refl
+{-
+x <ₑₕ y with x ≤ᵇ y
+... | b = ⟨ (x ≤ᵇ y) ≡ true , (λ p q → {!   !}) ⟩
+-}
 
 ⟦_⟧ : Formula → State → ℙ
--- ⟦ ` x ⟧ S = {!   !}
-⟦ ⊤ ⟧ S = ⊤ʰ
-⟦ ⊥ ⟧ S = ⊥ʰ
+⟦ ⊤ ⟧ s = ⊤ʰ
+⟦ ⊥ ⟧ s = ⊥ʰ
 ⟦ P₁ ∧ P₂ ⟧ S = ⟦ P₁ ⟧ S ∧ʰ ⟦ P₂ ⟧ S
 ⟦ P₁ ∨ P₂ ⟧ S = ⟦ P₁ ⟧ S ∨ʰ ⟦ P₂ ⟧ S
 ⟦ P₁ ⇒ P₂ ⟧ S = ⟦ P₁ ⟧ S ⇒ʰ ⟦ P₂ ⟧ S
@@ -112,4 +120,10 @@ x <ₑₕ y = {!   !}
    The interpretation function is also extended to hypotheses.
 -}
 
--- ⟦_⟧ₑ : Hypotheses → Env → ℙ             -- unicode \[[ \]] \_e
+⟦_⟧ₕ : Hypotheses → State → ℙ
+⟦ [] ⟧ₕ s = ⊤ʰ
+⟦ P ∷ Δ ⟧ₕ s = ⟦ P ⟧ s ∧ʰ ⟦ Δ ⟧ₕ s
+
+⟦_⊢_⟧ₓ : (Δ : Hypotheses) → (P : Formula) → {t : Δ ⊢ P}
+     → {s : State} → ⟦ Δ ⟧ₕ s ≡ ⊤ʰ → ⟦ P ⟧ s ≡ ⊤ʰ
+⟦ Δ ⊢ P ⟧ₓ {t = t} {s = s} d = {!   !}
