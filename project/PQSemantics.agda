@@ -52,7 +52,7 @@ open import HProp
    get the superscript symbol `ᵇ` in unicode by typing \^b.
 -}
 
--- open import Sol5.≤-Reasoning
+-- open import ≤-Reasoning
 
 {-
    The universe of truth values into which we interpret our logic.
@@ -124,6 +124,26 @@ x <ₑₕ y with x ≤ᵇ y
 ⟦ [] ⟧ₕ s = ⊤ʰ
 ⟦ P ∷ Δ ⟧ₕ s = ⟦ P ⟧ s ∧ʰ ⟦ Δ ⟧ₕ s
 
-⟦_⊢_⟧ₓ : (Δ : Hypotheses) → (P : Formula) → {t : Δ ⊢ P}
-     → {s : State} → ⟦ Δ ⟧ₕ s ≡ ⊤ʰ → ⟦ P ⟧ s ≡ ⊤ʰ
-⟦ Δ ⊢ P ⟧ₓ {t = t} {s = s} d = {!   !}
+⟦_⟧ₓ : {Δ : Hypotheses} → {φ : Formula} → (Δ ⊢ φ) → 
+      ∀ {s : State} → proof (⟦ Δ ⟧ₕ s) -> proof (⟦ φ ⟧ s)
+
+⟦ weaken {Δ₁} {Δ₂} φ {ψ} h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.contract φ h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.exchange φ₁ φ₂ h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.hyp _ ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.⊤-intro ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.⊥-elim h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.∧-intro h h₁ ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.∧-elim₁ h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.∧-elim₂ h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.∨-intro₁ h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.∨-intro₂ h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.∨-elim h h₁ h₂ ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.⇒-intro h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.⇒-elim h h₁ ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.=ₑ-intro ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.=ₑ-refl h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.=ₑ-trans h h₁ ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.<ₑ-add h ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.+ₚ-zero ⟧ₓ {s} p = {!   !}
+⟦ PQDeduction.+ₚ-comm ⟧ₓ {s} p = {!   !}
