@@ -12,10 +12,11 @@
    and its natural deduction proof system over a type of atomic formulaes.
 -}
 
-module PQDeduction (AtomicFormula : Set) where
+module PQDeduction where
 
 open import Data.List  using (List; []; _∷_; [_]; _++_) public
 open import Data.Nat
+open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_)
 
 open import HProp
 
@@ -24,10 +25,12 @@ infix 3 _ₚ
 infix 3 Locₚ
 infixl 5 _+ₚ_
 
+-- TODO: Expression can be an integer.
+-- TODO: It might be good idea to parameterise what is a location.
 
 -- Arithemtic expressions
 data AExprₚ : Set where
-    _ₚ : ℕ → AExprₚ
+    _ₚ : ℤ → AExprₚ
     Locₚ : ℕ → AExprₚ
     -ₚ_ : AExprₚ → AExprₚ
     _+ₚ_ : AExprₚ → AExprₚ → AExprₚ
@@ -217,7 +220,7 @@ data _⊢_ : (Δ : Hypotheses) → (φ : Formula) → Set where    -- unicode \v
    +ₚ-zero : {Δ : Hypotheses}
            → {x : AExprₚ}
            ------------------------
-           → Δ ⊢ x +ₚ (zero ₚ) =ₑ x
+           → Δ ⊢ x +ₚ ((+ zero) ₚ) =ₑ x
 
    +ₚ-comm : {Δ : Hypotheses}
             → {x y : AExprₚ}
@@ -299,4 +302,4 @@ cut-derivable : {Δ : Hypotheses}
               ------------------
               → Δ ⊢ ψ
 
-cut-derivable d₁ d₂ = ⇒-elim (⇒-intro d₂) d₁ 
+cut-derivable d₁ d₂ = ⇒-elim (⇒-intro d₂) d₁  
