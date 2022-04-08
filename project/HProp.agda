@@ -91,3 +91,16 @@ _⇒ʰ_ : HProp → HProp → HProp
 
 ∀ʰ : (A : Set) → (A → HProp) → HProp
 ∀ʰ A ϕ = ⟨ (∀ x → proof (ϕ x)) , (λ f g → fun-ext (λ x → is-prop (ϕ x) (f x) (g x))) ⟩
+
+
+∧ʰ-proj₁ : (a b : HProp) → proof (a ∧ʰ b) → proof (a)
+∧ʰ-proj₁ _ _ (x , y) = x
+
+∧ʰ-proj₂ : (a b : HProp) → proof (a ∧ʰ b) → proof (b)
+∧ʰ-proj₂ _ _ (x , y) = y
+
+∨ʰ-inj₁ : (a b : HProp) → proof a → proof (a ∨ʰ b)
+∨ʰ-inj₁ _ _ p = ∣ inj₁ p ∣
+
+∨ʰ-inj₂ : (a b : HProp) → proof b → proof (a ∨ʰ b)
+∨ʰ-inj₂ _ _ p = ∣ inj₂ p ∣
