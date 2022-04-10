@@ -3,7 +3,7 @@ module HProp where
 open import Level
 
 open import Data.Product hiding (∃)
-open import Data.Sum
+open import Data.Sum renaming (map to ⊎-map)
 open import Data.Empty
 open import Data.Unit
 
@@ -91,3 +91,32 @@ _⇒ʰ_ : HProp → HProp → HProp
 
 ∀ʰ : (A : Set) → (A → HProp) → HProp
 ∀ʰ A ϕ = ⟨ (∀ x → proof (ϕ x)) , (λ f g → fun-ext (λ x → is-prop (ϕ x) (f x) (g x))) ⟩
+
+
+∧ʰ-proj₁ : (a b : HProp) → proof (a ∧ʰ b) → proof (a)
+∧ʰ-proj₁ _ _ (x , y) = x
+
+∧ʰ-proj₂ : (a b : HProp) → proof (a ∧ʰ b) → proof (b)
+∧ʰ-proj₂ _ _ (x , y) = y
+
+∨ʰ-inj₁ : (a b : HProp) → proof a → proof (a ∨ʰ b)
+∨ʰ-inj₁ _ _ p = ∣ inj₁ p ∣
+
+∨ʰ-inj₂ : (a b : HProp) → proof b → proof (a ∨ʰ b)
+∨ʰ-inj₂ _ _ p = ∣ inj₂ p ∣
+
+∨ʰ-cong : (a b : HProp) → {c d : HProp} → (f : proof a → proof c) → (g : proof b → proof d)
+        → proof (a ∨ʰ b) → proof (c ∨ʰ d)
+∨ʰ-cong a b {c} {d} f g p = ∥∥-elim ((∥∥-is-proposition (proof c ⊎ proof d)))
+  (λ { (inj₁ x) → ∣ inj₁ (f x) ∣
+     ; (inj₂ y) → ∣ inj₂ (g y) ∣ } ) p
+
+∨ʰ-idem : {a : HProp} → proof (a ∨ʰ a) → proof (a)
+∨ʰ-idem {⟨ proof₁ , is-prop₁ ⟩} p = ∥∥-elim is-prop₁ (λ { (inj₁ x) → x
+                                                       ; (inj₂ y) → y }) p
+
+∧ʰ-distribˡ : (a b c : HProp) → proof (a ∧ʰ (b ∨ʰ c)) → proof ((a ∧ʰ b) ∨ʰ (a ∧ʰ c))
+∧ʰ-distribˡ a b c (fst , snd) 
+  = ∥∥-elim (∥∥-is-proposition (Σ (proof a) (λ v → proof b) ⊎ Σ (proof a) 
+           (λ v → proof c))) (λ { (inj₁ x) → ∣ inj₁ (fst , x) ∣
+                                ; (inj₂ y) → ∣ inj₂ (fst , y) ∣  }) snd
