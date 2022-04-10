@@ -1,13 +1,6 @@
-{-
-   Allowing overlapping instances for `∈` to use in `hyp`.
-
-   Warning: If used carelessly, could lead to exponential
-   slowdown and looping behaviour during instance search.
--}
-
 {-# OPTIONS --overlapping-instances #-}
 
-module PQSemantics (AtomicFormula : Set) where
+module PQSemantics where
 
 {-
    Imports from the standard library.
@@ -29,74 +22,18 @@ open import Data.Unit
 
 {-
    Importing the deeply embedded propositional logic together with its
-   natural dediction proof system, parametrised by atomic formulae type.
+   natural dediction proof system, parametrised by location L.
 -}
-
-import PQDeduction
-open module ND = PQDeduction AtomicFormula 
-   renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᵣ; ⊤ to ⊤ᶠ)
 
 open import HProp
+open import WhileSemantics using (⟦_⟧ₐ; L)
 
-{-
-   Importing a custom inequational reasoning module that provides a
-   `beginᵇ` and `∎ᵇ` style reasoning for the `≤` relation on `Bool`.
-
-   A typical proof with this equational reasoning machinery looks like
-
-     beginᵇ
-       lhs
-     ≤⟨ reason why `lhs ≤ intermediate-result` ⟩
-       intermediate-result
-     ≡ᵇ⟨ reason why `intermediate-result ≡ rhs` ⟩
-       rhs
-     ∎ᵇ
-
-   Notice the superscript `ᵇ` to distinguish this reasoning from
-   `begin` and `∎` style equational reasoning for `≡`. You can
-   get the superscript symbol `ᵇ` in unicode by typing \^b.
--}
-
--- open import ≤-Reasoning
-
-{-
-   The universe of truth values into which we interpret our logic.
-
-   As we are interpreting propositional logic, we shall just use
-   booleans. For predicate logics (e.g., in your projects), you will
-   want to choose something different as the interpretation target.
-
-   While the propositional logic we interpret is intuitionistic,
-   this boolean semantics also models classical logical axioms.
-   We will make this claim precise in Exercise 9 below.
--}
+import PQDeduction
+open module ND = PQDeduction L renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᵣ; ⊤ to ⊤ᶠ)
 
 ℙ = HProp   -- unicode \bP
 
-{-
-   Environments/valuations assigning truth values to atomic formulae.
--}
-
-L = ℕ
--- Env = AtomicFormula → ℙ
 State = L → ℤ
-
-----------------
--- Exercise 6 --
-----------------
-
-{-
-   Define logical implication between boolean values.
--}
-
--- _implies_ : ℙ → ℙ → ℙ
--- b₁ implies b₂ = not b₁ or b₂
-
-{-
-   The recursively defined interpretation function for formulae.
--}
-
-postulate ⟦_⟧ₑ : AExprₚ → State → ℤ
 
 _=ₑₕ_ : ℤ → ℤ → HProp
 x =ₑₕ y = ⟨ x ≡ y , (λ {refl refl → refl}) ⟩
@@ -112,14 +49,18 @@ x <ₑₕ y with x ≤ᵇ y
 ... | b = ⟨ (x ≤ᵇ y) ≡ true , (λ p q → {!   !}) ⟩
 -}
 
+{-
+   The recursively defined interpretation function for formulae.
+-}
+
 ⟦_⟧ : Formula → State → ℙ
 ⟦ ⊤ᶠ ⟧ s = ⊤ʰ
 ⟦ ⊥ᶠ ⟧ s = ⊥ʰ
 ⟦ P₁ ∧ P₂ ⟧ S = ⟦ P₁ ⟧ S ∧ʰ ⟦ P₂ ⟧ S
 ⟦ P₁ ∨ P₂ ⟧ S = ⟦ P₁ ⟧ S ∨ʰ ⟦ P₂ ⟧ S
 ⟦ P₁ ⇒ P₂ ⟧ S = ⟦ P₁ ⟧ S ⇒ʰ ⟦ P₂ ⟧ S
-⟦ x₁ =ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₑ S) =ₑₕ (⟦ x₂ ⟧ₑ S)
-⟦ x₁ <ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₑ S) <ₑₕ (⟦ x₂ ⟧ₑ S)
+⟦ x₁ =ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₐ S) =ₑₕ (⟦ x₂ ⟧ₐ S)
+⟦ x₁ <ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₐ S) <ₑₕ (⟦ x₂ ⟧ₐ S)
 
 {-
    The interpretation function is also extended to hypotheses.
@@ -129,12 +70,6 @@ x <ₑₕ y with x ≤ᵇ y
 ⟦ [] ⟧ₕ s = ⊤ʰ
 ⟦ P ∷ Δ ⟧ₕ s = ⟦ P ⟧ s ∧ʰ ⟦ Δ ⟧ₕ s
 
-{-
-∧ʰ-proof : {a : HProp} {b : HProp}
-         → proof (a) → proof (b) → proof (a ∧ʰ b)
-
-∧ʰ-proof {a} {b} p q = p , q
--}
 
 ⟦⟧ₕ-++ : (Δ₁ Δ₂ : Hypotheses) → {s : State}
       → proof (⟦ Δ₁ ++ Δ₂ ⟧ₕ s) → proof (⟦ Δ₁ ⟧ₕ s ∧ʰ ⟦ Δ₂ ⟧ₕ s)
@@ -213,6 +148,15 @@ sym⟦⟧ₕ-++ (x ∷ Δ₁) Δ₂ {s} ((pₓ , p₁) , p₂) = pₓ , sym⟦�
 
 ⟦ =ₑ-trans h₁ h₂ ⟧ₓ {s} p = trans (⟦ h₁ ⟧ₓ p) (⟦ h₂ ⟧ₓ p)
 
-⟦ <ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = {!   !}
-⟦ +ₚ-zero ⟧ₓ {s} p = {!   !}
-⟦ +ₚ-comm ⟧ₓ {s} p = {!   !}      
+⟦ <ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = 
+   begin
+      {!   !}
+   ≡⟨ {!   !} ⟩
+      {!   !}
+   ≡⟨ ⟦ h ⟧ₓ p ⟩
+      true
+   ∎
+
+⟦ +ₚ-zero {Δ} {x} ⟧ₓ {s} p = {!   !}
+
+⟦ +ₚ-comm ⟧ₓ {s} p = {!   !}
