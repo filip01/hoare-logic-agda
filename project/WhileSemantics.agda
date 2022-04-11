@@ -54,32 +54,56 @@ module WhileSemantics where
 
     bool_expr_test = ⟦ (intₕ (+ 10) ≤ₕ intₕ (+ 9)) ∧ₕ trueₕ ⟧ₒ (λ _ → (+ 0))
 
-    -- Define how commands should be interpreted.
+    -- Define how commands should be interpreted (only state).
 
     ListMonad = (Monad.T (Monad-List lzero) state)
 
-
-    ⟦_⟧ : Cmdₕ → state → ListMonad
-    ⟦ passₕ ⟧ Γ = (λ _ → (+ 0)) ∷ []
-    ⟦ c₁ |ₕ c₂ ⟧ Γ = foldr _++_ [] (map (λ s → (⟦ c₂ ⟧ s)) (⟦ c₁ ⟧ Γ))
-    ⟦ l :=ₕ a ⟧ Γ = aux l a' Γ ∷ []
+    ⟦_⟧ : Cmdₕ → state → state
+    ⟦ passₕ ⟧ Γ = (λ _ → (+ 0))
+    ⟦ c₁ |ₕ c₂ ⟧ Γ = ⟦ c₂ ⟧ (⟦ c₁ ⟧ Γ)
+    ⟦ l :=ₕ a ⟧ Γ = toSt l (⟦ a ⟧ₐ Γ) Γ
         where
-            a' = (⟦ a ⟧ₐ Γ)
-            aux : L → ℤ → state → state
-            aux l a' Γ l' with (Dec.does (l ≟ l'))
+            toSt : L → ℤ → state → state
+            toSt l a' Γ l' with (Dec.does (l ≟ l'))
             ... | false = Γ l
             ... | true = a'
     ⟦ ifₕ b then c₁ else c₂ ⟧ Γ with ⟦ b ⟧ₒ Γ
     ... | false = (⟦ c₂ ⟧ Γ)
     ... | true = (⟦ c₁ ⟧ Γ)
-
     -- TODO: Change the for loop to "for to do" form.
     ⟦ forₕ a doo c ⟧ Γ = (aux ( abs (⟦ a ⟧ₐ Γ) ) c Γ)
         where
-            aux : ℕ  → Cmdₕ → state → ListMonad
-            aux ℕ.zero c s = s ∷ []
-            aux (suc a') c s = foldr _++_ [] (map (λ s' → aux a' c s') (⟦ c ⟧ Γ))
+            aux : ℕ  → Cmdₕ → state → state
+            aux ℕ.zero c s = s
+            aux (suc a') c s = aux a' c (⟦ c ⟧ Γ)
 
-    ⟦ c₁ orₕ c₂ ⟧ Γ = (⟦ c₁ ⟧ Γ) ++ (⟦ c₂ ⟧ Γ)
+    -- ⟦ c₁ orₕ c₂ ⟧ Γ = ⟦ c₁ ⟧ Γ) ++ (⟦ c₂ ⟧ Γ)
 
-    cmd-test = ⟦ (7 :=ₕ (intₕ (+ 10))) ⟧ (λ _ → (+ 0))
+    cmd-test = ⟦ (7 :=ₕ intₕ (+ 10)) ⟧ (λ _ → (+ 0))
+    cmd-test' = ⟦ 7 :=ₕ intₕ (+ 10) |ₕ 8 :=ₕ ((locₕ 7) +ₕ (intₕ (+ 13))) ⟧ (λ _ → (+ 0)) 8
+
+
+    -- Define how commands should be interpreted (state + nondeterminism).
+
+    -- ⟦_⟧ : Cmdₕ → state → ListMonad
+    -- ⟦ passₕ ⟧ Γ = (λ _ → (+ 0)) ∷ []
+    -- ⟦ c₁ |ₕ c₂ ⟧ Γ = foldr _++_ [] (map (λ s → (⟦ c₂ ⟧ s)) (⟦ c₁ ⟧ Γ))
+    -- ⟦ l :=ₕ a ⟧ Γ = aux l a' Γ ∷ []
+    --     where
+    --         a' = (⟦ a ⟧ₐ Γ)
+    --         aux : L → ℤ → state → state
+    --         aux l a' Γ l' with (Dec.does (l ≟ l'))
+    --         ... | false = Γ l
+    --         ... | true = a'
+    -- ⟦ ifₕ b then c₁ else c₂ ⟧ Γ with ⟦ b ⟧ₒ Γ
+    -- ... | false = (⟦ c₂ ⟧ Γ)
+    -- ... | true = (⟦ c₁ ⟧ Γ)
+
+    -- -- TODO: Change the for loop to "for to do" form.
+    -- ⟦ forₕ a doo c ⟧ Γ = (aux ( abs (⟦ a ⟧ₐ Γ) ) c Γ)
+    --     where
+    --         aux : ℕ  → Cmdₕ → state → ListMonad
+    --         aux ℕ.zero c s = s ∷ []
+    --         aux (suc a') c s = foldr _++_ [] (map (λ s' → aux a' c s') (⟦ c ⟧ Γ))
+
+    -- ⟦ c₁ orₕ c₂ ⟧ Γ = (⟦ c₁ ⟧ Γ) ++ (⟦ c₂ ⟧ Γ) 

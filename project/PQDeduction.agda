@@ -256,4 +256,4 @@ cut-derivable : {Δ : Hypotheses}
               ------------------
               → Δ ⊢ ψ
 
-cut-derivable d₁ d₂ = ⇒-elim (⇒-intro d₂) d₁ 
+cut-derivable d₁ d₂ = ⇒-elim (⇒-intro d₂) d₁  

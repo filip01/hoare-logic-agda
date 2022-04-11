@@ -1,5 +1,7 @@
 {-# OPTIONS --overlapping-instances #-}
 
+{-# OPTIONS --allow-unsolved-metas #-}
+
 module PQSemantics where
 
 {-
