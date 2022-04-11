@@ -24,6 +24,11 @@ module HoareLogicSoundness where
     open WhileSemantics renaming (⟦_⟧ to ⟦_⟧ᶜ)
     open PQDeductionNat
 
+    is-proposition' : {s : State} {b₁ b₂ : BExprₕ} → 
+      (∥ proof (⟦ toFormulaₚ b₁ ⟧ s) ⊎ proof (⟦ toFormulaₚ b₂ ⟧ s) ∥) →
+        (proof (⟦ toFormulaₚ b₁ ⟧ s) ⊎ proof (⟦ toFormulaₚ b₂ ⟧ s))
+    is-proposition' {s} {b₁} {b₂} p = ∥∥-elim {! is-proposition  !} {!   !} {!   !}
+    
     interleaved mutual
 
       aux  : {s : State} → {b : BExprₕ} → (⟦ b ⟧ₒ s ≡ true) → (proof (⟦ toFormulaₚ b ⟧ s))
@@ -49,7 +54,9 @@ module HoareLogicSoundness where
       ... | true | false | Eq.[ eq₁ ] | Eq.[ eq₂ ] = ∣ inj₁ (aux {s} {b₁} eq₁) ∣
       ... | true | true | Eq.[ eq₁ ] | Eq.[ eq₂ ] = ∣ inj₁ (aux {s} {b₁} eq₁) ∣
       aux' {s} {b₁ ∨ₕ b₂} x x' with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
-      ... | false | false | Eq.[ eq₁ ] | Eq.[ eq₂ ] = aux' {s} {b₁} eq₁ {!   !}
+      ... | false | false | Eq.[ eq₁ ] | Eq.[ eq₂ ] with (is-proposition' {s} {b₁} {b₂} x')
+      ... | inj₁ y = aux' {s} {b₁} eq₁ y
+      ... | inj₂ y = aux' {s} {b₂} eq₂ y
       
 
     soundness : {P Q : Formula} → {C : Cmdₕ}

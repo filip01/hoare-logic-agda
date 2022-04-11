@@ -71,9 +71,9 @@ module HoareLogicForWhile where
         for-statement : {ϕ ψ : Formula}
                       → {a : AExprₕ}
                       → {c : Cmdₕ}
-                      → ⟪ ϕ ⟫ c ⟪ ψ ⟫
+                      → ⟪ ϕ ⟫ c ⟪ ϕ ⟫
                       ----------------
-                      → ⟪ ϕ ⟫ (forₕ a doo c) ⟪ ψ ⟫
+                      → ⟪ ϕ ⟫ (forₕ a doo c) ⟪ ϕ ⟫
 
         implied       : {Δ : Hypotheses}
                       → {ϕ ϕ' ψ ψ' : Formula}
