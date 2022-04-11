@@ -1,6 +1,13 @@
 import WhileSyntax
-open import PQDeduction
+open import WhileSemantics using (⟦_⟧ₒ)
+import PQDeduction
 open import PQSubstitution using (_[_/_]ᶠ ; _[_/_]ᵉ)
+
+open import Data.Bool using (Bool; true; false)
+
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl; sym; trans; cong; cong₂; subst; [_]; inspect)
+open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
 open import Data.Nat using (ℕ)
 
@@ -15,16 +22,14 @@ module HoareLogicForWhile where
     L = ℕ
 
     -- Introduce WHILE syntax that uses natural numbers as location.
-    module WhileSyntaxNat = WhileSyntax L
+    open module WhileSyntaxNat = WhileSyntax L
 
-    open WhileSyntaxNat
+    -- Intrudce PQ syntax that uses natural numbers as location.
+    open module PQDeductionNat = PQDeduction L
 
-    -- Covert AExprₕ to AExprₚ.
-    toAExprₚ : AExprₕ → AExprₚ
-    toAExprₚ (intₕ x) = x ₚ
-    toAExprₚ (locₕ x) = Locₚ x
-    toAExprₚ (-ₕ a) = -ₚ (toAExprₚ a)
-    toAExprₚ (a₁ +ₕ a₂) = (toAExprₚ a₁) +ₚ (toAExprₚ a₂)
+    toₚ : Bool → Formula
+    toₚ false = ⊥
+    toₚ true = ⊤
 
     -- Covert BExprₕ to Formula.
     toFormulaₚ : BExprₕ → Formula
@@ -33,7 +38,7 @@ module HoareLogicForWhile where
     toFormulaₚ (¬ₕ b) = ¬ (toFormulaₚ b)
     toFormulaₚ (b₁ ∧ₕ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨ₕ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ₕ a₂) = (toAExprₚ a₁) <ₑ (toAExprₚ a₂)
+    toFormulaₚ (a₁ ≤ₕ a₂) = a₁ <ₑ a₂ -- TODO: Wrong conversion.
 
 
     -- Hoare triples
@@ -51,14 +56,14 @@ module HoareLogicForWhile where
                       → {a : AExprₕ}
                       → {l : L}
                       ------------------
-                      → ⟪ ϕ [ (toAExprₚ a) / l ]ᶠ ⟫ l :=ₕ a ⟪ ψ ⟫
+                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l :=ₕ a ⟪ ψ ⟫
 
         if-statement  : {ϕ ψ : Formula}
                       → {b : BExprₕ}
                       → {c₁ c₂ : Cmdₕ}
                       → ⟪ ϕ ∧ (toFormulaₚ b) ⟫ c₁ ⟪ ψ ⟫
-                      → ⟪ ϕ ∧ (¬ (toFormulaₚ b))⟫ c₂ ⟪ ψ ⟫
-                      ------------------
+                      → ⟪ ϕ ∧ ¬ (toFormulaₚ b) ⟫ c₂ ⟪ ψ ⟫
+                      -----------------------------------
                       → ⟪ ϕ ⟫ ifₕ b then c₁ else c₂ ⟪ ψ ⟫
 
         -- TODO: Not sure if this is right rule for for statement.
