@@ -52,11 +52,11 @@ module HoareLogicForWhile where
                       → ⟪ ϕ ⟫ (c₁ |ₕ c₂) ⟪ ψ ⟫
 
 
-        assignment    : {ϕ ψ : Formula}
+        assignment    : {ϕ : Formula}
                       → {a : AExprₕ}
                       → {l : L}
                       ------------------
-                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l :=ₕ a ⟪ ψ ⟫
+                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l :=ₕ a ⟪ ϕ ⟫
 
         if-statement  : {ϕ ψ : Formula}
                       → {b : BExprₕ}
