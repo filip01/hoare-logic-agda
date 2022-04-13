@@ -66,8 +66,6 @@ module HoareLogicForWhile where
                       -----------------------------------
                       → ⟪ ϕ ⟫ ifₕ b then c₁ else c₂ ⟪ ψ ⟫
 
-        -- TODO: Not sure if this is right rule for for statement.
-        --          We need to somehow include the information that the `c` is performed only `a` times.
         for-statement : {ϕ ψ : Formula}
                       → {a : AExprₕ}
                       → {c : Cmdₕ}
@@ -79,8 +77,8 @@ module HoareLogicForWhile where
                       → {ϕ ϕ' ψ ψ' : Formula}
                       → {a : AExprₕ}
                       → {c : Cmdₕ}
-                      → (Δ ⊢ ϕ' ⇒ ϕ)
-                      → (Δ ⊢ ψ' ⇒ ψ)
+                      → ([] ⊢ ϕ' ⇒ ϕ)
+                      → ([] ⊢ ψ ⇒ ψ')
                       → ⟪ ϕ ⟫ c ⟪ ψ ⟫
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
@@ -109,4 +107,4 @@ module HoareLogicForWhile where
     --                 → {a : AExprₕ}
     --                 → {l : L}
     --                 ------------------
-    --                 → (⟪ prc ⟫ l :=ₕ a ⟪ poc ⟫)  
+    --                 → (⟪ prc ⟫ l :=ₕ a ⟪ poc ⟫)   
