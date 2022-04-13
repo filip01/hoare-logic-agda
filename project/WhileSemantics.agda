@@ -54,10 +54,15 @@ module WhileSemantics where
 
     bool_expr_test = ⟦ (intₕ (+ 10) ≤ₕ intₕ (+ 9)) ∧ₕ trueₕ ⟧ₒ (λ _ → (+ 0))
 
+    -- TODO: Explain
+    forDooAux : ℕ  → Cmdₕ → (state → state) → state → state
+    forDooAux ℕ.zero c stm s = s
+    forDooAux (suc n) c stm s = forDooAux n c stm (stm s)
+
     -- Define how commands should be interpreted (only state).
 
     ListMonad = (Monad.T (Monad-List lzero) state)
-
+    
     ⟦_⟧ : Cmdₕ → state → state
     ⟦ passₕ ⟧ Γ = (λ _ → (+ 0))
     ⟦ c₁ |ₕ c₂ ⟧ Γ = ⟦ c₂ ⟧ (⟦ c₁ ⟧ Γ)
@@ -71,11 +76,7 @@ module WhileSemantics where
     ... | false = (⟦ c₂ ⟧ Γ)
     ... | true = (⟦ c₁ ⟧ Γ)
     -- TODO: Change the for loop to "for to do" form.
-    ⟦ forₕ a doo c ⟧ Γ = (aux ( abs (⟦ a ⟧ₐ Γ) ) c Γ)
-        where
-            aux : ℕ  → Cmdₕ → state → state
-            aux ℕ.zero c s = s
-            aux (suc a') c s = aux a' c (⟦ c ⟧ Γ)
+    ⟦ forₕ a doo c ⟧ Γ = (forDooAux ( abs (⟦ a ⟧ₐ Γ) ) c ⟦ c ⟧ Γ)
 
     -- ⟦ c₁ orₕ c₂ ⟧ Γ = ⟦ c₁ ⟧ Γ) ++ (⟦ c₂ ⟧ Γ)
 
