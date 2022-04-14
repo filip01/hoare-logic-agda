@@ -68,6 +68,84 @@ module HoareLogicSoundness where
 
       bIsTrueFollows  {S} {x₁ ≤ₕ x₂} x = x
       bIsFalseFollows {S} {x₂ ≤ₕ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
+    
+    interleaved mutual
+
+      auxAr  : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
+           →  (⟦ a [ b / l ]ᵉ ⟧ₐ s) ≡ (⟦ a ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s))
+      auxAr {intₕ x} {b} {l} {s} = {!   !}
+      auxAr {locₕ x} {b} {l} {s} = {!   !}
+      auxAr { -ₕ a} {b} {l} {s} = {!   !}
+      auxAr {a +ₕ a₁} {b} {l} {s} = {!   !}
+
+      aux  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
+           → proof (⟦ Q [ a / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s))
+      aux' : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
+           → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s)) → proof (⟦ Q [ a / l ]ᶠ ⟧ s) 
+  
+      aux  {⊤} {a} {l} {s} _ = tt
+      aux' {⊤} {a} {l} {s} _ = tt
+
+      aux {⊥} {a} {l} {s} p = p
+      aux' {⊥} {a} {l} {s} p = p
+
+      aux {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ = aux {Q₂} {a} {l} {s} (p (aux' {Q₁} {a} {l} {s} pQ₁))
+      aux' {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ = aux' {Q₂} {a} {l} {s} (p (aux {Q₁} {a} {l} {s} pQ₁))
+
+      aux {x₁ =ₑ x₂} {a} {l} {s} p =
+        begin
+          ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ sym (auxAr {x₁} {a} {l} {s}) ⟩
+          ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ p ⟩
+          ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ auxAr {x₂} {a} {l} {s} ⟩
+          ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ∎
+      aux' {x₁ =ₑ x₂} {a} {l} {s} p =
+        begin
+          ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ auxAr {x₁} {a} {l} {s} ⟩
+          ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ p ⟩
+          ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ sym ( auxAr {x₂} {a} {l} {s}) ⟩
+          ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
+        ∎
+
+      aux  {Q} {a} {l} {s} p = {!   !}
+      aux' {Q} {a} {l} {s} p = {!   !}
+
+      -- aux {⊥} {a} {l} {s} p = p
+      -- aux {Q₁ ∧ Q₂} {a} {l} {s} p =
+      --   (aux {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p)) ,
+      --   (aux {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p))
+      -- aux {Q₁ ∨ Q₂} {a} {l} {s} p = 
+      --   ∨ʰ-cong
+      --     (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s)
+      --     (aux {Q₁}) (aux {Q₂}) p
+      -- aux {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ = {!  !}
+      -- aux {x₁ =ₑ x₂} {a} {l} {s} p = {!  !}
+        
+      -- aux {x <ₑ x₁} {a} {l} {s} = {!   !}
+
+
+    -- aux : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
+    --     → proof (⟦ Q [ a / l ]ᶠ ⟧ s) ≡ proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s))
+    -- aux {⊤} {a} {l} {s} = refl
+    -- aux {⊥} {a} {l} {s} = refl
+    -- aux {Q₁ ∧ Q₂} {a} {l} {s} =
+    --   begin
+    --     proof (⟦ (Q₁ ∧ Q₂) [ a / l ]ᶠ ⟧ s)
+    --   ≡⟨ ⟩
+    --     proof (⟦ Q₁ ∧ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s))
+    --   ∎
+
+      -- proof (⟦ (Q ND.∧ Q₁) [ a / l ]ᶠ ⟧ s) ≡ proof (⟦ Q ND.∧ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s))
+    -- aux {Q PQDeduction.∨ Q₁} {a} {l} {s} = {!   !}
+    -- aux {Q PQDeduction.⇒ Q₁} {a} {l} {s} = {!   !}
+    -- aux {x PQDeduction.=ₑ x₁} {a} {l} {s} = {!   !}
+    -- aux {x PQDeduction.<ₑ x₁} {a} {l} {s} = {!   !}
 
     --
     -- Soundness
@@ -80,9 +158,11 @@ module HoareLogicSoundness where
                 → proof (⟦ Q ⟧ (⟦ C ⟧ᶜ s))
 
     soundness {P} {Q} {.(_ |ₕ _)} (composition {P} {R} {Q} {c₁} {c₂} h₁ h₂) pP = soundness h₂ (soundness h₁ pP)
-    
-    soundness {.(_ [ _ / _ ]ᶠ)} {Q} {_ :=ₕ _} (assignment {P} {Q} {a}) pP = {!  !}
 
+    soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ₕ a} (assignment {P} {a}) {s} px = aux {Q} {a} {l} {s} px
+    
+    --soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ₕ a} (assignment {P} {a}) {s} px rewrite sym (aux {Q} {a} {l} {s}) = px
+    
     soundness {P} {Q} {ifₕ _ then _ else _} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ₒ s) | inspect ⟦ b ⟧ₒ s 
     ... | false | Eq.[ eq ] = soundness h₂ (pP , λ x → bIsFalseFollows {s} {b} eq x )
     ... | true | Eq.[ eq ] = soundness h₁ (pP , bIsTrueFollows {s} {b} eq)
@@ -101,4 +181,4 @@ module HoareLogicSoundness where
         soundOfForDooAux {ℕ.suc m'} {s} pP' = soundOfForDooAux {m'} {⟦ c ⟧ᶜ s} (soundness h pP')
     
     soundness {P} {Q} {C} (implied {Δ} iP iQ h) {s} pP with ⟦ iP ⟧ₓ {s} tt pP 
-    ... | pϕ = ⟦ iQ ⟧ₓ { ⟦ C ⟧ᶜ s} tt (soundness h {s} pϕ)
+    ... | pϕ = ⟦ iQ ⟧ₓ { ⟦ C ⟧ᶜ s} tt (soundness h {s} pϕ) 

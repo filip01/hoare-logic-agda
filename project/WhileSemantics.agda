@@ -59,6 +59,11 @@ module WhileSemantics where
     forDooAux ℕ.zero c stm s = s
     forDooAux (suc n) c stm s = forDooAux n c stm (stm s)
 
+    toSt : L → ℤ → state → state
+    toSt l a' Γ l' with (Dec.does (l ≟ l'))
+    ... | false = Γ l
+    ... | true = a'
+
     -- Define how commands should be interpreted (only state).
 
     ListMonad = (Monad.T (Monad-List lzero) state)
@@ -67,11 +72,6 @@ module WhileSemantics where
     ⟦ passₕ ⟧ Γ = (λ _ → (+ 0))
     ⟦ c₁ |ₕ c₂ ⟧ Γ = ⟦ c₂ ⟧ (⟦ c₁ ⟧ Γ)
     ⟦ l :=ₕ a ⟧ Γ = toSt l (⟦ a ⟧ₐ Γ) Γ
-        where
-            toSt : L → ℤ → state → state
-            toSt l a' Γ l' with (Dec.does (l ≟ l'))
-            ... | false = Γ l
-            ... | true = a'
     ⟦ ifₕ b then c₁ else c₂ ⟧ Γ with ⟦ b ⟧ₒ Γ
     ... | false = (⟦ c₂ ⟧ Γ)
     ... | true = (⟦ c₁ ⟧ Γ)
