@@ -61,7 +61,7 @@ module WhileSemantics where
 
     toSt : L → ℤ → state → state
     toSt l a' Γ l' with (Dec.does (l ≟ l'))
-    ... | false = Γ l
+    ... | false = Γ l'
     ... | true = a'
 
     -- Define how commands should be interpreted (only state).

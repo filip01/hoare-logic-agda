@@ -14,7 +14,7 @@ module PQSubstitution where
 
     _[_/_]ᵉ : AExprₕ → AExprₕ → ℕ → AExprₕ
     (intₕ x) [ e / l ]ᵉ = (intₕ x)
-    (locₕ x) [ e / l ]ᵉ with (Dec.does (x ≟ l))
+    (locₕ x) [ e / l ]ᵉ with (Dec.does (l ≟ x))
     ... | false = (locₕ x)
     ... | true = e
     (-ₕ a) [ e / l ]ᵉ = (-ₕ (a [ e / l ]ᵉ))
