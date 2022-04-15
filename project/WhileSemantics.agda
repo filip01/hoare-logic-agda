@@ -6,7 +6,6 @@ open import Data.Bool using (Bool; true; false; not; _∧_; _∨_)
 open import Data.List using (List; _∷_; []; _++_; map; foldr)
 open import Relation.Nullary using (Dec)
 
-
 import WhileSyntax
 
 open import ListMonad

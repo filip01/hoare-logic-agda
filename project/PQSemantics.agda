@@ -41,17 +41,17 @@ State = L → ℤ
 _=ₑₕ_ : ℤ → ℤ → HProp
 x =ₑₕ y = ⟨ x ≡ y , (λ {refl refl → refl}) ⟩
 
-{-
 _<ₑₕ_ : ℤ → ℤ → HProp
 x <ₑₕ y = ⟨ (x ≤ᵇ y) ≡ true , ≤ᵇ≡true-is-prop x y ⟩
    where
       ≤ᵇ≡true-is-prop : (x y : ℤ) → is-proposition ((x ≤ᵇ y) ≡ true)
       ≤ᵇ≡true-is-prop x y p q with x ≤ᵇ y
       ≤ᵇ≡true-is-prop x y refl refl | true = refl
--}
 
+{-
 _<ₐ_ : ℤ → ℤ → HProp
 a <ₐ b = ⟨ ∥ a < b ∥  , (∥∥-is-proposition (a < b)) ⟩
+-}
 
 {-
 x <ₑₕ y with x ≤ᵇ y
@@ -69,7 +69,7 @@ x <ₑₕ y with x ≤ᵇ y
 ⟦ P₁ ∨ P₂ ⟧ S = ⟦ P₁ ⟧ S ∨ʰ ⟦ P₂ ⟧ S
 ⟦ P₁ ⇒ P₂ ⟧ S = ⟦ P₁ ⟧ S ⇒ʰ ⟦ P₂ ⟧ S
 ⟦ x₁ =ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₐ S) =ₑₕ (⟦ x₂ ⟧ₐ S)
-⟦ x₁ <ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₐ S) <ₐ (⟦ x₂ ⟧ₐ S)
+⟦ x₁ <ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₐ S) <ₑₕ (⟦ x₂ ⟧ₐ S)
 
 {-
    The interpretation function is also extended to hypotheses.
@@ -157,21 +157,23 @@ sym⟦⟧ₕ-++ (x ∷ Δ₁) Δ₂ {s} ((pₓ , p₁) , p₂) = pₓ , sym⟦�
 
 ⟦ =ₑ-trans h₁ h₂ ⟧ₓ {s} p = trans (⟦ h₁ ⟧ₓ p) (⟦ h₂ ⟧ₓ p)
 
-⟦ <ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = ∥∥-elim 
+-- TODO : explain
+⟦ <ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = T-≡true (≤⇒≤ᵇ( +-monoˡ-≤ (⟦ z ⟧ₐ s) (≤ᵇ⇒≤ {⟦ x ⟧ₐ s } (≡true-T (⟦ h ⟧ₓ p)))))
+   where
+      ≡true-T : {a : Bool} → a ≡ true → T a
+      ≡true-T {true} _ = tt
+
+      T-≡true : {a : Bool} → T a → a ≡ true
+      T-≡true {true} _ = refl
+{-
+   ∥∥-elim 
    (∥∥-is-proposition (⟦ x ⟧ₐ s + ⟦ z ⟧ₐ s < ⟦ y ⟧ₐ s + ⟦ z ⟧ₐ s)) 
    (λ a → ∣ +-monoˡ-< (⟦ z ⟧ₐ s) a ∣) 
    (⟦ h ⟧ₓ p)
-
-{-
-   begin
-      {!   !}
-   ≡⟨ {!   !} ⟩
-      {!   !}
-   ≡⟨ ⟦ h ⟧ₓ p ⟩
-      true
-   ∎
 -}
+   
 
 ⟦ +ₚ-zero {Δ} {x} ⟧ₓ {s} p = +-identityʳ (⟦ x ⟧ₐ s)
 
 ⟦ +ₚ-comm {Δ} {x} {y} ⟧ₓ {s} p = +-comm (⟦ x ⟧ₐ s) (⟦ y ⟧ₐ s)
+  
