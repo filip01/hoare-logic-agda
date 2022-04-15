@@ -5,7 +5,7 @@ open import HoareLogicForWhile
 open import HProp
 open import PQSubstitution
 
-open import Data.Nat using (ℕ)
+open import Data.Nat using (ℕ) renaming (_≟_ to _≟ℕ_)
 open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_∣ to abs)
 open import Data.Bool using (Bool; true; false)
 open import Data.Empty renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᶠ)
@@ -69,83 +69,93 @@ module HoareLogicSoundness where
       bIsTrueFollows  {S} {x₁ ≤ₕ x₂} x = x
       bIsFalseFollows {S} {x₂ ≤ₕ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
     
+    --
+    -- Show how is substitution related to state.
+    --
+
+    subR2StateA : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
+         →  (⟦ a [ b / l ]ᵉ ⟧ₐ s) ≡ (⟦ a ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s))
+    subR2StateA {intₕ x} {b} {l} {s} = refl
+    subR2StateA {locₕ l'} {b} {l} {s} with does (l ≟ℕ l')
+    ... | false = refl
+    ... | true = refl
+    subR2StateA { -ₕ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
+    subR2StateA {a₁ +ₕ a₂} {b} {l} {s} = cong₂ _+_
+      {⟦ a₁ [ b / l ]ᵉ ⟧ₐ s}
+      {⟦ a₁ ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s)}
+        (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
+
     interleaved mutual
 
-      auxAr  : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
-           →  (⟦ a [ b / l ]ᵉ ⟧ₐ s) ≡ (⟦ a ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s))
-      auxAr {intₕ x} {b} {l} {s} = {!   !}
-      auxAr {locₕ x} {b} {l} {s} = {!   !}
-      auxAr { -ₕ a} {b} {l} {s} = {!   !}
-      auxAr {a +ₕ a₁} {b} {l} {s} = {!   !}
-
-      aux  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
-           → proof (⟦ Q [ a / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s))
-      aux' : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
-           → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s)) → proof (⟦ Q [ a / l ]ᶠ ⟧ s) 
+      subR2State  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
+                      → proof (⟦ Q [ a / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s))
+      subR2State' : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
+                      → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s)) → proof (⟦ Q [ a / l ]ᶠ ⟧ s) 
   
-      aux  {⊤} {a} {l} {s} _ = tt
-      aux' {⊤} {a} {l} {s} _ = tt
+      subR2State  {⊤} {a} {l} {s} _ = tt
+      subR2State' {⊤} {a} {l} {s} _ = tt
 
-      aux {⊥} {a} {l} {s} p = p
-      aux' {⊥} {a} {l} {s} p = p
+      subR2State {⊥} {a} {l} {s} p = p
+      subR2State' {⊥} {a} {l} {s} p = p
 
-      aux {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ = aux {Q₂} {a} {l} {s} (p (aux' {Q₁} {a} {l} {s} pQ₁))
-      aux' {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ = aux' {Q₂} {a} {l} {s} (p (aux {Q₁} {a} {l} {s} pQ₁))
+      subR2State {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ =
+        subR2State {Q₂} {a} {l} {s} (p (subR2State' {Q₁} {a} {l} {s} pQ₁))
+      subR2State' {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ =
+        subR2State' {Q₂} {a} {l} {s} (p (subR2State {Q₁} {a} {l} {s} pQ₁))
 
-      aux {x₁ =ₑ x₂} {a} {l} {s} p =
+      subR2State {x₁ =ₑ x₂} {a} {l} {s} p =
         begin
           ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
-        ≡⟨ sym (auxAr {x₁} {a} {l} {s}) ⟩
+        ≡⟨ sym (subR2StateA {x₁} {a} {l} {s}) ⟩
           ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s
         ≡⟨ p ⟩
           ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
-        ≡⟨ auxAr {x₂} {a} {l} {s} ⟩
+        ≡⟨ subR2StateA {x₂} {a} {l} {s} ⟩
           ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
         ∎
-      aux' {x₁ =ₑ x₂} {a} {l} {s} p =
+      subR2State' {x₁ =ₑ x₂} {a} {l} {s} p =
         begin
           ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s
-        ≡⟨ auxAr {x₁} {a} {l} {s} ⟩
+        ≡⟨ subR2StateA {x₁} {a} {l} {s} ⟩
           ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
         ≡⟨ p ⟩
           ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
-        ≡⟨ sym ( auxAr {x₂} {a} {l} {s}) ⟩
+        ≡⟨ sym ( subR2StateA {x₂} {a} {l} {s}) ⟩
           ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
         ∎
 
-      aux  {Q} {a} {l} {s} p = {!   !}
-      aux' {Q} {a} {l} {s} p = {!   !}
+      subR2State {Q₁ ∧ Q₂} {a} {l} {s} p =
+        (subR2State {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p)) ,
+        (subR2State {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p))
+      subR2State' {Q₁ ∧ Q₂} {a} {l} {s} p =
+        (subR2State' {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) p)) ,
+        (subR2State' {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) p))
+      subR2State {Q₁ ∨ Q₂} {a} {l} {s} p = 
+        ∨ʰ-cong
+          (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s)
+          {⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s)} {⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s)}
+          (subR2State {Q₁}) (subR2State {Q₂}) p
+      subR2State' {Q₁ ∨ Q₂} {a} {l} {s} p = ∨ʰ-cong
+        (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s))
+        {⟦ Q₁ [ a / l ]ᶠ ⟧ s} {⟦ Q₂ [ a / l ]ᶠ ⟧ s}
+        (subR2State' {Q₁}) (subR2State' {Q₂}) p
 
-      -- aux {⊥} {a} {l} {s} p = p
-      -- aux {Q₁ ∧ Q₂} {a} {l} {s} p =
-      --   (aux {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p)) ,
-      --   (aux {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p))
-      -- aux {Q₁ ∨ Q₂} {a} {l} {s} p = 
-      --   ∨ʰ-cong
-      --     (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s)
-      --     (aux {Q₁}) (aux {Q₂}) p
-      -- aux {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ = {!  !}
-      -- aux {x₁ =ₑ x₂} {a} {l} {s} p = {!  !}
-        
-      -- aux {x <ₑ x₁} {a} {l} {s} = {!   !}
-
-
-    -- aux : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
-    --     → proof (⟦ Q [ a / l ]ᶠ ⟧ s) ≡ proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s))
-    -- aux {⊤} {a} {l} {s} = refl
-    -- aux {⊥} {a} {l} {s} = refl
-    -- aux {Q₁ ∧ Q₂} {a} {l} {s} =
-    --   begin
-    --     proof (⟦ (Q₁ ∧ Q₂) [ a / l ]ᶠ ⟧ s)
-    --   ≡⟨ ⟩
-    --     proof (⟦ Q₁ ∧ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s))
-    --   ∎
-
-      -- proof (⟦ (Q ND.∧ Q₁) [ a / l ]ᶠ ⟧ s) ≡ proof (⟦ Q ND.∧ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s))
-    -- aux {Q PQDeduction.∨ Q₁} {a} {l} {s} = {!   !}
-    -- aux {Q PQDeduction.⇒ Q₁} {a} {l} {s} = {!   !}
-    -- aux {x PQDeduction.=ₑ x₁} {a} {l} {s} = {!   !}
-    -- aux {x PQDeduction.<ₑ x₁} {a} {l} {s} = {!   !}
+      subR2State {x₁ <ₑ x₂} {a} {l} {s} p =
+        begin
+          ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s) ≤ᵇ ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ cong₂ _≤ᵇ_ (sym (subR2StateA {x₁} {a} {l} {s})) (sym (subR2StateA {x₂} {a} {l} {s})) ⟩
+          ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s ≤ᵇ ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ p ⟩
+          true
+        ∎
+      subR2State' {x₁ <ₑ x₂} {a} {l} {s} p = 
+        begin
+          ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s ≤ᵇ ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ cong₂ _≤ᵇ_ (subR2StateA {x₁} {a} {l} {s}) (subR2StateA {x₂} {a} {l} {s}) ⟩
+          ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s) ≤ᵇ ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ p ⟩
+          true
+        ∎
 
     --
     -- Soundness
@@ -159,10 +169,8 @@ module HoareLogicSoundness where
 
     soundness {P} {Q} {.(_ |ₕ _)} (composition {P} {R} {Q} {c₁} {c₂} h₁ h₂) pP = soundness h₂ (soundness h₁ pP)
 
-    soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ₕ a} (assignment {P} {a}) {s} px = aux {Q} {a} {l} {s} px
-    
-    --soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ₕ a} (assignment {P} {a}) {s} px rewrite sym (aux {Q} {a} {l} {s}) = px
-    
+    soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ₕ a} (assignment {P} {a}) {s} px = subR2State {Q} {a} {l} {s} px
+        
     soundness {P} {Q} {ifₕ _ then _ else _} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ₒ s) | inspect ⟦ b ⟧ₒ s 
     ... | false | Eq.[ eq ] = soundness h₂ (pP , λ x → bIsFalseFollows {s} {b} eq x )
     ... | true | Eq.[ eq ] = soundness h₁ (pP , bIsTrueFollows {s} {b} eq)
@@ -181,4 +189,4 @@ module HoareLogicSoundness where
         soundOfForDooAux {ℕ.suc m'} {s} pP' = soundOfForDooAux {m'} {⟦ c ⟧ᶜ s} (soundness h pP')
     
     soundness {P} {Q} {C} (implied {Δ} iP iQ h) {s} pP with ⟦ iP ⟧ₓ {s} tt pP 
-    ... | pϕ = ⟦ iQ ⟧ₓ { ⟦ C ⟧ᶜ s} tt (soundness h {s} pϕ) 
+    ... | pϕ = ⟦ iQ ⟧ₓ { ⟦ C ⟧ᶜ s} tt (soundness h {s} pϕ)  

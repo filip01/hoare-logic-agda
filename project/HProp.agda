@@ -119,4 +119,4 @@ _⇒ʰ_ : HProp → HProp → HProp
 ∧ʰ-distribˡ a b c (fst , snd) 
   = ∥∥-elim (∥∥-is-proposition (Σ (proof a) (λ v → proof b) ⊎ Σ (proof a) 
            (λ v → proof c))) (λ { (inj₁ x) → ∣ inj₁ (fst , x) ∣
-                                ; (inj₂ y) → ∣ inj₂ (fst , y) ∣  }) snd
+                                ; (inj₂ y) → ∣ inj₂ (fst , y) ∣  }) snd 
