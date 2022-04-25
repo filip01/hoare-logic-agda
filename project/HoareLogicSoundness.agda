@@ -140,7 +140,7 @@ module HoareLogicSoundness where
         {⟦ Q₁ [ a / l ]ᶠ ⟧ s} {⟦ Q₂ [ a / l ]ᶠ ⟧ s}
         (subR2State' {Q₁}) (subR2State' {Q₂}) p
 
-      subR2State {x₁ <ₑ x₂} {a} {l} {s} p =
+      subR2State {x₁ ≤ₑ x₂} {a} {l} {s} p =
         begin
           ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s) ≤ᵇ ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
         ≡⟨ cong₂ _≤ᵇ_ (sym (subR2StateA {x₁} {a} {l} {s})) (sym (subR2StateA {x₂} {a} {l} {s})) ⟩
@@ -148,7 +148,7 @@ module HoareLogicSoundness where
         ≡⟨ p ⟩
           true
         ∎
-      subR2State' {x₁ <ₑ x₂} {a} {l} {s} p = 
+      subR2State' {x₁ ≤ₑ x₂} {a} {l} {s} p = 
         begin
           ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s ≤ᵇ ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
         ≡⟨ cong₂ _≤ᵇ_ (subR2StateA {x₁} {a} {l} {s}) (subR2StateA {x₂} {a} {l} {s}) ⟩

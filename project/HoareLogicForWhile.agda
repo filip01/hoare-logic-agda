@@ -38,7 +38,7 @@ module HoareLogicForWhile where
     toFormulaₚ (¬ₕ b) = ¬ (toFormulaₚ b)
     toFormulaₚ (b₁ ∧ₕ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨ₕ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ₕ a₂) = a₁ <ₑ a₂ -- TODO: Wrong conversion.
+    toFormulaₚ (a₁ ≤ₕ a₂) = a₁ ≤ₑ a₂
 
 
     -- Hoare triples
