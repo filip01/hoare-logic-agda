@@ -33,12 +33,12 @@ module HoareLogicForWhile where
 
     -- Covert BExprₕ to Formula.
     toFormulaₚ : BExprₕ → Formula
-    toFormulaₚ trueₕ = ⊤
-    toFormulaₚ falseₕ = ⊥
-    toFormulaₚ (¬ₕ b) = ¬ (toFormulaₚ b)
-    toFormulaₚ (b₁ ∧ₕ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
-    toFormulaₚ (b₁ ∨ₕ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ₕ a₂) = a₁ <ₑ a₂ -- TODO: Wrong conversion.
+    toFormulaₚ trueʷ = ⊤
+    toFormulaₚ falseʷ = ⊥
+    toFormulaₚ (¬ʷ b) = ¬ (toFormulaₚ b)
+    toFormulaₚ (b₁ ∧ʷ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
+    toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
+    toFormulaₚ (a₁ ≤ʷ a₂) = a₁ <ₑ a₂ -- TODO: Wrong conversion.
 
 
     -- Hoare triples
@@ -49,14 +49,14 @@ module HoareLogicForWhile where
                       → (⟪ ϕ ⟫ c₁ ⟪ θ ⟫)
                       → (⟪ θ ⟫ c₂ ⟪ ψ ⟫)
                       ------------------------
-                      → ⟪ ϕ ⟫ (c₁ |ₕ c₂) ⟪ ψ ⟫
+                      → ⟪ ϕ ⟫ (c₁ |ʷ c₂) ⟪ ψ ⟫
 
 
         assignment    : {ϕ : Formula}
                       → {a : AExprₕ}
                       → {l : L}
                       ------------------
-                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l :=ₕ a ⟪ ϕ ⟫
+                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l :=ʷ a ⟪ ϕ ⟫
 
         if-statement  : {ϕ ψ : Formula}
                       → {b : BExprₕ}
@@ -64,14 +64,14 @@ module HoareLogicForWhile where
                       → ⟪ ϕ ∧ (toFormulaₚ b) ⟫ c₁ ⟪ ψ ⟫
                       → ⟪ ϕ ∧ ¬ (toFormulaₚ b) ⟫ c₂ ⟪ ψ ⟫
                       -----------------------------------
-                      → ⟪ ϕ ⟫ ifₕ b then c₁ else c₂ ⟪ ψ ⟫
+                      → ⟪ ϕ ⟫ ifʷ b then c₁ else c₂ ⟪ ψ ⟫
 
         for-statement : {ϕ ψ : Formula}
                       → {a : AExprₕ}
                       → {c : Cmdₕ}
                       → ⟪ ϕ ⟫ c ⟪ ϕ ⟫
                       ----------------
-                      → ⟪ ϕ ⟫ (forₕ a doo c) ⟪ ϕ ⟫
+                      → ⟪ ϕ ⟫ (forʷ a doo c) ⟪ ϕ ⟫
 
         implied       : {Δ : Hypotheses}
                       → {ϕ ϕ' ψ ψ' : Formula}
@@ -97,7 +97,7 @@ module HoareLogicForWhile where
     --                 → (⟪ prc ⟫ c₁ ⟪ mc ⟫)
     --                 → (⟪ mc ⟫ c₂ ⟪ poc ⟫)
     --                 ------------------------
-    --                 → ⟪ prc ⟫ (c₁ |ₕ c₂) ⟪ poc ⟫
+    --                 → ⟪ prc ⟫ (c₁ |ʷ c₂) ⟪ poc ⟫
 
 
     --     assignment  : {Δ : Hypotheses}
@@ -107,4 +107,4 @@ module HoareLogicForWhile where
     --                 → {a : AExprₕ}
     --                 → {l : L}
     --                 ------------------
-    --                 → (⟪ prc ⟫ l :=ₕ a ⟪ poc ⟫)   
+    --                 → (⟪ prc ⟫ l :=ʷ a ⟪ poc ⟫)   

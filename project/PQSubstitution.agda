@@ -13,12 +13,12 @@ module PQSubstitution where
 
 
     _[_/_]ᵉ : AExprₕ → AExprₕ → ℕ → AExprₕ
-    (intₕ x) [ e / l ]ᵉ = (intₕ x)
-    (locₕ x) [ e / l ]ᵉ with (Dec.does (l ≟ x))
-    ... | false = (locₕ x)
+    (intʷ x) [ e / l ]ᵉ = (intʷ x)
+    (locʷ x) [ e / l ]ᵉ with (Dec.does (l ≟ x))
+    ... | false = (locʷ x)
     ... | true = e
-    (-ₕ a) [ e / l ]ᵉ = (-ₕ (a [ e / l ]ᵉ))
-    (a₁ +ₕ a₂) [ e / l ]ᵉ = ((a₁ [ e / l ]ᵉ) +ₕ (a₂ [ e / l ]ᵉ))
+    (-ʷ a) [ e / l ]ᵉ = (-ʷ (a [ e / l ]ᵉ))
+    (a₁ +ʷ a₂) [ e / l ]ᵉ = ((a₁ [ e / l ]ᵉ) +ʷ (a₂ [ e / l ]ᵉ))
 
     _[_/_]ᶠ : Formula → AExprₕ → ℕ → Formula
     ⊤ [ e / l ]ᶠ = ⊤

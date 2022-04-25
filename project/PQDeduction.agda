@@ -201,17 +201,17 @@ data _⊢_ : (Δ : Hypotheses) → (φ : Formula) → Set where    -- unicode \v
           → {x y z : AExprₕ}
           → Δ ⊢ x <ₑ y
           --------------------------
-          → Δ ⊢ (x +ₕ z) <ₑ (y +ₕ z)
+          → Δ ⊢ (x +ʷ z) <ₑ (y +ʷ z)
 
    +ₚ-zero : {Δ : Hypotheses}
            → {x : AExprₕ}
            ------------------------
-           → Δ ⊢ x +ₕ (intₕ (+ 0)) =ₑ x
+           → Δ ⊢ x +ʷ (intʷ (+ 0)) =ₑ x
 
    +ₚ-comm : {Δ : Hypotheses}
             → {x y : AExprₕ}
             ----------------------
-            → Δ ⊢ x +ₕ y =ₑ y +ₕ x
+            → Δ ⊢ x +ʷ y =ₑ y +ʷ x
 
 {-
    We define negation and logical equivalence as syntactic sugar.
