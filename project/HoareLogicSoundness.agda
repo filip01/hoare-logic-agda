@@ -41,33 +41,33 @@ module HoareLogicSoundness where
       -- If `b` evaluates to false, then there does NOT exist a witness of `⟦ toFormulaₚ b ⟧ s`.
       bIsFalseFollows : {s : State} → {b : BExprₕ} → (⟦ b ⟧ₒ s ≡ false) → ¬ᶠ (proof (⟦ toFormulaₚ b ⟧ s))
 
-      bIsTrueFollows  {s} {trueₕ} p = tt
-      bIsFalseFollows {s} {trueₕ} ()
+      bIsTrueFollows  {s} {trueʷ} p = tt
+      bIsFalseFollows {s} {trueʷ} ()
     
-      bIsTrueFollows  {s} {¬ₕ b} p x with ⟦ b ⟧ₒ s | inspect ⟦ b ⟧ₒ s
+      bIsTrueFollows  {s} {¬ʷ b} p x with ⟦ b ⟧ₒ s | inspect ⟦ b ⟧ₒ s
       ... | false | Eq.[ eq ] = bIsFalseFollows {s} {b} eq  x
-      bIsFalseFollows {s} {¬ₕ b} p x with ⟦ b ⟧ₒ s | inspect ⟦ b ⟧ₒ s
+      bIsFalseFollows {s} {¬ʷ b} p x with ⟦ b ⟧ₒ s | inspect ⟦ b ⟧ₒ s
       ... | true  | Eq.[ eq ] = x (bIsTrueFollows {s} {b} eq)
 
-      bIsTrueFollows  {s} {b₁ ∧ₕ b₂} x with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
+      bIsTrueFollows  {s} {b₁ ∧ʷ b₂} x with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
       ... | true  | true  | Eq.[ eq₁ ] | Eq.[ eq₂ ] = bIsTrueFollows {s} {b₁} eq₁ , bIsTrueFollows {s} {b₂} eq₂
-      bIsFalseFollows {s} {b₁ ∧ₕ b₂} x x' with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
+      bIsFalseFollows {s} {b₁ ∧ʷ b₂} x x' with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
       ... | false | false | Eq.[ eq₁ ] | _          = bIsFalseFollows {s} {b₁} eq₁ (proj₁ x')
       ... | false | true  | Eq.[ eq₁ ] | _          = bIsFalseFollows {s} {b₁} eq₁ (proj₁ x')
       ... | true  | false | _          | Eq.[ eq₂ ] = bIsFalseFollows {s} {b₂} eq₂ (proj₂ x')
 
-      bIsTrueFollows  {s} {b₁ ∨ₕ b₂} x with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
+      bIsTrueFollows  {s} {b₁ ∨ʷ b₂} x with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
       ... | false | true  | _          | Eq.[ eq₂ ] = ∣ inj₂ (bIsTrueFollows {s} {b₂} eq₂) ∣
       ... | true  | false | Eq.[ eq₁ ] | _          = ∣ inj₁ (bIsTrueFollows {s} {b₁} eq₁) ∣
       ... | true  | true  | Eq.[ eq₁ ] | _          = ∣ inj₁ (bIsTrueFollows {s} {b₁} eq₁) ∣
-      bIsFalseFollows {s} {b₁ ∨ₕ b₂} x x' with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
+      bIsFalseFollows {s} {b₁ ∨ʷ b₂} x x' with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
       ... | false | false | Eq.[ eq₁ ] | Eq.[ eq₂ ] =
         ∥∥-elim (λ x ())
           (λ { (inj₁ y) → bIsFalseFollows {s} {b₁} eq₁ y
              ; (inj₂ y) →  bIsFalseFollows {s} {b₂} eq₂ y } ) x'
 
-      bIsTrueFollows  {S} {x₁ ≤ₕ x₂} x = x
-      bIsFalseFollows {S} {x₂ ≤ₕ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
+      bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x = x
+      bIsFalseFollows {S} {x₂ ≤ʷ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
     
     --
     -- Show how is substitution related to state.
@@ -75,12 +75,12 @@ module HoareLogicSoundness where
 
     subR2StateA : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
          →  (⟦ a [ b / l ]ᵉ ⟧ₐ s) ≡ (⟦ a ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s))
-    subR2StateA {intₕ x} {b} {l} {s} = refl
-    subR2StateA {locₕ l'} {b} {l} {s} with does (l ≟ℕ l')
+    subR2StateA {intʷ x} {b} {l} {s} = refl
+    subR2StateA {locʷ l'} {b} {l} {s} with does (l ≟ℕ l')
     ... | false = refl
     ... | true = refl
-    subR2StateA { -ₕ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
-    subR2StateA {a₁ +ₕ a₂} {b} {l} {s} = cong₂ _+_
+    subR2StateA { -ʷ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
+    subR2StateA {a₁ +ʷ a₂} {b} {l} {s} = cong₂ _+_
       {⟦ a₁ [ b / l ]ᵉ ⟧ₐ s}
       {⟦ a₁ ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s)}
         (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
@@ -167,16 +167,16 @@ module HoareLogicSoundness where
                 → proof (⟦ P ⟧ s)
                 → proof (⟦ Q ⟧ (⟦ C ⟧ᶜ s))
 
-    soundness {P} {Q} {.(_ |ₕ _)} (composition {P} {R} {Q} {c₁} {c₂} h₁ h₂) pP = soundness h₂ (soundness h₁ pP)
+    soundness {P} {Q} {.(_ |ʷ _)} (composition {P} {R} {Q} {c₁} {c₂} h₁ h₂) pP = soundness h₂ (soundness h₁ pP)
 
-    soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ₕ a} (assignment {P} {a}) {s} px = subR2State {Q} {a} {l} {s} px
+    soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {P} {a}) {s} px = subR2State {Q} {a} {l} {s} px
         
-    soundness {P} {Q} {ifₕ _ then _ else _} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ₒ s) | inspect ⟦ b ⟧ₒ s 
+    soundness {P} {Q} {ifʷ _ then _ else _} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ₒ s) | inspect ⟦ b ⟧ₒ s 
     ... | false | Eq.[ eq ] = soundness h₂ (pP , λ x → bIsFalseFollows {s} {b} eq x )
     ... | true | Eq.[ eq ] = soundness h₁ (pP , bIsTrueFollows {s} {b} eq)
     
 
-    soundness {Q} {Q} {forₕ n doo c} (for-statement h) {s} pP with abs (⟦ n ⟧ₐ s) | inspect (λ s → abs (⟦ n ⟧ₐ s)) s
+    soundness {Q} {Q} {forʷ n doo c} (for-statement h) {s} pP with abs (⟦ n ⟧ₐ s) | inspect (λ s → abs (⟦ n ⟧ₐ s)) s
     ... | ℕ.zero   | _ = pP
     ... | ℕ.suc n' | Eq.[ eq ] = soundOfForDooAux {n'} {s} pP
 
