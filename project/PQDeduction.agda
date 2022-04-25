@@ -33,7 +33,7 @@ data Formula : Set where
   _∨_ : Formula → Formula → Formula       -- disjunction (unicode \vee)
   _⇒_ : Formula → Formula → Formula       -- implication (unicode \=>)
   _=ₑ_ : AExprₕ → AExprₕ → Formula         -- equality
-  _<ₑ_ : AExprₕ → AExprₕ → Formula         -- less than
+  _≤ₑ_ : AExprₕ → AExprₕ → Formula         -- less than
 
 infixr 6 _∧_
 infixr 5 _∨_
@@ -197,11 +197,11 @@ data _⊢_ : (Δ : Hypotheses) → (φ : Formula) → Set where    -- unicode \v
             -----------------
             → Δ ⊢ x =ₑ z  
 
-   <ₑ-add : {Δ : Hypotheses}
+   ≤ₑ-add : {Δ : Hypotheses}
           → {x y z : AExprₕ}
-          → Δ ⊢ x <ₑ y
+          → Δ ⊢ x ≤ₑ y
           --------------------------
-          → Δ ⊢ (x +ₕ z) <ₑ (y +ₕ z)
+          → Δ ⊢ (x +ₕ z) ≤ₑ (y +ₕ z)
 
    +ₚ-zero : {Δ : Hypotheses}
            → {x : AExprₕ}
