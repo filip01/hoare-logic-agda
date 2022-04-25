@@ -33,21 +33,12 @@ module HoareLogicForWhile where
 
     -- Covert BExprₕ to Formula.
     toFormulaₚ : BExprₕ → Formula
-<<<<<<< HEAD
-    toFormulaₚ trueₕ = ⊤
-    toFormulaₚ falseₕ = ⊥
-    toFormulaₚ (¬ₕ b) = ¬ (toFormulaₚ b)
-    toFormulaₚ (b₁ ∧ₕ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
-    toFormulaₚ (b₁ ∨ₕ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ₕ a₂) = a₁ ≤ₑ a₂
-=======
     toFormulaₚ trueʷ = ⊤
     toFormulaₚ falseʷ = ⊥
     toFormulaₚ (¬ʷ b) = ¬ (toFormulaₚ b)
     toFormulaₚ (b₁ ∧ʷ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
     toFormulaₚ (a₁ ≤ʷ a₂) = a₁ <ₑ a₂ -- TODO: Wrong conversion.
->>>>>>> origin/zputrle
 
 
     -- Hoare triples

@@ -201,11 +201,7 @@ data _⊢_ : (Δ : Hypotheses) → (φ : Formula) → Set where    -- unicode \v
           → {x y z : AExprₕ}
           → Δ ⊢ x ≤ₑ y
           --------------------------
-<<<<<<< HEAD
-          → Δ ⊢ (x +ₕ z) ≤ₑ (y +ₕ z)
-=======
           → Δ ⊢ (x +ʷ z) <ₑ (y +ʷ z)
->>>>>>> origin/zputrle
 
    +ₚ-zero : {Δ : Hypotheses}
            → {x : AExprₕ}
