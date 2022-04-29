@@ -6,10 +6,15 @@ open import Data.Bool using (Bool; true; false; not; _∧_; _∨_)
 open import Data.List using (List; _∷_; []; _++_; map; foldr)
 open import Relation.Nullary using (Dec)
 
+open import Data.Unit using (⊤; tt)
+open import Data.Product using (_,_; _×_)
+
 import WhileSyntax
 
-open import ListMonad
-open Monad
+open import MonadDef
+open import Monads
+open ListMonad
+open StateTransformer
 
 open import Agda.Builtin.Maybe
 
@@ -33,6 +38,10 @@ module WhileSemantics where
 
     infix 4 ⟦_⟧ₐ
 
+    NDS-Monad = StateT state (Monad-List lzero)
+
+
+
     ⟦_⟧ₐ : AExprₕ → state → ℤ
     ⟦ intʷ x ⟧ₐ Γ = x
     ⟦ locʷ l ⟧ₐ Γ = Γ l
@@ -53,11 +62,13 @@ module WhileSemantics where
 
     bool_expr_test = ⟦ (intʷ (+ 10) ≤ʷ intʷ (+ 9)) ∧ʷ trueʷ ⟧ₒ (λ _ → (+ 0))
 
+
     -- TODO: Explain
     forDooAux : ℕ  → Cmdₕ → (state → state) → state → state
     forDooAux ℕ.zero c stm s = s
     forDooAux (suc n) c stm s = forDooAux n c stm (stm s)
 
+{-
     toSt : L → ℤ → state → state
     toSt l a' Γ l' with (Dec.does (l ≟ l'))
     ... | false = Γ l'
@@ -82,8 +93,35 @@ module WhileSemantics where
     cmd-test = ⟦ (7 :=ʷ intʷ (+ 10)) ⟧ (λ _ → (+ 0))
     cmd-test' = ⟦ 7 :=ʷ intʷ (+ 10) |ʷ 8 :=ʷ ((locʷ 7) +ʷ (intʷ (+ 13))) ⟧ (λ _ → (+ 0)) 8
 
+-}
 
     -- Define how commands should be interpreted (state + nondeterminism).
+
+    open Monad NDS-Monad
+
+    ⟦_⟧ : Cmdₕ → (Monad.T NDS-Monad) ⊤
+    ⟦ passʷ ⟧ = η tt
+    ⟦ c₁ |ʷ c₂ ⟧ = ⟦ c₁ ⟧ >> ⟦ c₂ ⟧
+    ⟦ l :=ʷ a ⟧ s = η tt (aux l a' s)
+         where
+             a' = (⟦ a ⟧ₐ s)
+             aux : L → ℤ → state → state
+             aux l a' Γ l' with (Dec.does (l ≟ l'))
+             ... | false = Γ l
+             ... | true = a'
+    ⟦ ifʷ b then c₁ else c₂ ⟧ s with ⟦ b ⟧ₒ s
+    ... | true = (⟦ c₁ ⟧ s)
+    ... | false = (⟦ c₂ ⟧ s)
+    ⟦ forʷ a doo c ⟧ s = aux (abs (⟦ a ⟧ₐ s)) c s
+         where
+             aux : ℕ → Cmdₕ → (Monad.T NDS-Monad) ⊤
+             aux ℕ.zero c = η tt
+             aux (suc n) c = ⟦ c ⟧ >> (aux n c) 
+    ⟦ c₁ orʷ c₂ ⟧ s = ⟦ c₁ ⟧ s ++ ⟦ c₂ ⟧ s
+    {-
+    ⟦ c₁ orʷ c₂ ⟧ s = (⟦ c₁ ⟧ s) >>ᴺᴰ (⟦ c₂ ⟧ s)
+        where open Monad (Monad-List lzero) renaming (_>>_ to _>>ᴺᴰ_)
+    -}
 
     -- ⟦_⟧ : Cmdₕ → state → ListMonad
     -- ⟦ passʷ ⟧ Γ = (λ _ → (+ 0)) ∷ []
@@ -106,4 +144,4 @@ module WhileSemantics where
     --         aux ℕ.zero c s = s ∷ []
     --         aux (suc a') c s = foldr _++_ [] (map (λ s' → aux a' c s') (⟦ c ⟧ Γ))
 
-    -- ⟦ c₁ orʷ c₂ ⟧ Γ = (⟦ c₁ ⟧ Γ) ++ (⟦ c₂ ⟧ Γ) 
+    -- ⟦ c₁ orʷ c₂ ⟧ Γ = (⟦ c₁ ⟧ Γ) ++ (⟦ c₂ ⟧ Γ)   

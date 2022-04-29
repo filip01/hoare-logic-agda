@@ -33,7 +33,7 @@ module HoareLogicSoundness where
     -- Relate how the boolean expressions are interpreted in WHILE language and how they are interpreted in the
     -- PQ logic.
     --
-    
+{-
     interleaved mutual
 
       -- If `b` evaluates to true, then there exist a witness of `⟦ toFormulaₚ b ⟧ s`.
@@ -189,4 +189,5 @@ module HoareLogicSoundness where
         soundOfForDooAux {ℕ.suc m'} {s} pP' = soundOfForDooAux {m'} {⟦ c ⟧ᶜ s} (soundness h pP')
     
     soundness {P} {Q} {C} (implied {Δ} iP iQ h) {s} pP with ⟦ iP ⟧ₓ {s} tt pP 
-    ... | pϕ = ⟦ iQ ⟧ₓ { ⟦ C ⟧ᶜ s} tt (soundness h {s} pϕ)  
+    ... | pϕ = ⟦ iQ ⟧ₓ { ⟦ C ⟧ᶜ s} tt (soundness h {s} pϕ)
+-}
