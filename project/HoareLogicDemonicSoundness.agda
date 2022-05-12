@@ -105,6 +105,7 @@ module HoareLogicDemonicSoundness where
       bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x = x
       bIsFalseFollows {S} {x₂ ≤ʷ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
     
+
     --
     -- Show how is substitution related to state.
     --
@@ -119,8 +120,75 @@ module HoareLogicDemonicSoundness where
       {⟦ a₁ [ b / l ]ᵉ ⟧ₐ s}
       {⟦ a₁ ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s)}
         (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
+    interleaved mutual
+      subR2State  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
+                      → proof (⟦ Q [ a / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s))
+      subR2State' : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
+                      → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s)) → proof (⟦ Q [ a / l ]ᶠ ⟧ s) 
+  
+      subR2State  {⊤} {a} {l} {s} _ = tt
+      subR2State' {⊤} {a} {l} {s} _ = tt
+      subR2State {⊥} {a} {l} {s} p = p
+      subR2State' {⊥} {a} {l} {s} p = p
+      subR2State {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ =
+        subR2State {Q₂} {a} {l} {s} (p (subR2State' {Q₁} {a} {l} {s} pQ₁))
+      subR2State' {Q₁ ⇒ Q₂} {a} {l} {s} p pQ₁ =
+        subR2State' {Q₂} {a} {l} {s} (p (subR2State {Q₁} {a} {l} {s} pQ₁))
+      subR2State {x₁ =ₑ x₂} {a} {l} {s} p =
+        begin
+          ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ sym (subR2StateA {x₁} {a} {l} {s}) ⟩
+          ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ p ⟩
+          ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ subR2StateA {x₂} {a} {l} {s} ⟩
+          ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ∎
+      subR2State' {x₁ =ₑ x₂} {a} {l} {s} p =
+        begin
+          ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ subR2StateA {x₁} {a} {l} {s} ⟩
+          ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ p ⟩
+          ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ sym ( subR2StateA {x₂} {a} {l} {s}) ⟩
+          ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
+        ∎
+      subR2State {Q₁ ∧ Q₂} {a} {l} {s} p =
+        (subR2State {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p)) ,
+        (subR2State {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p))
+      subR2State' {Q₁ ∧ Q₂} {a} {l} {s} p =
+        (subR2State' {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) p)) ,
+        (subR2State' {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) p))
+      subR2State {Q₁ ∨ Q₂} {a} {l} {s} p = 
+        ∨ʰ-cong
+          (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s)
+          {⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s)} {⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s)}
+          (subR2State {Q₁}) (subR2State {Q₂}) p
+      subR2State' {Q₁ ∨ Q₂} {a} {l} {s} p = ∨ʰ-cong
+        (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ₐ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ₐ s) s))
+        {⟦ Q₁ [ a / l ]ᶠ ⟧ s} {⟦ Q₂ [ a / l ]ᶠ ⟧ s}
+        (subR2State' {Q₁}) (subR2State' {Q₂}) p
+      subR2State {x₁ ≤ₑ x₂} {a} {l} {s} p =
+        begin
+          ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s) ≤ᵇ ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ cong₂ _≤ᵇ_ (sym (subR2StateA {x₁} {a} {l} {s})) (sym (subR2StateA {x₂} {a} {l} {s})) ⟩
+          ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s ≤ᵇ ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ p ⟩
+          true
+        ∎
+      subR2State' {x₁ ≤ₑ x₂} {a} {l} {s} p = 
+        begin
+          ⟦ x₁ [ a / l ]ᵉ ⟧ₐ s ≤ᵇ ⟦ x₂ [ a / l ]ᵉ ⟧ₐ s
+        ≡⟨ cong₂ _≤ᵇ_ (subR2StateA {x₁} {a} {l} {s}) (subR2StateA {x₂} {a} {l} {s}) ⟩
+          ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s) ≤ᵇ ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
+        ≡⟨ p ⟩
+          true
+        ∎ 
     
+    --
     -- Demonic soundness
+    --
 
     dsoundness' : {P Q : Formula} {C : Cmdₕ}
               → ⟪ P ⟫ C ⟪ Q ⟫
@@ -134,7 +202,10 @@ module HoareLogicDemonicSoundness where
          (dsoundness' h₂ (⟦ c₁ ⟧ᶜ (proj₂ x)) (dc-++-[]  {_} {c₁} {x} (dsoundness' h₁ (x ∷ []) ((proj₁ pPs) , tt))) ,
           dsoundness' (composition h₁ h₂) ls (proj₂ pPs))
 
-    dsoundness' {.(Q [ _ / _ ]ᶠ)} {Q} {.(_ :=ʷ _)} assignment ls pPs = {!   !}
+    dsoundness' {.(Q [ _ / _ ]ᶠ)} {Q} {.(_ :=ʷ _)} assignment [] pPs = tt
+    dsoundness' {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {P} {a}) (x ∷ ls) pPs =
+      subR2State {Q} {a} {l} {proj₂ x} ((proj₁ pPs)) ,
+      dsoundness' (assignment {P} {a}) ls (proj₂ pPs)
 
     dsoundness' {P} {Q} {.(ifʷ b then _ else _)} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) [] pPs = tt
     dsoundness' {P} {Q} {.(ifʷ b then _ else _)} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
