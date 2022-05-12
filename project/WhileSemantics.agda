@@ -62,16 +62,19 @@ module WhileSemantics where
 
     open Monad NDS-Monad
 
+    -- Useful definitions (need to be externally visible)
+    toSt : L → ℤ → state → state
+    toSt l a' Γ l' with (Dec.does (l ≟ l'))
+    ... | false = Γ l'
+    ... | true = a'
+
+
     ⟦_⟧ : Cmdₕ → (Monad.T NDS-Monad) ⊤
     ⟦ passʷ ⟧ = η tt
     ⟦ c₁ |ʷ c₂ ⟧ = ⟦ c₁ ⟧ >> ⟦ c₂ ⟧
-    ⟦ l :=ʷ a ⟧ s = η tt (aux l a' s)
+    ⟦ l :=ʷ a ⟧ s = η tt (toSt l a' s)
          where
              a' = (⟦ a ⟧ₐ s)
-             aux : L → ℤ → state → state
-             aux l a' Γ l' with (Dec.does (l ≟ l'))
-             ... | false = Γ l
-             ... | true = a'
     ⟦ ifʷ b then c₁ else c₂ ⟧ s with ⟦ b ⟧ₒ s
     ... | true = (⟦ c₁ ⟧ s)
     ... | false = (⟦ c₂ ⟧ s)

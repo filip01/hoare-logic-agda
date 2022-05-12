@@ -66,7 +66,62 @@ module HoareLogicDemonicSoundness where
     dc-++-[] :  {θ : Formula} {c : Cmdₕ} {x : ⊤ᶠ × State}
       → proof (dcondition θ (⟦ c ⟧ᶜ (proj₂ x) ++ [])) → proof (dcondition θ (⟦ c ⟧ᶜ (proj₂ x)))
     dc-++-[] {_} {c} {x} h rewrite (aux {_} {⟦ c ⟧ᶜ (proj₂ x)}) = h
+
+    trueIsNotEqToFalse : (true ≡ false) → ⊥ᶠ
+    trueIsNotEqToFalse ()
+
+    --
+    -- Relate how the boolean expressions are interpreted in WHILE language and how they are interpreted in the
+    -- PQ logic.
+    --
+
+    interleaved mutual
+      -- If `b` evaluates to true, then there exist a witness of `⟦ toFormulaₚ b ⟧ s`.
+      bIsTrueFollows  : {s : State} → {b : BExprₕ} → (⟦ b ⟧ₒ s ≡ true) → (proof (⟦ toFormulaₚ b ⟧ s))
+      -- If `b` evaluates to false, then there does NOT exist a witness of `⟦ toFormulaₚ b ⟧ s`.
+      bIsFalseFollows : {s : State} → {b : BExprₕ} → (⟦ b ⟧ₒ s ≡ false) → ¬ᶠ (proof (⟦ toFormulaₚ b ⟧ s))
+      bIsTrueFollows  {s} {trueʷ} p = tt
+      bIsFalseFollows {s} {trueʷ} ()
     
+      bIsTrueFollows  {s} {¬ʷ b} p x with ⟦ b ⟧ₒ s | inspect ⟦ b ⟧ₒ s
+      ... | false | Eq.[ eq ] = bIsFalseFollows {s} {b} eq  x
+      bIsFalseFollows {s} {¬ʷ b} p x with ⟦ b ⟧ₒ s | inspect ⟦ b ⟧ₒ s
+      ... | true  | Eq.[ eq ] = x (bIsTrueFollows {s} {b} eq)
+      bIsTrueFollows  {s} {b₁ ∧ʷ b₂} x with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
+      ... | true  | true  | Eq.[ eq₁ ] | Eq.[ eq₂ ] = bIsTrueFollows {s} {b₁} eq₁ , bIsTrueFollows {s} {b₂} eq₂
+      bIsFalseFollows {s} {b₁ ∧ʷ b₂} x x' with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
+      ... | false | false | Eq.[ eq₁ ] | _          = bIsFalseFollows {s} {b₁} eq₁ (proj₁ x')
+      ... | false | true  | Eq.[ eq₁ ] | _          = bIsFalseFollows {s} {b₁} eq₁ (proj₁ x')
+      ... | true  | false | _          | Eq.[ eq₂ ] = bIsFalseFollows {s} {b₂} eq₂ (proj₂ x')
+      bIsTrueFollows  {s} {b₁ ∨ʷ b₂} x with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
+      ... | false | true  | _          | Eq.[ eq₂ ] = ∣ inj₂ (bIsTrueFollows {s} {b₂} eq₂) ∣
+      ... | true  | false | Eq.[ eq₁ ] | _          = ∣ inj₁ (bIsTrueFollows {s} {b₁} eq₁) ∣
+      ... | true  | true  | Eq.[ eq₁ ] | _          = ∣ inj₁ (bIsTrueFollows {s} {b₁} eq₁) ∣
+      bIsFalseFollows {s} {b₁ ∨ʷ b₂} x x' with ⟦ b₁ ⟧ₒ s | ⟦ b₂ ⟧ₒ s |  inspect ⟦ b₁ ⟧ₒ s | inspect ⟦ b₂ ⟧ₒ s
+      ... | false | false | Eq.[ eq₁ ] | Eq.[ eq₂ ] =
+        ∥∥-elim (λ x ())
+          (λ { (inj₁ y) → bIsFalseFollows {s} {b₁} eq₁ y
+             ; (inj₂ y) →  bIsFalseFollows {s} {b₂} eq₂ y } ) x'
+      bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x = x
+      bIsFalseFollows {S} {x₂ ≤ʷ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
+    
+    --
+    -- Show how is substitution related to state.
+    --
+    subR2StateA : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
+         →  (⟦ a [ b / l ]ᵉ ⟧ₐ s) ≡ (⟦ a ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s))
+    subR2StateA {intʷ x} {b} {l} {s} = refl
+    subR2StateA {locʷ l'} {b} {l} {s} with does (l ≟ℕ l')
+    ... | false = refl
+    ... | true = refl
+    subR2StateA { -ʷ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
+    subR2StateA {a₁ +ʷ a₂} {b} {l} {s} = cong₂ _+_
+      {⟦ a₁ [ b / l ]ᵉ ⟧ₐ s}
+      {⟦ a₁ ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s)}
+        (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
+    
+    -- Demonic soundness
+
     dsoundness' : {P Q : Formula} {C : Cmdₕ}
               → ⟪ P ⟫ C ⟪ Q ⟫
               → ∀ (ls : List (⊤ᶠ × State))
@@ -81,7 +136,20 @@ module HoareLogicDemonicSoundness where
 
     dsoundness' {.(Q [ _ / _ ]ᶠ)} {Q} {.(_ :=ʷ _)} assignment ls pPs = {!   !}
 
-    dsoundness' {P} {Q} {.(ifʷ _ then _ else _)} (if-statement h h₁) ls pPs = {!   !}
+    dsoundness' {P} {Q} {.(ifʷ b then _ else _)} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) [] pPs = tt
+    dsoundness' {P} {Q} {.(ifʷ b then _ else _)} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
+      dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ ifʷ b then _ else _ ⟧ᶜ (proj₂ x))}
+        (cases-b ,
+         dsoundness' (if-statement {_} {_} {b} h₁ h₂) ls (proj₂ pPs))
+
+      where
+
+        cases-b : proof (dcondition Q (⟦ ifʷ b then c₁ else c₂ ⟧ᶜ (proj₂ x)))
+        cases-b with (⟦ b ⟧ₒ (proj₂ x)) | inspect ⟦ b ⟧ₒ (proj₂ x)
+        ... | false | Eq.[ eq ] =
+          dc-++-[] {Q} {c₂} (dsoundness' h₂ (x ∷ []) (((proj₁ pPs) , bIsFalseFollows {proj₂ x} {b} eq) , tt))
+        ... | true | Eq.[ eq ] =
+          dc-++-[] {Q} {c₁} (dsoundness' h₁ (x ∷ []) (((proj₁ pPs) , bIsTrueFollows {proj₂ x} {b} eq) , tt))
 
     dsoundness' {P} {.P} {.(forʷ _ doo _)} (for-statement h) ls pPs = {!   !}
     
@@ -96,4 +164,4 @@ module HoareLogicDemonicSoundness where
     dsoundness {P} {Q} {C} h s pPs = dc-++-[] {_} {C} {tt , s} (dsoundness' {P} {Q} {C} h ((tt , s) ∷ []) (pPs , tt))
          
 
-    -- ((tt , s) ∷ [])
+    -- ((tt , s) ∷ [])   
