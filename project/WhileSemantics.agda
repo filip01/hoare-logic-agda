@@ -68,6 +68,9 @@ module WhileSemantics where
     ... | false = Γ l'
     ... | true = a'
 
+    forDooAux : ℕ → ((Monad.T NDS-Monad) ⊤) → (Monad.T NDS-Monad) ⊤
+    forDooAux ℕ.zero c = η tt
+    forDooAux (suc n) c = (c >> (forDooAux n c))
 
     ⟦_⟧ : Cmdₕ → (Monad.T NDS-Monad) ⊤
     ⟦ passʷ ⟧ = η tt
@@ -78,7 +81,7 @@ module WhileSemantics where
     ⟦ ifʷ b then c₁ else c₂ ⟧ s with ⟦ b ⟧ₒ s
     ... | true = (⟦ c₁ ⟧ s)
     ... | false = (⟦ c₂ ⟧ s)
-    ⟦ forʷ a doo c ⟧ s = aux (abs (⟦ a ⟧ₐ s)) c s
+    ⟦ forʷ a doo c ⟧ s = forDooAux (abs (⟦ a ⟧ₐ s)) ⟦ c ⟧ s
          where
              aux : ℕ → Cmdₕ → (Monad.T NDS-Monad) ⊤
              aux ℕ.zero c = η tt
@@ -88,4 +91,4 @@ module WhileSemantics where
     {-
     ⟦ c₁ orʷ c₂ ⟧ s = (⟦ c₁ ⟧ s) >>ᴺᴰ (⟦ c₂ ⟧ s)
         where open Monad (Monad-List lzero) renaming (_>>_ to _>>ᴺᴰ_)
-    -}
+    -} 
