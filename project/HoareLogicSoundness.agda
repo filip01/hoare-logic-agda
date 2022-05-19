@@ -1,4 +1,4 @@
-import PQDeduction
+import PQDeduction hiding (_∈_)
 open import PQSemantics
 import WhileSemantics
 open import HoareLogicForWhile
@@ -10,14 +10,22 @@ open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_�
 open import Data.Bool using (Bool; true; false)
 open import Data.Empty renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᶠ)
 open import Data.Unit renaming (⊤ to ⊤ᶠ)
-open import Data.Product
-open import Data.Sum
+open import Data.Product hiding (map)
+open import Data.Sum hiding (map)
+open import Data.List using (map; foldr; head)
+open import Data.List.Properties
+open import Data.List.Membership.Propositional renaming (_∈_ to _∈ₗ_)
 
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; sym; trans; cong; cong₂; subst; [_]; inspect)
 open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
 open import Relation.Nullary renaming (¬_ to ¬ᶠ_ )
+
+open import MonadDef
+open import Monads
+open ListMonad
+open StateTransformer
 
 module HoareLogicSoundness where
 
@@ -84,7 +92,9 @@ module HoareLogicSoundness where
       {⟦ a₁ [ b / l ]ᵉ ⟧ₐ s}
       {⟦ a₁ ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s)}
         (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
-
+-}
+    -- TODO
+{-
     interleaved mutual
 
       subR2State  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
@@ -156,19 +166,61 @@ module HoareLogicSoundness where
         ≡⟨ p ⟩
           true
         ∎
+-}
+    -- Apply ⟦ Q ⟧ to all states
+    Cmd→List-s : (C : Cmdₕ) → (s : State) → List State
+    Cmd→List-s C s = map (λ {(_ , z) → z}) (⟦ C ⟧ᶜ s)
 
+    -- Angelic = ⟦ Q ⟧ s₁ ∨ ⟦ Q ⟧ s₂ ∨ ⋯
+    --angelic : (Q : Formula) → (C : Cmdₕ) → (s : State) → HProp
+    --angelic Q C s = foldr _∨ʰ_ ⊥ʰ (Q-Cmd→List-h Q C s)
     --
     -- Soundness
     --
-
-    soundness : {P Q : Formula} → {C : Cmdₕ}
+    soundness : {P Q : Formula} 
+              → {C : Cmdₕ}
               → ⟪ P ⟫ C ⟪ Q ⟫
-              → ∀ {s : State}
-                → proof (⟦ P ⟧ s)
-                → proof (⟦ Q ⟧ (⟦ C ⟧ᶜ s))
+              → {s : State}
+              → proof (⟦ P ⟧ s)
+              -- → Σ[ s' ∈ State ] (s' ∈ Cmd→List-s C s × proof (⟦ Q ⟧ s'))
+              → Σ[ s' ∈ State ] (_ , s' ∈ ⟦ C ⟧ᶜ s × proof (⟦ Q ⟧ s'))
 
-    soundness {P} {Q} {.(_ |ʷ _)} (composition {P} {R} {Q} {c₁} {c₂} h₁ h₂) pP = soundness h₂ (soundness h₁ pP)
+    soundness {P} {Q} {.(_ |ʷ _)} (composition {P} {R} {Q} {C₁} {C₂} h₁ h₂) {s} pP 
+        with (soundness {P} {R} {C₁} h₁ pP)
+    ... | s₁ , i₁ , t₁ with soundness {R} {Q} {C₂} h₂ t₁
+    ...                | s₂ , i₂ , t₂ = s₂ , (aux₂ (⟦ C₁ ⟧ᶜ s) i₁ ⟦ C₂ ⟧ᶜ i₂ , t₂) 
+      where
+        ∈-++l : {A : Set} → {x : A} → (L : List A) → {L' : List A}
+              → (x ∈ L) → (x ∈ (L ++ L'))
+        ∈-++l L {[]} p rewrite (++-identityʳ L) = p
+        ∈-++l .(_ ∷ _) {l ∷ L'} ∈-here = ∈-here
+        ∈-++l (_ ∷ xs) {l ∷ L'} (∈-there {{in-xs}}) = ∈-there {{∈-++l xs in-xs}}
 
+        ∈-++r : {A : Set} → {x : A} → (L : List A) → {L' : List A}
+              → (x ∈ L') → (x ∈ (L ++ L'))
+        ∈-++r [] {L'} p = p
+        ∈-++r (_ ∷ L₁) {.(_ ∷ _)} ∈-here = ∈-there {{∈-++r L₁ ∈-here}}
+        ∈-++r (_ ∷ L₁) {.(_ ∷ _)} (∈-there {{in-xs}}) = ∈-there {{∈-++r L₁ (∈-there {{in-xs}})}}
+
+        aux₂ : {A B : Set} → {x y : B × A} → (L : List (B × A))
+             → (x ∈ L)
+             → (f : A → List (B × A))
+             → (y ∈ (f (proj₂ x)))
+             → (y ∈ (foldr _++_ [] (map (λ { (_ , s') → f s' }) L) ))
+
+        aux₂ ((_ , a) ∷ L₁) ∈-here f q = ∈-++l (f a) q
+        aux₂ ((_ , a) ∷ L₁) (∈-there {{in-xs}}) f q 
+          = ∈-++r (f a) (aux₂ L₁ in-xs f q)
+
+    soundness {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {Q} {a}) {s} pP
+      = {!   !} , ({!   !} , {!   !})
+      where 
+        open Monad NDS-Monad
+    
+    soundness {P} {Q} {.(ifʷ _ then _ else _)} (if-statement t t₁) pP = {!   !}
+    soundness {P} {.P} {.(forʷ _ doo _)} (for-statement t) pP = {!   !}
+    soundness {P} {Q} {C} (implied x x₁ t) pP = {!   !}
+{-
     soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {P} {a}) {s} px = subR2State {Q} {a} {l} {s} px
         
     soundness {P} {Q} {ifʷ _ then _ else _} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ₒ s) | inspect ⟦ b ⟧ₒ s 
@@ -190,4 +242,4 @@ module HoareLogicSoundness where
     
     soundness {P} {Q} {C} (implied {Δ} iP iQ h) {s} pP with ⟦ iP ⟧ₓ {s} tt pP 
     ... | pϕ = ⟦ iQ ⟧ₓ { ⟦ C ⟧ᶜ s} tt (soundness h {s} pϕ)
--}
+-}            

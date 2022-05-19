@@ -32,7 +32,7 @@ open import HProp
 open import WhileSemantics using (⟦_⟧ₐ; L)
 
 import PQDeduction
-open module ND = PQDeduction L renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᵣ; ⊤ to ⊤ᶠ)
+open PQDeduction L renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᵣ; ⊤ to ⊤ᶠ) hiding (_∈_)
 
 ℙ = HProp   -- unicode \bP
 
