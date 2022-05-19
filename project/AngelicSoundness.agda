@@ -27,7 +27,7 @@ open import Monads
 open ListMonad
 open StateTransformer
 
-module HoareLogicSoundness where
+module AngelicSoundness where
 
     open WhileSyntaxNat
     open WhileSemantics renaming (⟦_⟧ to ⟦_⟧ᶜ)
