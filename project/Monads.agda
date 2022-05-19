@@ -18,10 +18,13 @@ open import MonadDef
 
 open import Axiom.Extensionality.Propositional using (Extensionality)
 
+-- TODO: Maybe it would be good idea to rename entries in Monad M.
 module Monads where
+
     postulate fun-ext : ∀ {a b} → Extensionality a b
-    --State = ℕ → ℤ
+    
     module StateTransformer where
+    
         StateT : {l : Level} → (State : Set) → Monad l → Monad l
         StateT {l} S M = record
             { T = λ A → S → T (A × S)

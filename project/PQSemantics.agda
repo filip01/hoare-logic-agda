@@ -18,6 +18,7 @@ open import Data.Nat using (ℕ ; suc ; _≟_) renaming (_<ᵇ_ to _ℕ<ᵇ_)
 open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_; _<_) renaming (∣_∣ to abs; _≟_ to _≟ℤ_)
 open import Data.Integer.Properties
 open import Data.Bool renaming (_<_ to _<b_)
+open import Data.List using (List; []; _∷_; [_]; _++_)
 
 open import Data.Sum
 open import Data.Empty renaming (⊥ to ⊥ₜ)

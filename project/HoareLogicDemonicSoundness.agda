@@ -1,11 +1,13 @@
-import PQDeduction hiding (_∈_)
+import PQDeduction --renaming (∈ to ∈ₗ)
 open import PQSemantics
 import WhileSemantics
 open import HoareLogicForWhile
 open import HProp
 open import PQSubstitution
 
-open import Data.Maybe hiding (map)
+open import Data.List renaming (map to mapᴸ)
+
+open import Data.Maybe
 
 open import Data.Nat using (ℕ) renaming (_≟_ to _≟ℕ_)
 open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_∣ to abs)
@@ -14,7 +16,7 @@ open import Data.Empty renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᶠ)
 open import Data.Unit renaming (⊤ to ⊤ᶠ)
 open import Data.Product hiding (map)
 open import Data.Sum hiding (map)
-open import Data.List
+open import Data.List using (map; foldr; head)
 open import Data.List.Properties
 open import Data.List.Membership.Propositional renaming (_∈_ to _∈ₗ_)
 
@@ -24,12 +26,11 @@ open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
 open import Relation.Nullary renaming (¬_ to ¬ᶠ_ )
 
-open import MonadDef
-open import Monads
-open ListMonad
-open StateTransformer
+--
+-- Demonic soundness of Hoar logic for While language
+--
 
-module AngelicSoundness where
+module HoareLogicDemonicSoundness where
 
     open WhileSyntaxNat
     open WhileSemantics renaming (⟦_⟧ to ⟦_⟧ᶜ)
@@ -48,7 +49,7 @@ module AngelicSoundness where
     -- angelic_soundness = {!   !}
 
     -- Some useful lemmas
-{-
+    
     dcondition : {A : Set} → (Q : Formula) → List (A × State) → HProp
     dcondition Q [] = ⊤ʰ
     dcondition Q (x ∷ sts) = (⟦ Q ⟧ (proj₂ x)) ∧ʰ dcondition Q sts
@@ -122,9 +123,7 @@ module AngelicSoundness where
       {⟦ a₁ [ b / l ]ᵉ ⟧ₐ s}
       {⟦ a₁ ⟧ₐ (toSt l (⟦ b ⟧ₐ s) s)}
         (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
--}
-    -- TODO
-{-
+
     interleaved mutual
       subR2State  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
                       → proof (⟦ Q [ a / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ₐ s) s))
@@ -189,80 +188,104 @@ module AngelicSoundness where
           ⟦ x₁ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s) ≤ᵇ ⟦ x₂ ⟧ₐ (toSt l (⟦ a ⟧ₐ s) s)
         ≡⟨ p ⟩
           true
-        ∎
--}
-    -- Apply ⟦ Q ⟧ to all states
-    Cmd→List-s : (C : Cmdₕ) → (s : State) → List State
-    Cmd→List-s C s = map (λ {(_ , z) → z}) (⟦ C ⟧ᶜ s)
+        ∎ 
+    
+    --
+    -- Demonic soundness
+    --
 
-    -- Angelic = ⟦ Q ⟧ s₁ ∨ ⟦ Q ⟧ s₂ ∨ ⋯
-    --angelic : (Q : Formula) → (C : Cmdₕ) → (s : State) → HProp
-    --angelic Q C s = foldr _∨ʰ_ ⊥ʰ (Q-Cmd→List-h Q C s)
-
-    soundness : {P Q : Formula} 
-              → {C : Cmdₕ}
+    -- More general definition of soundness
+    dsoundness' : {P Q : Formula} {C : Cmdₕ}
               → ⟪ P ⟫ C ⟪ Q ⟫
-              → {s : State}
-              → proof (⟦ P ⟧ s)
-              -- → Σ[ s' ∈ State ] (s' ∈ Cmd→List-s C s × proof (⟦ Q ⟧ s'))
-              → Σ[ s' ∈ State ] (_ , s' ∈ ⟦ C ⟧ᶜ s × proof (⟦ Q ⟧ s'))
+              → ∀ (ls : List (⊤ᶠ × State))
+                → proof (dcondition P ls)
+                → proof (dcondition Q (apply-and-fold C ls))
 
-    soundness {P} {Q} {.(_ |ʷ _)} (composition {P} {R} {Q} {C₁} {C₂} h₁ h₂) {s} pP 
-        with (soundness {P} {R} {C₁} h₁ pP)
-    ... | s₁ , i₁ , t₁ with soundness {R} {Q} {C₂} h₂ t₁
-    ...                | s₂ , i₂ , t₂ = s₂ , (aux₂ (⟦ C₁ ⟧ᶜ s) i₁ ⟦ C₂ ⟧ᶜ i₂ , t₂) 
+    dsoundness' {P} {Q} {_ |ʷ _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) [] pPs = tt
+    dsoundness' {P} {Q} {_ |ʷ _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
+      dc-++-eq-∧ʰ {⊤ᶠ} {Q} {foldr _++_ [] (mapᴸ (λ { (_ , s') → ⟦ c₂ ⟧ᶜ s' }) (⟦ c₁ ⟧ᶜ (proj₂ x)))} 
+         (dsoundness' h₂ (⟦ c₁ ⟧ᶜ (proj₂ x)) (dc-++-[]  {_} {c₁} {x} (dsoundness' h₁ (x ∷ []) ((proj₁ pPs) , tt))) ,
+          dsoundness' (composition h₁ h₂) ls (proj₂ pPs))
+
+    dsoundness' {.(Q [ _ / _ ]ᶠ)} {Q} {_ :=ʷ _} assignment [] pPs = tt
+    dsoundness' {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {P} {a}) (x ∷ ls) pPs =
+      subR2State {Q} {a} {l} {proj₂ x} ((proj₁ pPs)) ,
+      dsoundness' (assignment {P} {a}) ls (proj₂ pPs)
+
+    dsoundness' {P} {Q} {ifʷ b then _ else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) [] pPs = tt
+    dsoundness' {P} {Q} {ifʷ b then _ else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
+      dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ ifʷ b then _ else _ ⟧ᶜ (proj₂ x))}
+        (cases-b ,
+         dsoundness' (if-statement {_} {_} {b} h₁ h₂) ls (proj₂ pPs))
+
       where
-        ∈-++l : {A : Set} → {x : A} → (L : List A) → {L' : List A}
-              → (x ∈ L) → (x ∈ (L ++ L'))
-        ∈-++l L {[]} p rewrite (++-identityʳ L) = p
-        ∈-++l .(_ ∷ _) {l ∷ L'} ∈-here = ∈-here
-        ∈-++l (_ ∷ xs) {l ∷ L'} (∈-there {{in-xs}}) = ∈-there {{∈-++l xs in-xs}}
 
-        ∈-++r : {A : Set} → {x : A} → (L : List A) → {L' : List A}
-              → (x ∈ L') → (x ∈ (L ++ L'))
-        ∈-++r [] {L'} p = p
-        ∈-++r (_ ∷ L₁) {.(_ ∷ _)} ∈-here = ∈-there {{∈-++r L₁ ∈-here}}
-        ∈-++r (_ ∷ L₁) {.(_ ∷ _)} (∈-there {{in-xs}}) = ∈-there {{∈-++r L₁ (∈-there {{in-xs}})}}
+        cases-b : proof (dcondition Q (⟦ ifʷ b then c₁ else c₂ ⟧ᶜ (proj₂ x)))
+        cases-b with (⟦ b ⟧ₒ (proj₂ x)) | inspect ⟦ b ⟧ₒ (proj₂ x)
+        ... | false | Eq.[ eq ] =
+          dc-++-[] {Q} {c₂} (dsoundness' h₂ (x ∷ []) (((proj₁ pPs) , bIsFalseFollows {proj₂ x} {b} eq) , tt))
+        ... | true | Eq.[ eq ] =
+          dc-++-[] {Q} {c₁} (dsoundness' h₁ (x ∷ []) (((proj₁ pPs) , bIsTrueFollows {proj₂ x} {b} eq) , tt))
 
-        aux₂ : {A B : Set} → {x y : B × A} → (L : List (B × A))
-             → (x ∈ L)
-             → (f : A → List (B × A))
-             → (y ∈ (f (proj₂ x)))
-             → (y ∈ (foldr _++_ [] (map (λ { (_ , s') → f s' }) L) ))
+    dsoundness' {P} {P} {forʷ _ doo _} (for-statement h) [] pPs = tt
+    dsoundness' {P} {P} {forʷ _ doo _} (for-statement {_} {_} {a} {c} h) (x ∷ ls) pPs = 
+      dc-++-eq-∧ʰ {⊤ᶠ} {P} {forDooAux (abs (⟦ a ⟧ₐ (proj₂ x))) ⟦ c ⟧ᶜ (proj₂ x)}
+        ( cases-m (abs (⟦ a ⟧ₐ (proj₂ x))) x (proj₁ pPs) ,
+         dsoundness' (for-statement {P} {P} {a} {c} h) ls (proj₂ pPs))
 
-        aux₂ ((_ , a) ∷ L₁) ∈-here f q = ∈-++l (f a) q
-        aux₂ ((_ , a) ∷ L₁) (∈-there {{in-xs}}) f q 
-          = ∈-++r (f a) (aux₂ L₁ in-xs f q)
+      where
+      
+        cases-m : (n : ℕ) → (x : (⊤ᶠ × State)) → (pPx : proof (⟦ P ⟧ (proj₂ x)))
+          → proof (dcondition P (forDooAux n ⟦ c ⟧ᶜ (proj₂ x)))
+        cases-m ℕ.zero x pPx = pPx , tt
+        cases-m (ℕ.suc n) x pPx = soundOfC>>ForDooAux {n} {proj₂ x} pPx 
 
-    soundness {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {Q} {a}) {s} pP
-      = {!   !} , ({!   !} , {!   !})
-      where 
-        open Monad NDS-Monad
-    
-    soundness {P} {Q} {.(ifʷ _ then _ else _)} (if-statement t t₁) pP = {!   !}
-    soundness {P} {.P} {.(forʷ _ doo _)} (for-statement t) pP = {!   !}
-    soundness {P} {Q} {C} (implied x x₁ t) pP = {!   !}
-    soundness {P} {Q} {.(_ orʷ _)} (or-statement t t₁) pP = {!   !}
-{-
-    soundness {.(_ [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {P} {a}) {s} px = subR2State {Q} {a} {l} {s} px
-        
-    soundness {P} {Q} {ifʷ _ then _ else _} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ₒ s) | inspect ⟦ b ⟧ₒ s 
-    ... | false | Eq.[ eq ] = soundness h₂ (pP , λ x → bIsFalseFollows {s} {b} eq x )
-    ... | true | Eq.[ eq ] = soundness h₁ (pP , bIsTrueFollows {s} {b} eq)
-    
+          where
 
-    soundness {Q} {Q} {forʷ n doo c} (for-statement h) {s} pP with abs (⟦ n ⟧ₐ s) | inspect (λ s → abs (⟦ n ⟧ₐ s)) s
-    ... | ℕ.zero   | _ = pP
-    ... | ℕ.suc n' | Eq.[ eq ] = soundOfForDooAux {n'} {s} pP
+            soundOfC>>ForDooAux : {n : ℕ} → ∀ {x' : State}
+              → proof (⟦ P ⟧ x')
+              → proof (dcondition P ((⟦ c ⟧ᶜ >> forDooAux n ⟦ c ⟧ᶜ) x'))
+            soundOfC>>ForDooAux {n} {x'} pPs = 
+              cases-ls (⟦ c ⟧ᶜ x')
+                (dc-++-[] {P} {c} (dsoundness' h  (( tt , x' ) ∷ []) (pPs , tt)))
 
-      where 
+              where 
 
-        soundOfForDooAux : {m : ℕ} → ∀ {s : State}
-                → proof (⟦ Q ⟧ s)
-                → proof (⟦ Q ⟧ (forDooAux m c ⟦ c ⟧ᶜ (⟦ c ⟧ᶜ s)))
-        soundOfForDooAux {ℕ.zero} {s} pP' = soundness h pP'
-        soundOfForDooAux {ℕ.suc m'} {s} pP' = soundOfForDooAux {m'} {⟦ c ⟧ᶜ s} (soundness h pP')
-    
-    soundness {P} {Q} {C} (implied {Δ} iP iQ h) {s} pP with ⟦ iP ⟧ₓ {s} tt pP 
-    ... | pϕ = ⟦ iQ ⟧ₓ { ⟦ C ⟧ᶜ s} tt (soundness h {s} pϕ)
--}
+                -- Needed so that we able to recuse on (⟦ c ⟧ᶜ x').
+                cases-ls : (ls : List (⊤ᶠ × State)) → (pPls : proof (dcondition P ls)) → 
+                  proof (dcondition P (foldr _++_ [] (mapᴸ (λ { (a , s') → forDooAux n ⟦ c ⟧ᶜ s' }) ls)))
+                cases-ls [] pPls = tt
+                cases-ls (x'' ∷ ls'') pPls = dc-++-eq-∧ʰ {_} {P} {forDooAux n ⟦ c ⟧ᶜ (proj₂ x'')}
+                  (cases-m n x'' (proj₁ pPls) ,
+                   (cases-ls ls'' (proj₂ pPls)))
+
+    dsoundness' {P} {Q} {C} (implied _ _ _) [] pPs = tt
+    dsoundness' {P'} {Q'} {C} (implied {Δ} {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) (x ∷ ls) pPs = 
+      dc-++-eq-∧ʰ {⊤ᶠ} {Q'} {⟦ C ⟧ᶜ (proj₂ x)}
+        (auxAppToCond {⟦ C ⟧ᶜ (proj₂ x)} Q⇒Q'
+            (dc-++-[] {Q} {C} (dsoundness' h (x ∷ [])
+              ((⟦ P'⇒P ⟧ₓ {proj₂ x} tt ((proj₁ pPs))) , tt))) ,
+         (dsoundness' (implied {Δ} {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) ls ((proj₂ pPs))))
+
+        where
+
+          auxAppToCond : {ls' : List (⊤ᶠ × State)} → ([] ⊢ Q ⇒ Q')
+            → proof (dcondition Q ls') → proof (dcondition Q' ls')
+          auxAppToCond {[]} iQ h = tt
+          auxAppToCond {x' ∷ ls'} iQ h = (⟦ iQ ⟧ₓ tt ((proj₁ h))) , (auxAppToCond {ls'} iQ (proj₂ h))
+
+    dsoundness' {P} {Q} {_ orʷ _} (or-statement h h₁) [] pPs = tt
+    dsoundness' {P} {Q} {_ orʷ _} (or-statement {Δ} {P} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs = 
+      dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ cₗ ⟧ᶜ (proj₂ x) ++ ⟦ cᵣ ⟧ᶜ (proj₂ x))}
+        (dc-++-eq-∧ʰ {⊤ᶠ}  {Q}  {⟦ cₗ ⟧ᶜ (proj₂ x)}
+          (dc-++-[] {Q} {cₗ} (dsoundness' h₁ (x ∷ []) ((proj₁ pPs) , tt)) ,
+           dc-++-[] {Q} {cᵣ} (dsoundness' h₂ (x ∷ []) ((proj₁ pPs) , tt))) ,
+         dsoundness' (or-statement {Δ} {P} {Q} {cₗ} {cᵣ} h₁ h₂) ls ((proj₂ pPs)))
+
+    -- Soundness
+    dsoundness : {P Q : Formula} {C : Cmdₕ}
+              → ⟪ P ⟫ C ⟪ Q ⟫
+              → ∀ (s : State)
+                → proof (⟦ P ⟧ s)
+                → proof (dcondition Q (⟦ C ⟧ᶜ s))
+    dsoundness {P} {Q} {C} h s pPs = dc-++-[] {_} {C} {tt , s} (dsoundness' {P} {Q} {C} h ((tt , s) ∷ []) (pPs , tt))

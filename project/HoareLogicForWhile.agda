@@ -9,6 +9,8 @@ import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; sym; trans; cong; cong₂; subst; [_]; inspect)
 open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
+open import Data.List using (List; []; _∷_; [_]; _++_)
+
 open import Data.Nat using (ℕ)
 
 {-
@@ -75,7 +77,6 @@ module HoareLogicForWhile where
 
         implied       : {Δ : Hypotheses}
                       → {ϕ ϕ' ψ ψ' : Formula}
-                      → {a : AExprₕ}
                       → {c : Cmdₕ}
                       → ([] ⊢ ϕ' ⇒ ϕ)
                       → ([] ⊢ ψ ⇒ ψ')
@@ -83,6 +84,13 @@ module HoareLogicForWhile where
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
 
+        or-statement  : {Δ : Hypotheses}
+                      → {ϕ ψ : Formula}
+                      → {cₗ cᵣ : Cmdₕ}
+                      → ⟪ ϕ ⟫ cₗ ⟪ ψ ⟫
+                      → ⟪ ϕ ⟫ cᵣ ⟪ ψ ⟫
+                      ----------------
+                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
 
     -- TODO: An alternative way of structuring Hoar triples. Not sure which one is more appropriate.
     --          Remove when no longer needed.

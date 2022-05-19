@@ -32,15 +32,13 @@ module WhileSemantics where
     -- Define state
     state = L → ℤ
 
-    -- TODO: Value of all the locaitons might not be defined.
+    -- Define a monad that captures nondeterminism and state effets.
+    
+    NDS-Monad = StateT state (Monad-List lzero)
 
     -- Define how arithmetic expressions should be interpreted.
 
     infix 4 ⟦_⟧ₐ
-
-    NDS-Monad = StateT state (Monad-List lzero)
-
-
 
     ⟦_⟧ₐ : AExprₕ → state → ℤ
     ⟦ intʷ x ⟧ₐ Γ = x
@@ -60,87 +58,37 @@ module WhileSemantics where
     ⟦ b₁ ∨ʷ b₂ ⟧ₒ Γ = ⟦ b₁ ⟧ₒ Γ ∨ ⟦ b₂ ⟧ₒ Γ
     ⟦ a₁ ≤ʷ a₂ ⟧ₒ Γ = (⟦ a₁ ⟧ₐ Γ) ≤ᵇ (⟦ a₂ ⟧ₐ Γ)
 
-    bool_expr_test = ⟦ (intʷ (+ 10) ≤ʷ intʷ (+ 9)) ∧ʷ trueʷ ⟧ₒ (λ _ → (+ 0))
-
-
-    -- TODO: Explain
-    forDooAux : ℕ  → Cmdₕ → (state → state) → state → state
-    forDooAux ℕ.zero c stm s = s
-    forDooAux (suc n) c stm s = forDooAux n c stm (stm s)
-
-    toSt : L → ℤ → state → state
-    toSt l a' Γ l' with (Dec.does (l ≟ l'))
-    ... | false = Γ l'
-    ... | true = a'
-{-
-    -- Define how commands should be interpreted (only state).
-
-    ListMonad = (Monad.T (Monad-List lzero) state)
-    
-    ⟦_⟧ : Cmdₕ → state → state
-    ⟦ passʷ ⟧ Γ = (λ _ → (+ 0))
-    ⟦ c₁ |ʷ c₂ ⟧ Γ = ⟦ c₂ ⟧ (⟦ c₁ ⟧ Γ)
-    ⟦ l :=ʷ a ⟧ Γ = toSt l (⟦ a ⟧ₐ Γ) Γ
-    ⟦ ifʷ b then c₁ else c₂ ⟧ Γ with ⟦ b ⟧ₒ Γ
-    ... | false = (⟦ c₂ ⟧ Γ)
-    ... | true = (⟦ c₁ ⟧ Γ)
-    -- TODO: Change the for loop to "for to do" form.
-    ⟦ forʷ a doo c ⟧ Γ = (forDooAux ( abs (⟦ a ⟧ₐ Γ) ) c ⟦ c ⟧ Γ)
-
-    -- (⟦ c₁ orʷ c₂ ⟧ Γ = ⟦ c₁ ⟧ Γ) ++ (⟦ c₂ ⟧ Γ)
-
-    cmd-test = ⟦ (7 :=ʷ intʷ (+ 10)) ⟧ (λ _ → (+ 0))
-    cmd-test' = ⟦ 7 :=ʷ intʷ (+ 10) |ʷ 8 :=ʷ ((locʷ 7) +ʷ (intʷ (+ 13))) ⟧ (λ _ → (+ 0)) 8
-
--}
-
     -- Define how commands should be interpreted (state + nondeterminism).
 
     open Monad NDS-Monad
 
+    -- Useful definitions (need to be externally visible)
+    toSt : L → ℤ → state → state
+    toSt l a' Γ l' with (Dec.does (l ≟ l'))
+    ... | false = Γ l'
+    ... | true = a'
+
+    forDooAux : ℕ → ((Monad.T NDS-Monad) ⊤) → (Monad.T NDS-Monad) ⊤
+    forDooAux ℕ.zero c = η tt
+    forDooAux (suc n) c = (c >> (forDooAux n c))
+
     ⟦_⟧ : Cmdₕ → (Monad.T NDS-Monad) ⊤
     ⟦ passʷ ⟧ = η tt
     ⟦ c₁ |ʷ c₂ ⟧ = ⟦ c₁ ⟧ >> ⟦ c₂ ⟧
-    ⟦ l :=ʷ a ⟧ s = η tt (aux l a' s)
+    ⟦ l :=ʷ a ⟧ s = η tt (toSt l a' s)
          where
              a' = (⟦ a ⟧ₐ s)
-             aux : L → ℤ → state → state
-             aux l a' Γ l' with (Dec.does (l ≟ l'))
-             ... | false = Γ l
-             ... | true = a'
     ⟦ ifʷ b then c₁ else c₂ ⟧ s with ⟦ b ⟧ₒ s
     ... | true = (⟦ c₁ ⟧ s)
     ... | false = (⟦ c₂ ⟧ s)
-    ⟦ forʷ a doo c ⟧ s = aux (abs (⟦ a ⟧ₐ s)) c s
+    ⟦ forʷ a doo c ⟧ s = forDooAux (abs (⟦ a ⟧ₐ s)) ⟦ c ⟧ s
          where
              aux : ℕ → Cmdₕ → (Monad.T NDS-Monad) ⊤
              aux ℕ.zero c = η tt
              aux (suc n) c = ⟦ c ⟧ >> (aux n c) 
     ⟦ c₁ orʷ c₂ ⟧ s = ⟦ c₁ ⟧ s ++ ⟦ c₂ ⟧ s
+
     {-
     ⟦ c₁ orʷ c₂ ⟧ s = (⟦ c₁ ⟧ s) >>ᴺᴰ (⟦ c₂ ⟧ s)
         where open Monad (Monad-List lzero) renaming (_>>_ to _>>ᴺᴰ_)
-    -}
-
-    -- ⟦_⟧ : Cmdₕ → state → ListMonad
-    -- ⟦ passʷ ⟧ Γ = (λ _ → (+ 0)) ∷ []
-    -- ⟦ c₁ |ʷ c₂ ⟧ Γ = foldr _++_ [] (map (λ s → (⟦ c₂ ⟧ s)) (⟦ c₁ ⟧ Γ))
-    -- ⟦ l :=ʷ a ⟧ Γ = aux l a' Γ ∷ []
-    --     where
-    --         a' = (⟦ a ⟧ₐ Γ)
-    --         aux : L → ℤ → state → state
-    --         aux l a' Γ l' with (Dec.does (l ≟ l'))
-    --         ... | false = Γ l
-    --         ... | true = a'
-    -- ⟦ ifʷ b then c₁ else c₂ ⟧ Γ with ⟦ b ⟧ₒ Γ
-    -- ... | false = (⟦ c₂ ⟧ Γ)
-    -- ... | true = (⟦ c₁ ⟧ Γ)
-
-    -- -- TODO: Change the for loop to "for to do" form.
-    -- ⟦ forʷ a doo c ⟧ Γ = (aux ( abs (⟦ a ⟧ₐ Γ) ) c Γ)
-    --     where
-    --         aux : ℕ  → Cmdₕ → state → ListMonad
-    --         aux ℕ.zero c s = s ∷ []
-    --         aux (suc a') c s = foldr _++_ [] (map (λ s' → aux a' c s') (⟦ c ⟧ Γ))
-
-    -- ⟦ c₁ orʷ c₂ ⟧ Γ = (⟦ c₁ ⟧ Γ) ++ (⟦ c₂ ⟧ Γ)   
+    -} 
