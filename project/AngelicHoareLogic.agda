@@ -18,7 +18,7 @@ open import Data.Nat using (ℕ)
 
     Logic is parameeterised over a (state) logic SL that can be used to reason about the state of the program.
 -}
-module HoareLogicForWhile where
+module AngelicHoareLogic where
 
     -- Define location type
     L = ℕ
@@ -84,35 +84,16 @@ module HoareLogicForWhile where
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
     
-        or-statement  : {Δ : Hypotheses}
+        or-statementₗ  : {Δ : Hypotheses}
                       → {ϕ ψ : Formula}
                       → {cₗ cᵣ : Cmdₕ}
                       → ⟪ ϕ ⟫ cₗ ⟪ ψ ⟫
+                      ----------------
+                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
+        
+        or-statementᵣ : {Δ : Hypotheses}
+                      → {ϕ ψ : Formula}
+                      → {cₗ cᵣ : Cmdₕ}
                       → ⟪ ϕ ⟫ cᵣ ⟪ ψ ⟫
                       ----------------
                       → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
-
-    -- TODO: An alternative way of structuring Hoar triples. Not sure which one is more appropriate.
-    --          Remove when no longer needed.
-    -- data ⟪_⟫_⟪_⟫ : {Δ : Hypotheses} → {ϕ ψ : Formula} → (Δ ⊢ ϕ) → Cmdₕ → (Δ ⊢ ψ) → Set where
-        
-    --     composition : {Δ : Hypotheses}
-    --                 → {ϕ θ ψ : Formula}
-    --                 → {c₁ c₂ : Cmdₕ}
-    --                 → {prc : Δ ⊢ ϕ}
-    --                 → {mc : Δ ⊢ θ}
-    --                 → {poc : Δ ⊢ ψ}
-    --                 → (⟪ prc ⟫ c₁ ⟪ mc ⟫)
-    --                 → (⟪ mc ⟫ c₂ ⟪ poc ⟫)
-    --                 ------------------------
-    --                 → ⟪ prc ⟫ (c₁ |ʷ c₂) ⟪ poc ⟫
-
-
-    --     assignment  : {Δ : Hypotheses}
-    --                 → {ϕ θ ψ : Formula}
-    --                 → {prc : (Δ ∷ ()) ⊢ ϕ}
-    --                 → {poc : Δ ⊢ ψ}
-    --                 → {a : AExprₕ}
-    --                 → {l : L}
-    --                 ------------------
-    --                 → (⟪ prc ⟫ l :=ʷ a ⟪ poc ⟫)   
