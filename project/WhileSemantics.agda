@@ -10,13 +10,13 @@ open import Data.Unit using (⊤; tt)
 open import Data.Product using (_,_; _×_)
 
 import WhileSyntax
-
-open import MonadDef
 open import Monads
 open ListMonad
 open StateTransformer
 
-open import Agda.Builtin.Maybe
+--
+-- Semanics of a WHILE language with state and nondeterminism
+--
 
 module WhileSemantics where
 
@@ -37,25 +37,25 @@ module WhileSemantics where
 
     -- Define how arithmetic expressions should be interpreted.
 
-    infix 4 ⟦_⟧ₐ
+    infix 4 ⟦_⟧ᵃ
 
-    ⟦_⟧ₐ : AExprₕ → state → ℤ
-    ⟦ intʷ x ⟧ₐ Γ = x
-    ⟦ locʷ l ⟧ₐ Γ = Γ l
-    ⟦ -ʷ a ⟧ₐ Γ = - (⟦ a ⟧ₐ Γ)
-    ⟦ a₁ +ʷ a₂ ⟧ₐ Γ = (⟦ a₁ ⟧ₐ Γ) + (⟦ a₂ ⟧ₐ Γ) 
+    ⟦_⟧ᵃ : AExprₕ → state → ℤ
+    ⟦ intʷ x ⟧ᵃ Γ = x
+    ⟦ locʷ l ⟧ᵃ Γ = Γ l
+    ⟦ -ʷ a ⟧ᵃ Γ = - (⟦ a ⟧ᵃ Γ)
+    ⟦ a₁ +ʷ a₂ ⟧ᵃ Γ = (⟦ a₁ ⟧ᵃ Γ) + (⟦ a₂ ⟧ᵃ Γ) 
 
     -- Define how boolean expressions should be interpreted.
 
-    infix 5 ⟦_⟧ₒ
+    infix 5 ⟦_⟧ᵇ
 
-    ⟦_⟧ₒ : BExprₕ → state → Bool
-    ⟦ trueʷ ⟧ₒ _ = true
-    ⟦ falseʷ ⟧ₒ _ = false
-    ⟦ ¬ʷ b ⟧ₒ Γ = not (⟦ b ⟧ₒ Γ)
-    ⟦ b₁ ∧ʷ b₂ ⟧ₒ Γ = ⟦ b₁ ⟧ₒ Γ ∧ ⟦ b₂ ⟧ₒ Γ
-    ⟦ b₁ ∨ʷ b₂ ⟧ₒ Γ = ⟦ b₁ ⟧ₒ Γ ∨ ⟦ b₂ ⟧ₒ Γ
-    ⟦ a₁ ≤ʷ a₂ ⟧ₒ Γ = (⟦ a₁ ⟧ₐ Γ) ≤ᵇ (⟦ a₂ ⟧ₐ Γ)
+    ⟦_⟧ᵇ : BExprₕ → state → Bool
+    ⟦ trueʷ ⟧ᵇ _ = true
+    ⟦ falseʷ ⟧ᵇ _ = false
+    ⟦ ¬ʷ b ⟧ᵇ Γ = not (⟦ b ⟧ᵇ Γ)
+    ⟦ b₁ ∧ʷ b₂ ⟧ᵇ Γ = ⟦ b₁ ⟧ᵇ Γ ∧ ⟦ b₂ ⟧ᵇ Γ
+    ⟦ b₁ ∨ʷ b₂ ⟧ᵇ Γ = ⟦ b₁ ⟧ᵇ Γ ∨ ⟦ b₂ ⟧ᵇ Γ
+    ⟦ a₁ ≤ʷ a₂ ⟧ᵇ Γ = (⟦ a₁ ⟧ᵃ Γ) ≤ᵇ (⟦ a₂ ⟧ᵃ Γ)
 
     -- Define how commands should be interpreted (state + nondeterminism).
 
@@ -75,9 +75,9 @@ module WhileSemantics where
     ⟦ passʷ ⟧ = η tt
     ⟦ c₁ |ʷ c₂ ⟧ = ⟦ c₁ ⟧ >> ⟦ c₂ ⟧
     ⟦ l :=ʷ a ⟧ s = η tt (toSt l a' s)
-        where a' = (⟦ a ⟧ₐ s)
-    ⟦ ifʷ b then c₁ else c₂ ⟧ s with ⟦ b ⟧ₒ s
+        where a' = (⟦ a ⟧ᵃ s)
+    ⟦ ifʷ b then c₁ else c₂ ⟧ s with ⟦ b ⟧ᵇ s
     ... | true = (⟦ c₁ ⟧ s)
     ... | false = (⟦ c₂ ⟧ s)
-    ⟦ forʷ a doo c ⟧ s = forDooAux (abs (⟦ a ⟧ₐ s)) ⟦ c ⟧ s
-    ⟦ c₁ orʷ c₂ ⟧ s = ⟦ c₁ ⟧ s ++ ⟦ c₂ ⟧ s
+    ⟦ forʷ a doo c ⟧ s = forDooAux (abs (⟦ a ⟧ᵃ s)) ⟦ c ⟧ s
+    ⟦ c₁ orʷ c₂ ⟧ s = ⟦ c₁ ⟧ s ++ ⟦ c₂ ⟧ s 

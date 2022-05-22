@@ -1,7 +1,6 @@
 import WhileSyntax
-open import WhileSemantics using (⟦_⟧ₒ)
 import PQDeduction
-open import PQSubstitution using (_[_/_]ᶠ ; _[_/_]ᵉ)
+open import PQSubstitution using (_[_/_]ᶠ ; _[_/_]ᵃ)
 
 open import Data.Bool using (Bool; true; false)
 
@@ -40,8 +39,7 @@ module AngelicHoareLogic where
     toFormulaₚ (¬ʷ b) = ¬ (toFormulaₚ b)
     toFormulaₚ (b₁ ∧ʷ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂ -- TODO: Wrong conversion.
-
+    toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂
 
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where

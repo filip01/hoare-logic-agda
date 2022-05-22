@@ -30,7 +30,7 @@ open import Data.Unit
 -}
 
 open import HProp
-open import WhileSemantics using (⟦_⟧ₐ; L)
+open import WhileSemantics using (⟦_⟧ᵃ; L)
 
 import PQDeduction
 open PQDeduction L renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᵣ; ⊤ to ⊤ᶠ) hiding (_∈_)
@@ -69,8 +69,8 @@ x <ₑₕ y with x ≤ᵇ y
 ⟦ P₁ ∧ P₂ ⟧ S = ⟦ P₁ ⟧ S ∧ʰ ⟦ P₂ ⟧ S
 ⟦ P₁ ∨ P₂ ⟧ S = ⟦ P₁ ⟧ S ∨ʰ ⟦ P₂ ⟧ S
 ⟦ P₁ ⇒ P₂ ⟧ S = ⟦ P₁ ⟧ S ⇒ʰ ⟦ P₂ ⟧ S
-⟦ x₁ =ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₐ S) =ₑₕ (⟦ x₂ ⟧ₐ S)
-⟦ x₁ ≤ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₐ S) <ₑₕ (⟦ x₂ ⟧ₐ S)
+⟦ x₁ =ₑ x₂ ⟧ S = (⟦ x₁ ⟧ᵃ S) =ₑₕ (⟦ x₂ ⟧ᵃ S)
+⟦ x₁ ≤ₑ x₂ ⟧ S = (⟦ x₁ ⟧ᵃ S) <ₑₕ (⟦ x₂ ⟧ᵃ S)
 
 {-
    The interpretation function is also extended to hypotheses.
@@ -159,7 +159,7 @@ sym⟦⟧ₕ-++ (x ∷ Δ₁) Δ₂ {s} ((pₓ , p₁) , p₂) = pₓ , sym⟦�
 ⟦ =ₑ-trans h₁ h₂ ⟧ₓ {s} p = trans (⟦ h₁ ⟧ₓ p) (⟦ h₂ ⟧ₓ p)
 
 -- TODO : explain
-⟦ ≤ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = T-≡true (≤⇒≤ᵇ( +-monoˡ-≤ (⟦ z ⟧ₐ s) (≤ᵇ⇒≤ {⟦ x ⟧ₐ s } (≡true-T (⟦ h ⟧ₓ p)))))
+⟦ ≤ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = T-≡true (≤⇒≤ᵇ( +-monoˡ-≤ (⟦ z ⟧ᵃ s) (≤ᵇ⇒≤ {⟦ x ⟧ᵃ s } (≡true-T (⟦ h ⟧ₓ p)))))
    where
       ≡true-T : {a : Bool} → a ≡ true → T a
       ≡true-T {true} _ = tt
@@ -168,13 +168,13 @@ sym⟦⟧ₕ-++ (x ∷ Δ₁) Δ₂ {s} ((pₓ , p₁) , p₂) = pₓ , sym⟦�
       T-≡true {true} _ = refl
 {-
    ∥∥-elim 
-   (∥∥-is-proposition (⟦ x ⟧ₐ s + ⟦ z ⟧ₐ s < ⟦ y ⟧ₐ s + ⟦ z ⟧ₐ s)) 
-   (λ a → ∣ +-monoˡ-< (⟦ z ⟧ₐ s) a ∣) 
+   (∥∥-is-proposition (⟦ x ⟧ᵃ s + ⟦ z ⟧ᵃ s < ⟦ y ⟧ᵃ s + ⟦ z ⟧ᵃ s)) 
+   (λ a → ∣ +-monoˡ-< (⟦ z ⟧ᵃ s) a ∣) 
    (⟦ h ⟧ₓ p)
 -}
    
 
-⟦ +ₚ-zero {Δ} {x} ⟧ₓ {s} p = +-identityʳ (⟦ x ⟧ₐ s)
+⟦ +ₚ-zero {Δ} {x} ⟧ₓ {s} p = +-identityʳ (⟦ x ⟧ᵃ s)
 
-⟦ +ₚ-comm {Δ} {x} {y} ⟧ₓ {s} p = +-comm (⟦ x ⟧ₐ s) (⟦ y ⟧ₐ s)
+⟦ +ₚ-comm {Δ} {x} {y} ⟧ₓ {s} p = +-comm (⟦ x ⟧ᵃ s) (⟦ y ⟧ᵃ s)
   

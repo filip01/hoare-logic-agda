@@ -1,28 +1,55 @@
-open import Level        renaming (zero to lzero; suc to lsuc)
+open import Level using (Level) renaming (zero to lzero; suc to lsuc)
 
-open import Data.List
-open import Data.Nat
+open import Data.List using (List; []; _∷_; [_]; _++_; map; concat)
+open import Data.Nat using (ℕ)
 open import Data.Integer using (ℤ)
 
 import Relation.Binary.PropositionalEquality as Eq
-open Eq                  using (_≡_; refl; sym; trans; cong; cong₂; subst; [_]; inspect)
-open Eq.≡-Reasoning      using (begin_; _≡⟨⟩_; step-≡; _∎)
+open Eq using (_≡_; refl; sym; trans; cong; cong₂; subst; [_]; inspect)
+open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
 open import Axiom.Extensionality.Propositional
 
-open import Function     using (id; _∘_)
+open import Function using (id; _∘_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
-open import Data.Unit
-
-open import MonadDef
+open import Data.Unit using (⊤)
 
 open import Axiom.Extensionality.Propositional using (Extensionality)
 
--- TODO: Maybe it would be good idea to rename entries in Monad M.
+--
+-- Monads needed to interpret Hoare logic for WHILE with state and nondeterminism
+--
+
 module Monads where
 
     postulate fun-ext : ∀ {a b} → Extensionality a b
+
+    --
+    -- Definition of a monad
+    --
+
+    record Monad (l : Level) : Set (lsuc l) where
+        field
+            T       : Set l → Set l         -- carrier type
+            η       : {X : Set l} → X → T X -- unit
+            _>>=_   : {X Y : Set l} → T X → (X → T Y) → T Y -- bind
+            -- monad laws
+            η-left  : {X Y : Set l} (x : X) (f : X → T Y) → η x >>= f ≡ f x
+            η-right : {X : Set l} (c : T X) → c >>= η ≡ c
+            >>=-assoc : {X Y Z : Set l} (c : T X) (f : X → T Y) (g : Y → T Z)
+                → ((c >>= f) >>= g) ≡ c >>= (λ x → f x >>= g)
+
+        -- the derived operation _>>_ is needed to make Agda do notation work
+        _>>_ : {X Y : Set l} → T X → T Y → T Y
+        m >> k = ( m >>= λ _ → k)
+
+        -- programers call η return, so we alias it
+        return = η
     
+    --
+    -- A transfor that extends the provided monad with a notion of a state.
+    --
+
     module StateTransformer where
     
         StateT : {l : Level} → (State : Set) → Monad l → Monad l
@@ -58,7 +85,12 @@ module Monads where
         liftₛₜ {M = M} = λ t s → t >>= λ a → η (a , s)
             where open Monad M
 
+    --
+    -- List monad - Can be used to model nondeterminism.
+    --
+
     module ListMonad where
+
         Monad-List : (l : Level) → Monad l
         Monad-List l =
             record

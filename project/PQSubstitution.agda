@@ -11,14 +11,13 @@ module PQSubstitution where
 
     open import WhileSyntax L
 
-
-    _[_/_]ᵉ : AExprₕ → AExprₕ → ℕ → AExprₕ
-    (intʷ x) [ e / l ]ᵉ = (intʷ x)
-    (locʷ x) [ e / l ]ᵉ with (Dec.does (l ≟ x))
+    _[_/_]ᵃ : AExprₕ → AExprₕ → ℕ → AExprₕ
+    (intʷ x) [ e / l ]ᵃ = (intʷ x)
+    (locʷ x) [ e / l ]ᵃ with (Dec.does (l ≟ x))
     ... | false = (locʷ x)
     ... | true = e
-    (-ʷ a) [ e / l ]ᵉ = (-ʷ (a [ e / l ]ᵉ))
-    (a₁ +ʷ a₂) [ e / l ]ᵉ = ((a₁ [ e / l ]ᵉ) +ʷ (a₂ [ e / l ]ᵉ))
+    (-ʷ a) [ e / l ]ᵃ = (-ʷ (a [ e / l ]ᵃ))
+    (a₁ +ʷ a₂) [ e / l ]ᵃ = ((a₁ [ e / l ]ᵃ) +ʷ (a₂ [ e / l ]ᵃ))
 
     _[_/_]ᶠ : Formula → AExprₕ → ℕ → Formula
     ⊤ [ e / l ]ᶠ = ⊤
@@ -26,5 +25,5 @@ module PQSubstitution where
     (ϕ₁ ∧ ϕ₂) [ e / l ]ᶠ = ((ϕ₁ [ e / l ]ᶠ) ∧ (ϕ₂ [ e / l ]ᶠ))
     (ϕ₁ ∨ ϕ₂) [ e / l ]ᶠ = ((ϕ₁ [ e / l ]ᶠ) ∨ (ϕ₂ [ e / l ]ᶠ))
     (ϕ₁ ⇒ ϕ₂) [ e / l ]ᶠ = ((ϕ₁ [ e / l ]ᶠ) ⇒ (ϕ₂ [ e / l ]ᶠ))
-    (x₁ =ₑ x₂) [ e / l ]ᶠ = (x₁ [ e / l ]ᵉ) =ₑ (x₂ [ e / l ]ᵉ)
-    (x₁ ≤ₑ x₂) [ e / l ]ᶠ = (x₁ [ e / l ]ᵉ) ≤ₑ (x₂ [ e / l ]ᵉ) 
+    (x₁ =ₑ x₂) [ e / l ]ᶠ = (x₁ [ e / l ]ᵃ) =ₑ (x₂ [ e / l ]ᵃ)
+    (x₁ ≤ₑ x₂) [ e / l ]ᶠ = (x₁ [ e / l ]ᵃ) ≤ₑ (x₂ [ e / l ]ᵃ) 

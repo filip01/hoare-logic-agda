@@ -1,7 +1,6 @@
 import WhileSyntax
-open import WhileSemantics using (⟦_⟧ₒ)
 import PQDeduction
-open import PQSubstitution using (_[_/_]ᶠ ; _[_/_]ᵉ)
+open import PQSubstitution using (_[_/_]ᶠ ; _[_/_]ᵃ)
 
 open import Data.Bool using (Bool; true; false)
 
@@ -18,7 +17,7 @@ open import Data.Nat using (ℕ)
 
     Logic is parameeterised over a (state) logic SL that can be used to reason about the state of the program.
 -}
-module HoareLogicForWhile where
+module DemonicHoareLogic where
 
     -- Define location type
     L = ℕ
@@ -82,11 +81,11 @@ module HoareLogicForWhile where
                       → ⟪ ϕ ⟫ c ⟪ ψ ⟫
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
-    
+
         or-statement  : {Δ : Hypotheses}
                       → {ϕ ψ : Formula}
                       → {cₗ cᵣ : Cmdₕ}
                       → ⟪ ϕ ⟫ cₗ ⟪ ψ ⟫
                       → ⟪ ϕ ⟫ cᵣ ⟪ ψ ⟫
                       ----------------
-                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫   
+                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
