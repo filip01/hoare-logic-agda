@@ -43,7 +43,6 @@ data Cmdₕ : Set where
     _:=ʷ_ : L → AExprₕ → Cmdₕ
     ifʷ_then_else_ : BExprₕ → Cmdₕ → Cmdₕ → Cmdₕ
     forʷ_doo_ : AExprₕ → Cmdₕ → Cmdₕ
-    -- TODO: Add to model nondeterminism.
     _orʷ_ : Cmdₕ → Cmdₕ → Cmdₕ  
 
 test' = passʷ |ʷ passʷ

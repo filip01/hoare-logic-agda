@@ -42,7 +42,6 @@ module HoareLogicForWhile where
     toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
     toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂ -- TODO: Wrong conversion.
 
-
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where
         
@@ -90,29 +89,4 @@ module HoareLogicForWhile where
                       → ⟪ ϕ ⟫ cₗ ⟪ ψ ⟫
                       → ⟪ ϕ ⟫ cᵣ ⟪ ψ ⟫
                       ----------------
-                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
-
-    -- TODO: An alternative way of structuring Hoar triples. Not sure which one is more appropriate.
-    --          Remove when no longer needed.
-    -- data ⟪_⟫_⟪_⟫ : {Δ : Hypotheses} → {ϕ ψ : Formula} → (Δ ⊢ ϕ) → Cmdₕ → (Δ ⊢ ψ) → Set where
-        
-    --     composition : {Δ : Hypotheses}
-    --                 → {ϕ θ ψ : Formula}
-    --                 → {c₁ c₂ : Cmdₕ}
-    --                 → {prc : Δ ⊢ ϕ}
-    --                 → {mc : Δ ⊢ θ}
-    --                 → {poc : Δ ⊢ ψ}
-    --                 → (⟪ prc ⟫ c₁ ⟪ mc ⟫)
-    --                 → (⟪ mc ⟫ c₂ ⟪ poc ⟫)
-    --                 ------------------------
-    --                 → ⟪ prc ⟫ (c₁ |ʷ c₂) ⟪ poc ⟫
-
-
-    --     assignment  : {Δ : Hypotheses}
-    --                 → {ϕ θ ψ : Formula}
-    --                 → {prc : (Δ ∷ ()) ⊢ ϕ}
-    --                 → {poc : Δ ⊢ ψ}
-    --                 → {a : AExprₕ}
-    --                 → {l : L}
-    --                 ------------------
-    --                 → (⟪ prc ⟫ l :=ʷ a ⟪ poc ⟫)   
+                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫   
