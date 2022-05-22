@@ -7,16 +7,16 @@ This repository contains formalization of *Hoare logic for WHILE language extend
  - We embedded a small imperative programming language (commonly called WHILE language) extended with state and nondeterminism.
  - Defined an interpreter for the extended WHILE language.
  - Embedded a logic (called *PQ logic*) that can be used to reason about the state of the program.
- - Embedded two variants of Hoare logic for extended WHILE language based upon PQ logic; one variant assumed angelic, and the other, demonic nonteterminism.
+ - Embedded two variants of Hoare logic for extended WHILE language based upon PQ logic; one variant assumed angelic, and the other, demonic nondeterminism.
  - Proved soundness for both variants of the Hoar logic with respect to the interpreter in the partial correctness reading.
 
 ## Structure of the repository
 
  - `src/` - directory containing the source code
- - `src/AngelicHoareLogic.agda` - embedding of Hoare logic with angelic nondeterminism
- - `src/AngelicSoundness.agda` - proof of soundness with angelic nondeterminism
- - `src/DemonicHoareLogic.agda` - embedding of Hoare logic with demonic nondeterminism
- - `src/DemonicSoundness.agda` - proof of soundness with demonic nondeterminism
+ - `src/AngelicHoareLogic.agda` - embedding of the Hoare logic with angelic nondeterminism
+ - `src/AngelicSoundness.agda` - proof of soundness of the Hoare logic with angelic nondeterminism
+ - `src/DemonicHoareLogic.agda` - embedding of the Hoare logic with demonic nondeterminism
+ - `src/DemonicSoundness.agda` - proof of soundness of the Hoare logic with demonic nondeterminism
  - `src/HProp.agda` - definition of the universe of propositions
  - `src/Monads.agda` - definition of a monad, state transformer and monad of lists
  - `src/PQDeduction.agda` - embedding of PQ logic
