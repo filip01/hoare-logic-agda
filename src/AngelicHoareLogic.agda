@@ -12,12 +12,11 @@ open import Data.List using (List; []; _∷_; [_]; _++_)
 
 open import Data.Nat using (ℕ)
 
-{-
-    Here you can find HoarLogic for WHILE programming language.
+--
+--  HoarLogic for WHILE language with state and angelic nondeterminism
+--
 
-    Logic is parameeterised over a (state) logic SL that can be used to reason about the state of the program.
--}
-module DemonicHoareLogic where
+module AngelicHoareLogic where
 
     -- Define location type
     L = ℕ
@@ -39,7 +38,7 @@ module DemonicHoareLogic where
     toFormulaₚ (¬ʷ b) = ¬ (toFormulaₚ b)
     toFormulaₚ (b₁ ∧ʷ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂ -- TODO: Wrong conversion.
+    toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂
 
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where
@@ -81,11 +80,17 @@ module DemonicHoareLogic where
                       → ⟪ ϕ ⟫ c ⟪ ψ ⟫
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
-
-        or-statement  : {Δ : Hypotheses}
+    
+        or-statementₗ  : {Δ : Hypotheses}
                       → {ϕ ψ : Formula}
                       → {cₗ cᵣ : Cmdₕ}
                       → ⟪ ϕ ⟫ cₗ ⟪ ψ ⟫
+                      ----------------
+                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
+        
+        or-statementᵣ : {Δ : Hypotheses}
+                      → {ϕ ψ : Formula}
+                      → {cₗ cᵣ : Cmdₕ}
                       → ⟪ ϕ ⟫ cᵣ ⟪ ψ ⟫
                       ----------------
                       → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫

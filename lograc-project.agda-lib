@@ -2,4 +2,4 @@ name: lograc-project
 include:
   agda-stdlib/src
   agda-categories/src
-  project
+  src

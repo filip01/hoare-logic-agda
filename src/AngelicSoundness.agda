@@ -98,7 +98,7 @@ module AngelicSoundness where
       subR2State' : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
                       → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) → proof (⟦ Q [ a / l ]ᶠ ⟧ s) 
   
-      subR2State  {⊤} {a} {l} {s} _ = tt
+      subR2State {⊤} {a} {l} {s} _ = tt
       subR2State' {⊤} {a} {l} {s} _ = tt
       subR2State {⊥} {a} {l} {s} p = p
       subR2State' {⊥} {a} {l} {s} p = p

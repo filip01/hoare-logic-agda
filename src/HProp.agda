@@ -7,6 +7,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 open import Axiom.Extensionality.Propositional using (Extensionality)
 
+
+--
+-- Universe of propositions where propositions are represented as types that only have one element.
+--
+
 module HProp where
 
     postulate fun-ext : ∀ {a b} → Extensionality a b

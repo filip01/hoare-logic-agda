@@ -21,6 +21,7 @@ open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
 open import Relation.Nullary renaming (¬_ to ¬ᶠ_ )
 
+
 --
 -- Soundness of Hoar logic for WHILE with states and demonic nondeterminism
 --
@@ -33,11 +34,12 @@ module DemonicSoundness where
     
     open Monad NDS-Monad
 
-    -- Some useful lemmas
-    
+    -- Demonic condition - A formula `Q` needs to hold for all the states of a list.
     dcondition : {A : Set} → (Q : Formula) → List (A × State) → HProp
     dcondition Q [] = ⊤ʰ
     dcondition Q (x ∷ sts) = (⟦ Q ⟧ (proj₂ x)) ∧ʰ dcondition Q sts
+
+    -- Some useful lemmas
 
     dc-++-eq-∧ʰ : {A : Set} {Q : Formula} {ls ls' : List (A × State)}
       → proof ((dcondition Q ls) ∧ʰ (dcondition Q ls')) → proof (dcondition Q (ls ++ ls'))
@@ -64,6 +66,7 @@ module DemonicSoundness where
     --
 
     interleaved mutual
+
       -- If `b` evaluates to true, then there exist a witness of `⟦ toFormulaₚ b ⟧ s`.
       bIsTrueFollows  : {s : State} → {b : BExprₕ} → (⟦ b ⟧ᵇ s ≡ true) → (proof (⟦ toFormulaₚ b ⟧ s))
       -- If `b` evaluates to false, then there does NOT exist a witness of `⟦ toFormulaₚ b ⟧ s`.
@@ -96,6 +99,7 @@ module DemonicSoundness where
     --
     -- Show how is substitution related to state.
     --
+
     subR2StateA : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
          →  (⟦ a [ b / l ]ᵃ ⟧ᵃ s) ≡ (⟦ a ⟧ᵃ (toSt l (⟦ b ⟧ᵃ s) s))
     subR2StateA {intʷ x} {b} {l} {s} = refl
@@ -109,6 +113,7 @@ module DemonicSoundness where
         (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
 
     interleaved mutual
+ 
       subR2State  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
                       → proof (⟦ Q [ a / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s))
       subR2State' : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
@@ -179,43 +184,43 @@ module DemonicSoundness where
     --
 
     -- More general definition of soundness
-    dsoundness' : {P Q : Formula} {C : Cmdₕ}
+    gdsoundness : {P Q : Formula} {C : Cmdₕ}
               → ⟪ P ⟫ C ⟪ Q ⟫
               → ∀ (ls : List (⊤ᶠ × State))
                 → proof (dcondition P ls)
                 → proof (dcondition Q (apply-and-fold C ls))
 
-    dsoundness' {P} {Q} {_ |ʷ _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) [] pPs = tt
-    dsoundness' {P} {Q} {_ |ʷ _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
+    gdsoundness {P} {Q} {_ |ʷ _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) [] pPs = tt
+    gdsoundness {P} {Q} {_ |ʷ _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
       dc-++-eq-∧ʰ {⊤ᶠ} {Q} {foldr _++_ [] (map (λ { (_ , s') → ⟦ c₂ ⟧ᶜ s' }) (⟦ c₁ ⟧ᶜ (proj₂ x)))} 
-         (dsoundness' h₂ (⟦ c₁ ⟧ᶜ (proj₂ x)) (dc-++-[]  {_} {c₁} {x} (dsoundness' h₁ (x ∷ []) ((proj₁ pPs) , tt))) ,
-          dsoundness' (composition h₁ h₂) ls (proj₂ pPs))
+         (gdsoundness h₂ (⟦ c₁ ⟧ᶜ (proj₂ x)) (dc-++-[]  {_} {c₁} {x} (gdsoundness h₁ (x ∷ []) ((proj₁ pPs) , tt))) ,
+          gdsoundness (composition h₁ h₂) ls (proj₂ pPs))
 
-    dsoundness' {.(Q [ _ / _ ]ᶠ)} {Q} {_ :=ʷ _} assignment [] pPs = tt
-    dsoundness' {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {P} {a}) (x ∷ ls) pPs =
+    gdsoundness {.(Q [ _ / _ ]ᶠ)} {Q} {_ :=ʷ _} assignment [] pPs = tt
+    gdsoundness {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {P} {a}) (x ∷ ls) pPs =
       subR2State {Q} {a} {l} {proj₂ x} ((proj₁ pPs)) ,
-      dsoundness' (assignment {P} {a}) ls (proj₂ pPs)
+      gdsoundness (assignment {P} {a}) ls (proj₂ pPs)
 
-    dsoundness' {P} {Q} {ifʷ b then _ else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) [] pPs = tt
-    dsoundness' {P} {Q} {ifʷ b then _ else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
+    gdsoundness {P} {Q} {ifʷ b then _ else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) [] pPs = tt
+    gdsoundness {P} {Q} {ifʷ b then _ else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
       dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ ifʷ b then _ else _ ⟧ᶜ (proj₂ x))}
         (cases-b ,
-         dsoundness' (if-statement {_} {_} {b} h₁ h₂) ls (proj₂ pPs))
+         gdsoundness (if-statement {_} {_} {b} h₁ h₂) ls (proj₂ pPs))
 
       where
 
         cases-b : proof (dcondition Q (⟦ ifʷ b then c₁ else c₂ ⟧ᶜ (proj₂ x)))
         cases-b with (⟦ b ⟧ᵇ (proj₂ x)) | inspect ⟦ b ⟧ᵇ (proj₂ x)
         ... | false | Eq.[ eq ] =
-          dc-++-[] {Q} {c₂} (dsoundness' h₂ (x ∷ []) (((proj₁ pPs) , bIsFalseFollows {proj₂ x} {b} eq) , tt))
+          dc-++-[] {Q} {c₂} (gdsoundness h₂ (x ∷ []) (((proj₁ pPs) , bIsFalseFollows {proj₂ x} {b} eq) , tt))
         ... | true | Eq.[ eq ] =
-          dc-++-[] {Q} {c₁} (dsoundness' h₁ (x ∷ []) (((proj₁ pPs) , bIsTrueFollows {proj₂ x} {b} eq) , tt))
+          dc-++-[] {Q} {c₁} (gdsoundness h₁ (x ∷ []) (((proj₁ pPs) , bIsTrueFollows {proj₂ x} {b} eq) , tt))
 
-    dsoundness' {P} {P} {forʷ _ doo _} (for-statement h) [] pPs = tt
-    dsoundness' {P} {P} {forʷ _ doo _} (for-statement {_} {_} {a} {c} h) (x ∷ ls) pPs = 
+    gdsoundness {P} {P} {forʷ _ doo _} (for-statement h) [] pPs = tt
+    gdsoundness {P} {P} {forʷ _ doo _} (for-statement {_} {_} {a} {c} h) (x ∷ ls) pPs = 
       dc-++-eq-∧ʰ {⊤ᶠ} {P} {forDooAux (abs (⟦ a ⟧ᵃ (proj₂ x))) ⟦ c ⟧ᶜ (proj₂ x)}
         ( cases-m (abs (⟦ a ⟧ᵃ (proj₂ x))) x (proj₁ pPs) ,
-         dsoundness' (for-statement {P} {P} {a} {c} h) ls (proj₂ pPs))
+         gdsoundness (for-statement {P} {P} {a} {c} h) ls (proj₂ pPs))
 
       where
       
@@ -231,7 +236,7 @@ module DemonicSoundness where
               → proof (dcondition P ((⟦ c ⟧ᶜ >> forDooAux n ⟦ c ⟧ᶜ) x'))
             soundOfC>>ForDooAux {n} {x'} pPs = 
               cases-ls (⟦ c ⟧ᶜ x')
-                (dc-++-[] {P} {c} (dsoundness' h  (( tt , x' ) ∷ []) (pPs , tt)))
+                (dc-++-[] {P} {c} (gdsoundness h  (( tt , x' ) ∷ []) (pPs , tt)))
 
               where 
 
@@ -243,13 +248,13 @@ module DemonicSoundness where
                   (cases-m n x'' (proj₁ pPls) ,
                    (cases-ls ls'' (proj₂ pPls)))
 
-    dsoundness' {P} {Q} {C} (implied _ _ _) [] pPs = tt
-    dsoundness' {P'} {Q'} {C} (implied {Δ} {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) (x ∷ ls) pPs = 
+    gdsoundness {P} {Q} {C} (implied _ _ _) [] pPs = tt
+    gdsoundness {P'} {Q'} {C} (implied {Δ} {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) (x ∷ ls) pPs = 
       dc-++-eq-∧ʰ {⊤ᶠ} {Q'} {⟦ C ⟧ᶜ (proj₂ x)}
         (auxAppToCond {⟦ C ⟧ᶜ (proj₂ x)} Q⇒Q'
-            (dc-++-[] {Q} {C} (dsoundness' h (x ∷ [])
+            (dc-++-[] {Q} {C} (gdsoundness h (x ∷ [])
               ((⟦ P'⇒P ⟧ₓ {proj₂ x} tt ((proj₁ pPs))) , tt))) ,
-         (dsoundness' (implied {Δ} {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) ls ((proj₂ pPs))))
+         (gdsoundness (implied {Δ} {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) ls ((proj₂ pPs))))
 
         where
 
@@ -258,13 +263,13 @@ module DemonicSoundness where
           auxAppToCond {[]} iQ h = tt
           auxAppToCond {x' ∷ ls'} iQ h = (⟦ iQ ⟧ₓ tt ((proj₁ h))) , (auxAppToCond {ls'} iQ (proj₂ h))
 
-    dsoundness' {P} {Q} {_ orʷ _} (or-statement h h₁) [] pPs = tt
-    dsoundness' {P} {Q} {_ orʷ _} (or-statement {Δ} {P} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs = 
+    gdsoundness {P} {Q} {_ orʷ _} (or-statement h h₁) [] pPs = tt
+    gdsoundness {P} {Q} {_ orʷ _} (or-statement {Δ} {P} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs = 
       dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ cₗ ⟧ᶜ (proj₂ x) ++ ⟦ cᵣ ⟧ᶜ (proj₂ x))}
         (dc-++-eq-∧ʰ {⊤ᶠ}  {Q}  {⟦ cₗ ⟧ᶜ (proj₂ x)}
-          (dc-++-[] {Q} {cₗ} (dsoundness' h₁ (x ∷ []) ((proj₁ pPs) , tt)) ,
-           dc-++-[] {Q} {cᵣ} (dsoundness' h₂ (x ∷ []) ((proj₁ pPs) , tt))) ,
-         dsoundness' (or-statement {Δ} {P} {Q} {cₗ} {cᵣ} h₁ h₂) ls ((proj₂ pPs)))
+          (dc-++-[] {Q} {cₗ} (gdsoundness h₁ (x ∷ []) ((proj₁ pPs) , tt)) ,
+           dc-++-[] {Q} {cᵣ} (gdsoundness h₂ (x ∷ []) ((proj₁ pPs) , tt))) ,
+         gdsoundness (or-statement {Δ} {P} {Q} {cₗ} {cᵣ} h₁ h₂) ls ((proj₂ pPs)))
 
     -- Soundness
     dsoundness : {P Q : Formula} {C : Cmdₕ}
@@ -272,4 +277,4 @@ module DemonicSoundness where
               → ∀ (s : State)
                 → proof (⟦ P ⟧ s)
                 → proof (dcondition Q (⟦ C ⟧ᶜ s))
-    dsoundness {P} {Q} {C} h s pPs = dc-++-[] {_} {C} {tt , s} (dsoundness' {P} {Q} {C} h ((tt , s) ∷ []) (pPs , tt)) 
+    dsoundness {P} {Q} {C} h s pPs = dc-++-[] {_} {C} {tt , s} (gdsoundness {P} {Q} {C} h ((tt , s) ∷ []) (pPs , tt)) 
