@@ -25,3 +25,8 @@ This repository contains formalization of *Hoare logic for WHILE language extend
  - `src/WhileSemantics.agda` - embedding of the extended WHILE language
  - `src/WhileSyntax.agda` - interpretation of the extended WHILE language
 
+## Getting all the related materials
+
+In order to type-check the code in `src/`, you also need to checkout the `agda-lib` submodule. For the initial checkout of the repository, you can use
+    
+    git clone --recurse-submodules git@github.com:filip01/hoare-logic-agda.git
