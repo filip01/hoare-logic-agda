@@ -64,7 +64,7 @@ module Monads where
             record
             { T = List
             ; η = _∷ []
-            ; _>>=_ = λ xs f → concat (map f xs)
+            ; _>>=_ = λ xs f → concat (map f xs) -- add deduplicate ?
             ; η-left = λ xs f → ++-identityʳ (f xs)
             ; η-right = concat-[-]
             ; >>=-assoc = λ xs f g →
@@ -87,19 +87,4 @@ module Monads where
                 map-∘ : {X Y Z : Set l} (g : Y → Z) (f : X → Y) (xs : List X) →
                     map (g ∘ f) xs ≡ map g (map f xs)
                 map-∘ g f [] = refl
-                map-∘ g f (x ∷ xs) = cong (g (f x) ∷_) (map-∘ g f xs)
-
-        module _ where
-            demo₂ : Monad.T (Monad-List lzero) ℕ
-            demo₂ =
-                do
-                    x ← 1 ∷ 2 ∷ 3 ∷ []
-                    y ← 4 ∷ 5 ∷ []
-                    return (10 * x + y)
-                where open Monad (Monad-List lzero)      
-    
-    -- record ListMonad' {l : Level} : Set l where
-        
-    --     open ListMonad
-
-    --     choose : ...
+                map-∘ g f (x ∷ xs) = cong (g (f x) ∷_) (map-∘ g f xs)    

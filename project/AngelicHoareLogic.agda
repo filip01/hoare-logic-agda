@@ -18,7 +18,7 @@ open import Data.Nat using (ℕ)
 
     Logic is parameeterised over a (state) logic SL that can be used to reason about the state of the program.
 -}
-module HoareLogicForWhile where
+module AngelicHoareLogic where
 
     -- Define location type
     L = ℕ
@@ -41,6 +41,7 @@ module HoareLogicForWhile where
     toFormulaₚ (b₁ ∧ʷ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
     toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂ -- TODO: Wrong conversion.
+
 
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where
@@ -83,10 +84,16 @@ module HoareLogicForWhile where
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
     
-        or-statement  : {Δ : Hypotheses}
+        or-statementₗ  : {Δ : Hypotheses}
                       → {ϕ ψ : Formula}
                       → {cₗ cᵣ : Cmdₕ}
                       → ⟪ ϕ ⟫ cₗ ⟪ ψ ⟫
+                      ----------------
+                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
+        
+        or-statementᵣ : {Δ : Hypotheses}
+                      → {ϕ ψ : Formula}
+                      → {cₗ cᵣ : Cmdₕ}
                       → ⟪ ϕ ⟫ cᵣ ⟪ ψ ⟫
                       ----------------
-                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫   
+                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫

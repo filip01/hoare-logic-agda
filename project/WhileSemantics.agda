@@ -20,7 +20,6 @@ open import Agda.Builtin.Maybe
 
 module WhileSemantics where
 
-
     -- Define location type
     L = ℕ
 
@@ -76,19 +75,9 @@ module WhileSemantics where
     ⟦ passʷ ⟧ = η tt
     ⟦ c₁ |ʷ c₂ ⟧ = ⟦ c₁ ⟧ >> ⟦ c₂ ⟧
     ⟦ l :=ʷ a ⟧ s = η tt (toSt l a' s)
-         where
-             a' = (⟦ a ⟧ₐ s)
+        where a' = (⟦ a ⟧ₐ s)
     ⟦ ifʷ b then c₁ else c₂ ⟧ s with ⟦ b ⟧ₒ s
     ... | true = (⟦ c₁ ⟧ s)
     ... | false = (⟦ c₂ ⟧ s)
     ⟦ forʷ a doo c ⟧ s = forDooAux (abs (⟦ a ⟧ₐ s)) ⟦ c ⟧ s
-         where
-             aux : ℕ → Cmdₕ → (Monad.T NDS-Monad) ⊤
-             aux ℕ.zero c = η tt
-             aux (suc n) c = ⟦ c ⟧ >> (aux n c) 
     ⟦ c₁ orʷ c₂ ⟧ s = ⟦ c₁ ⟧ s ++ ⟦ c₂ ⟧ s
-
-    {-
-    ⟦ c₁ orʷ c₂ ⟧ s = (⟦ c₁ ⟧ s) >>ᴺᴰ (⟦ c₂ ⟧ s)
-        where open Monad (Monad-List lzero) renaming (_>>_ to _>>ᴺᴰ_)
-    -} 
