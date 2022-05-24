@@ -31,3 +31,7 @@ This repository contains formalization of *Hoare logic for WHILE language extend
 In order to type-check the code in `src/`, you also need to checkout the `agda-lib` submodule. For the initial checkout of the repository, you can use
     
     git clone --recurse-submodules git@github.com:filip01/hoare-logic-agda.git
+
+## Used literature
+
+- "Logic in Computer Science" by Huth & Ryan
