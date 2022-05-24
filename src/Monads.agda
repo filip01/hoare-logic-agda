@@ -47,7 +47,7 @@ module Monads where
         return = η
     
     --
-    -- A transfor that extends the provided monad with a notion of a state.
+    -- A transformer that extends the provided monad with a notion of a state.
     --
 
     module StateTransformer where

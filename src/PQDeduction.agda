@@ -5,7 +5,7 @@ open import Data.Integer
 open import HProp
 
 --
--- PQ logic - Predicate logic extended with nasic arithemtic operations.
+-- PQ logic - Predicate logic extended with basic arithmetic operations.
 --
 
 module PQDeduction (L : Set) where

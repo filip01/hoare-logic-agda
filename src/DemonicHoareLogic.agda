@@ -13,7 +13,7 @@ open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
 
 --
---  HoarLogic for WHILE language with state and demonic nondeterminism
+--  Hoare logic for WHILE language with state and demonic nondeterminism
 --
 
 module DemonicHoareLogic where

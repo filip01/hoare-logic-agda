@@ -6,7 +6,7 @@ open import Data.Integer using (ℤ; +_)
 
 module WhileSyntax (L : Set) where
 
-    -- arithemtic expressions
+    -- arithmetic expressions
 
     infixl 4 -ʷ_
     infix 3 intʷ

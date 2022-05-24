@@ -1,4 +1,4 @@
-name: lograc-project
+name: hoare-logic-agda
 include:
   agda-stdlib/src
   agda-categories/src

@@ -15,12 +15,12 @@ open ListMonad
 open StateTransformer
 
 --
--- Semanics of a WHILE language with state and nondeterminism
+-- Semantics of a WHILE language with state and nondeterminism
 --
 
 module WhileSemantics where
 
-    -- Define location type
+    -- Location
     L = ℕ
 
     -- Introduce WHILE syntax that uses natural numbers as location.
@@ -28,14 +28,13 @@ module WhileSemantics where
 
     open WhileSyntaxNat
 
-    -- Define state
+    -- State
     state = L → ℤ
 
-    -- Define a monad that captures nondeterminism and state effets.
-    
+    -- Monad that captures nondeterminism and state effets.
     NDS-Monad = StateT state (Monad-List lzero)
 
-    -- Define how arithmetic expressions should be interpreted.
+    -- Interpretation of arithmetic expressions
 
     infix 4 ⟦_⟧ᵃ
 
@@ -45,7 +44,7 @@ module WhileSemantics where
     ⟦ -ʷ a ⟧ᵃ Γ = - (⟦ a ⟧ᵃ Γ)
     ⟦ a₁ +ʷ a₂ ⟧ᵃ Γ = (⟦ a₁ ⟧ᵃ Γ) + (⟦ a₂ ⟧ᵃ Γ) 
 
-    -- Define how boolean expressions should be interpreted.
+    -- Interpretation of Boolean expressions
 
     infix 5 ⟦_⟧ᵇ
 
@@ -57,11 +56,9 @@ module WhileSemantics where
     ⟦ b₁ ∨ʷ b₂ ⟧ᵇ Γ = ⟦ b₁ ⟧ᵇ Γ ∨ ⟦ b₂ ⟧ᵇ Γ
     ⟦ a₁ ≤ʷ a₂ ⟧ᵇ Γ = (⟦ a₁ ⟧ᵃ Γ) ≤ᵇ (⟦ a₂ ⟧ᵃ Γ)
 
-    -- Define how commands should be interpreted (state + nondeterminism).
 
     open Monad NDS-Monad
 
-    -- Useful definitions (need to be externally visible)
     toSt : L → ℤ → state → state
     toSt l a' Γ l' with (Dec.does (l ≟ l'))
     ... | false = Γ l'
@@ -70,6 +67,8 @@ module WhileSemantics where
     forDooAux : ℕ → ((Monad.T NDS-Monad) ⊤) → (Monad.T NDS-Monad) ⊤
     forDooAux ℕ.zero c = η tt
     forDooAux (suc n) c = (c >> (forDooAux n c))
+
+    -- Interpretation of commands
 
     ⟦_⟧ : Cmdₕ → (Monad.T NDS-Monad) ⊤
     ⟦ passʷ ⟧ = η tt

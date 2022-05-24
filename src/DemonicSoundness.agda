@@ -39,7 +39,9 @@ module DemonicSoundness where
     dcondition Q [] = ⊤ʰ
     dcondition Q (x ∷ sts) = (⟦ Q ⟧ (proj₂ x)) ∧ʰ dcondition Q sts
 
+    --
     -- Some useful lemmas
+    --
 
     dc-++-eq-∧ʰ : {A : Set} {Q : Formula} {ls ls' : List (A × State)}
       → proof ((dcondition Q ls) ∧ʰ (dcondition Q ls')) → proof (dcondition Q (ls ++ ls'))
@@ -60,10 +62,8 @@ module DemonicSoundness where
     trueIsNotEqToFalse : (true ≡ false) → ⊥ᶠ
     trueIsNotEqToFalse ()
 
-    --
     -- Relate how the boolean expressions are interpreted in WHILE language and how they are interpreted in the
     -- PQ logic.
-    --
 
     interleaved mutual
 
@@ -73,7 +73,6 @@ module DemonicSoundness where
       bIsFalseFollows : {s : State} → {b : BExprₕ} → (⟦ b ⟧ᵇ s ≡ false) → ¬ᶠ (proof (⟦ toFormulaₚ b ⟧ s))
       bIsTrueFollows  {s} {trueʷ} p = tt
       bIsFalseFollows {s} {trueʷ} ()
-    
       bIsTrueFollows  {s} {¬ʷ b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
       ... | false | Eq.[ eq ] = bIsFalseFollows {s} {b} eq  x
       bIsFalseFollows {s} {¬ʷ b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
@@ -96,9 +95,7 @@ module DemonicSoundness where
       bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x = x
       bIsFalseFollows {S} {x₂ ≤ʷ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
 
-    --
-    -- Show how is substitution related to state.
-    --
+    -- Show how is substitution related to a state.
 
     subR2StateA : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
          →  (⟦ a [ b / l ]ᵃ ⟧ᵃ s) ≡ (⟦ a ⟧ᵃ (toSt l (⟦ b ⟧ᵃ s) s))
@@ -113,12 +110,15 @@ module DemonicSoundness where
         (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
 
     interleaved mutual
- 
+
+      -- A proof of substitution of 'a' for 'l' in 'Q' and then evaluating its interpretation at state 's' implies
+      --    a proof of interpreting 'Q' evaluated at state where 'l' has a value '⟦ a ⟧ᵃ s'.
       subR2State  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
                       → proof (⟦ Q [ a / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s))
+      -- A proof of interpreting 'Q' evaluated at state where 'l' has a value '⟦ a ⟧ᵃ s' implies
+      --    a proof of substitution of 'a' for 'l' in 'Q' and then evaluating its interpretation at state 's'.
       subR2State' : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
-                      → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) → proof (⟦ Q [ a / l ]ᶠ ⟧ s) 
-  
+                      → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) → proof (⟦ Q [ a / l ]ᶠ ⟧ s)
       subR2State  {⊤} {a} {l} {s} _ = tt
       subR2State' {⊤} {a} {l} {s} _ = tt
       subR2State {⊥} {a} {l} {s} p = p

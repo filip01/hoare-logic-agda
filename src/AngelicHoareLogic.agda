@@ -13,7 +13,7 @@ open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
 
 --
---  HoarLogic for WHILE language with state and angelic nondeterminism
+--  Hoare logic for WHILE language with state and angelic nondeterminism
 --
 
 module AngelicHoareLogic where
@@ -24,7 +24,7 @@ module AngelicHoareLogic where
     -- Introduce WHILE syntax that uses natural numbers as location.
     open module WhileSyntaxNat = WhileSyntax L
 
-    -- Intrudce PQ syntax that uses natural numbers as location.
+    -- Introduce PQ syntax that uses natural numbers as location.
     open module PQDeductionNat = PQDeduction L
 
     toₚ : Bool → Formula
