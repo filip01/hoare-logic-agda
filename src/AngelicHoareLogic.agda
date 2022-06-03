@@ -81,16 +81,10 @@ module AngelicHoareLogic where
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
     
-        or-statementₗ  : {Δ : Hypotheses}
-                      → {ϕ ψ : Formula}
-                      → {cₗ cᵣ : Cmdₕ}
-                      → ⟪ ϕ ⟫ cₗ ⟪ ψ ⟫
+        or-statement  : {Δ : Hypotheses}
+                      → {ϕ₁ ϕ₂ ψ : Formula}
+                      → {c₁ c₂ : Cmdₕ}
+                      → ⟪ ϕ₁ ⟫ c₁ ⟪ ψ ⟫
+                      → ⟪ ϕ₂ ⟫ c₂ ⟪ ψ ⟫
                       ----------------
-                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
-        
-        or-statementᵣ : {Δ : Hypotheses}
-                      → {ϕ ψ : Formula}
-                      → {cₗ cᵣ : Cmdₕ}
-                      → ⟪ ϕ ⟫ cᵣ ⟪ ψ ⟫
-                      ----------------
-                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
+                      → ⟪ ϕ₁ ∨ ϕ₂ ⟫ c₁ orʷ c₂ ⟪ ψ ⟫

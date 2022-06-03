@@ -70,12 +70,6 @@ module HProp where
         θ (x₁ , y₁) (x₂ , y₂) with ξ x₁ x₂ | ζ y₁ y₂
         ... | refl | refl = refl
 
-    ∧ʰ-proj₁ : (a b : HProp) → proof (a ∧ʰ b) → proof (a)
-    ∧ʰ-proj₁ _ _ (x , y) = x
-
-    ∧ʰ-proj₂ : (a b : HProp) → proof (a ∧ʰ b) → proof (b)
-    ∧ʰ-proj₂ _ _ (x , y) = y
-
     -- disjunction
 
     _∨ʰ_ : HProp → HProp → HProp
@@ -83,12 +77,6 @@ module HProp where
       where
         θ : is-proposition ∥ p ⊎ q ∥
         θ = ∥∥-is-proposition _
-
-    ∨ʰ-inj₁ : (a b : HProp) → proof a → proof (a ∨ʰ b)
-    ∨ʰ-inj₁ _ _ p = ∣ inj₁ p ∣
-
-    ∨ʰ-inj₂ : (a b : HProp) → proof b → proof (a ∨ʰ b)
-    ∨ʰ-inj₂ _ _ p = ∣ inj₂ p ∣
 
     -- implication
 
@@ -110,6 +98,18 @@ module HProp where
 
 
     -- additional laws
+    
+    ∧ʰ-proj₁ : (a b : HProp) → proof (a ∧ʰ b) → proof (a)
+    ∧ʰ-proj₁ _ _ (x , y) = x
+
+    ∧ʰ-proj₂ : (a b : HProp) → proof (a ∧ʰ b) → proof (b)
+    ∧ʰ-proj₂ _ _ (x , y) = y
+
+    ∨ʰ-inj₁ : (a b : HProp) → proof a → proof (a ∨ʰ b)
+    ∨ʰ-inj₁ _ _ p = ∣ inj₁ p ∣
+
+    ∨ʰ-inj₂ : (a b : HProp) → proof b → proof (a ∨ʰ b)
+    ∨ʰ-inj₂ _ _ p = ∣ inj₂ p ∣
 
     ∨ʰ-cong : (a b : HProp) → {c d : HProp} → (f : proof a → proof c) → (g : proof b → proof d)
             → proof (a ∨ʰ b) → proof (c ∨ʰ d)

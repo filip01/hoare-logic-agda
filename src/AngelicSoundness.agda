@@ -172,30 +172,37 @@ module AngelicSoundness where
       ∈-++r (_ ∷ L₁) {.(_ ∷ _)} ∈-here = ∈-there {{∈-++r L₁ ∈-here}}
       ∈-++r (_ ∷ L₁) {.(_ ∷ _)} (∈-there {{in-xs}}) = ∈-there {{∈-++r L₁ (∈-there {{in-xs}})}}
 
-      aux₂ : {A B : Set} → {x y : B × A} → (L : List (B × A))
+      ∈-to-∈-list-× : {A B : Set} → {x y : B × A} → (L : List (B × A))
             → (x ∈ L)
             → (f : A → List (B × A))
             → (y ∈ (f (proj₂ x)))
             → (y ∈ (foldr _++_ [] (map (λ { (_ , s') → f s' }) L) ))
 
-      aux₂ ((_ , a) ∷ L₁) ∈-here f q = ∈-++l (f a) q
-      aux₂ ((_ , a) ∷ L₁) (∈-there {{in-xs}}) f q 
-        = ∈-++r (f a) (aux₂ L₁ in-xs f q)
+      ∈-to-∈-list-× ((_ , a) ∷ L₁) ∈-here f q = ∈-++l (f a) q
+      ∈-to-∈-list-× ((_ , a) ∷ L₁) (∈-there {{in-xs}}) f q 
+        = ∈-++r (f a) (∈-to-∈-list-× L₁ in-xs f q)
+
+    ∥∥-to-∥∥ : {A : Set} → {B : Set} → ∥ A ∥ → (A → ∥ B ∥) → ∥ B ∥
+    ∥∥-to-∥∥ x f = ∥∥-elim (∥∥-is-proposition _) f x
+
+    angelic : (Q : Formula) → (C : Cmdₕ) → {s : State} → HProp
+    angelic Q C {s} =  (∃ʰ State (λ s' → ⟨ ∥ (_ , s') ∈ ⟦ C ⟧ᶜ s ∥ , ∥∥-is-proposition _ ⟩ ∧ʰ (⟦ Q ⟧ s')))
 
     soundness : {P Q : Formula} 
               → {C : Cmdₕ}
               → ⟪ P ⟫ C ⟪ Q ⟫
               → {s : State}
               → proof (⟦ P ⟧ s)
-              → Σ[ s' ∈ State ] (_ , s' ∈ ⟦ C ⟧ᶜ s × proof (⟦ Q ⟧ s'))
+              → proof (angelic Q C {s})
 
     soundness {P} {Q} {.(_ |ʷ _)} (composition {P} {R} {Q} {C₁} {C₂} h₁ h₂) {s} pP 
-        with (soundness {P} {R} {C₁} h₁ pP)
-    ... | s₁ , i₁ , t₁ with soundness {R} {Q} {C₂} h₂ t₁
-    ...                | s₂ , i₂ , t₂ = s₂ , (aux₂ (⟦ C₁ ⟧ᶜ s) i₁ ⟦ C₂ ⟧ᶜ i₂ , t₂) 
-
+      = ∥∥-to-∥∥ (soundness h₁ pP) (λ {(s₁ , i₁ , p₁) 
+        → ∥∥-to-∥∥ (soundness h₂ p₁) (λ {(s₂ , i₂ , p₂) 
+          → ∣ s₂ , (∥∥-to-∥∥ i₁ (λ i¹ 
+            → ∥∥-to-∥∥ i₂ λ i² → ∣ ∈-to-∈-list-× (⟦ C₁ ⟧ᶜ s) i¹ ⟦ C₂ ⟧ᶜ i² ∣) , p₂) ∣})})
+    
     soundness {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {Q} {a}) {s} pP
-      = toSt l (⟦ a ⟧ᵃ s) s , (∈-here , subR2State {Q} {a} {l} {s} pP)
+      = ∣ toSt l (⟦ a ⟧ᵃ s) s , (∣ ∈-here ∣ , subR2State {Q} {a} {l} {s} pP) ∣
     
     soundness {P} {Q} {.(ifʷ _ then _ else _)} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ᵇ s) | inspect ⟦ b ⟧ᵇ s
     ... | false | Eq.[ eq ] = soundness h₂ (pP , bIsFalseFollows {s} {b} eq)
@@ -210,18 +217,23 @@ module AngelicSoundness where
                     → {s : State}
                     → proof (⟦ P ⟧ s)
                     → (n : ℕ)
-                    → Σ[ s' ∈ State ] ((_ , s' ∈ (forDooAux n ⟦ C ⟧ᶜ s)) × proof (⟦ P ⟧ s'))
-          sound-for h {s} pP ℕ.zero = s , (∈-here , pP)
-          sound-for {P} {C} h {s} pP (ℕ.suc x) with (soundness h pP)
-          ... | s₁ , i₁ , t₁ with sound-for h t₁ x
-          ...               | s₂ , i₂ , t₂ = s₂ , (aux₂ (⟦ C ⟧ᶜ s) i₁ (forDooAux x ⟦ C ⟧ᶜ) i₂ , t₂)
+                    → proof (∃ʰ State (λ s' → ⟨ ∥ (_ , s') ∈ (forDooAux n ⟦ C ⟧ᶜ s) ∥ , ∥∥-is-proposition _ ⟩ ∧ʰ (⟦ P ⟧ s')))
+          
+          sound-for {P} {C} h {s} pP ℕ.zero = ∣ s , (∣ ∈-here ∣ , pP) ∣
+          sound-for {P} {C} h {s} pP (ℕ.suc n) 
+            = ∥∥-to-∥∥ (soundness h pP) (λ {(s₁ , i₁ , p₁) 
+              → ∥∥-to-∥∥ (sound-for h p₁ n) λ {(s₂ , i₂ , p₂) 
+                → ∣ s₂ , ∥∥-to-∥∥ i₁ (λ i¹ 
+                  → ∥∥-to-∥∥ i₂ λ i² 
+                    → ∣ ∈-to-∈-list-× (⟦ C ⟧ᶜ s) i¹ (forDooAux n ⟦ C ⟧ᶜ) i² ∣) , p₂ ∣}})
     
-    soundness {P} {Q} {C} (implied iP iQ h) {s} pP with ⟦ iP ⟧ₓ tt pP
-    ... | P' with soundness h P'
-    ... |    s₁ , i₁ , t₁ = s₁ , (i₁ , (⟦ iQ ⟧ₓ tt t₁))
+    soundness {P} {Q} {C} (implied iP iQ h) {s} pP
+      = ∥∥-to-∥∥ (soundness h ((⟦ iP ⟧ₓ tt pP))) (λ {(s₁ , i₁ , p₁) → ∣ s₁ , i₁ , (⟦ iQ ⟧ₓ tt p₁) ∣})
     
-    soundness {P} {Q} {cₗ orʷ cᵣ} (or-statementₗ h) {s} pP with (soundness h pP)
-    ... | s₁ , i₁ , t₁ = s₁ , (∈-++l (⟦ cₗ ⟧ᶜ s) i₁ , t₁)
-
-    soundness {P} {Q} {cₗ orʷ cᵣ} (or-statementᵣ h) {s} pP with (soundness h pP)
-    ... | s₁ , i₁ , t₁ = s₁ , ((∈-++r (⟦ cₗ ⟧ᶜ s) i₁) , t₁)
+    soundness {P} {Q} {C₁ orʷ C₂} (or-statement h₁ h₂) {s} pP
+      = ∥∥-to-∥∥ pP (λ {(inj₁ p) → sound-to-or {C₁} {C₂} (∨ʰ-inj₁ (angelic Q C₁) (angelic Q C₂) (soundness h₁ p))
+                    ; (inj₂ p) → sound-to-or {C₁} {C₂} (∨ʰ-inj₂ (angelic Q C₁) (angelic Q C₂) (soundness h₂ p))})
+      where
+        sound-to-or : {C C' : Cmdₕ} → proof ((angelic Q C {s}) ∨ʰ angelic Q C' {s})→ proof (angelic Q (C orʷ C'))
+        sound-to-or {C} {C'} S = ∥∥-to-∥∥ S (λ {(inj₁ x) → ∥∥-to-∥∥ x (λ {(i , j , k) → ∣ i , (∥∥-to-∥∥ j (λ i → ∣ ∈-++l (⟦ C ⟧ᶜ s) i ∣) , k) ∣})
+                                            ; (inj₂ x') → ∥∥-to-∥∥ x' (λ {(i , j , k) → ∣ i , (∥∥-to-∥∥ j (λ i → ∣ ∈-++r (⟦ C ⟧ᶜ s) i ∣) , k) ∣})})
