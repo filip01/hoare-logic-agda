@@ -82,9 +82,9 @@ module DemonicHoareLogic where
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
 
         or-statement  : {Δ : Hypotheses}
-                      → {ϕ ψ : Formula}
+                      → {ϕₗ ϕᵣ ψ : Formula}
                       → {cₗ cᵣ : Cmdₕ}
-                      → ⟪ ϕ ⟫ cₗ ⟪ ψ ⟫
-                      → ⟪ ϕ ⟫ cᵣ ⟪ ψ ⟫
+                      → ⟪ ϕₗ ⟫ cₗ ⟪ ψ ⟫
+                      → ⟪ ϕᵣ ⟫ cᵣ ⟪ ψ ⟫
                       ----------------
-                      → ⟪ ϕ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫
+                      → ⟪ ϕₗ ∧ ϕᵣ ⟫ cₗ orʷ cᵣ ⟪ ψ ⟫

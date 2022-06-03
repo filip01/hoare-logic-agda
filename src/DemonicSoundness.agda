@@ -263,13 +263,13 @@ module DemonicSoundness where
           auxAppToCond {[]} iQ h = tt
           auxAppToCond {x' ∷ ls'} iQ h = (⟦ iQ ⟧ₓ tt ((proj₁ h))) , (auxAppToCond {ls'} iQ (proj₂ h))
 
-    gdsoundness {P} {Q} {_ orʷ _} (or-statement h h₁) [] pPs = tt
-    gdsoundness {P} {Q} {_ orʷ _} (or-statement {Δ} {P} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs = 
+    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ orʷ cᵣ)} (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) [] pPs = tt
+    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ orʷ cᵣ)} (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs =
       dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ cₗ ⟧ᶜ (proj₂ x) ++ ⟦ cᵣ ⟧ᶜ (proj₂ x))}
-        (dc-++-eq-∧ʰ {⊤ᶠ}  {Q}  {⟦ cₗ ⟧ᶜ (proj₂ x)}
-          (dc-++-[] {Q} {cₗ} (gdsoundness h₁ (x ∷ []) ((proj₁ pPs) , tt)) ,
-           dc-++-[] {Q} {cᵣ} (gdsoundness h₂ (x ∷ []) ((proj₁ pPs) , tt))) ,
-         gdsoundness (or-statement {Δ} {P} {Q} {cₗ} {cᵣ} h₁ h₂) ls ((proj₂ pPs)))
+        (dc-++-eq-∧ʰ {⊤ᶠ} {Q}  {⟦ cₗ ⟧ᶜ (proj₂ x)}
+          (dc-++-[] {Q} {cₗ} (gdsoundness h₁ (x ∷ []) ((proj₁ (proj₁ pPs) , tt))) ,
+           dc-++-[] {Q} {cᵣ} (gdsoundness h₂ (x ∷ []) (proj₂ (proj₁ pPs) , tt))) ,
+         gdsoundness (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) ls ((proj₂ pPs)))
 
     -- Soundness
     dsoundness : {P Q : Formula} {C : Cmdₕ}
