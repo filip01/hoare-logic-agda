@@ -33,12 +33,12 @@ module AngelicHoareLogic where
 
     -- Covert BExprₕ to Formula.
     toFormulaₚ : BExprₕ → Formula
-    toFormulaₚ trueʷ = ⊤
-    toFormulaₚ falseʷ = ⊥
-    toFormulaₚ (¬ʷ b) = ¬ (toFormulaₚ b)
-    toFormulaₚ (b₁ ∧ʷ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
-    toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂
+    toFormulaₚ True = ⊤
+    toFormulaₚ False = ⊥
+    toFormulaₚ (¬' b) = ¬ (toFormulaₚ b)
+    toFormulaₚ (b₁ ∧' b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
+    toFormulaₚ (b₁ ∨' b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
+    toFormulaₚ (a₁ ≤' a₂) = a₁ ≤ₑ a₂
 
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where
@@ -48,14 +48,14 @@ module AngelicHoareLogic where
                       → (⟪ ϕ ⟫ c₁ ⟪ θ ⟫)
                       → (⟪ θ ⟫ c₂ ⟪ ψ ⟫)
                       ------------------------
-                      → ⟪ ϕ ⟫ (c₁ |ʷ c₂) ⟪ ψ ⟫
+                      → ⟪ ϕ ⟫ (c₁ ； c₂) ⟪ ψ ⟫
 
 
         assignment    : {ϕ : Formula}
                       → {a : AExprₕ}
                       → {l : L}
                       ------------------
-                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l :=ʷ a ⟪ ϕ ⟫
+                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l ≔ a ⟪ ϕ ⟫
 
         if-statement  : {ϕ ψ : Formula}
                       → {b : BExprₕ}
@@ -63,14 +63,14 @@ module AngelicHoareLogic where
                       → ⟪ ϕ ∧ (toFormulaₚ b) ⟫ c₁ ⟪ ψ ⟫
                       → ⟪ ϕ ∧ ¬ (toFormulaₚ b) ⟫ c₂ ⟪ ψ ⟫
                       -----------------------------------
-                      → ⟪ ϕ ⟫ ifʷ b then c₁ else c₂ ⟪ ψ ⟫
+                      → ⟪ ϕ ⟫ If b Then c₁ Else c₂ ⟪ ψ ⟫
 
         for-statement : {ϕ ψ : Formula}
                       → {a : AExprₕ}
                       → {c : Cmdₕ}
                       → ⟪ ϕ ⟫ c ⟪ ϕ ⟫
                       ----------------
-                      → ⟪ ϕ ⟫ (forʷ a doo c) ⟪ ϕ ⟫
+                      → ⟪ ϕ ⟫ (For a Do c) ⟪ ϕ ⟫
 
         implied       : {Δ : Hypotheses}
                       → {ϕ ϕ' ψ ψ' : Formula}
@@ -87,4 +87,4 @@ module AngelicHoareLogic where
                       → ⟪ ϕ₁ ⟫ c₁ ⟪ ψ ⟫
                       → ⟪ ϕ₂ ⟫ c₂ ⟪ ψ ⟫
                       ----------------
-                      → ⟪ ϕ₁ ∨ ϕ₂ ⟫ c₁ orʷ c₂ ⟪ ψ ⟫
+                      → ⟪ ϕ₁ ∨ ϕ₂ ⟫ c₁ Or c₂ ⟪ ψ ⟫

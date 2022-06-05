@@ -71,40 +71,40 @@ module DemonicSoundness where
       bIsTrueFollows  : {s : State} → {b : BExprₕ} → (⟦ b ⟧ᵇ s ≡ true) → (proof (⟦ toFormulaₚ b ⟧ s))
       -- If `b` evaluates to false, then there does NOT exist a witness of `⟦ toFormulaₚ b ⟧ s`.
       bIsFalseFollows : {s : State} → {b : BExprₕ} → (⟦ b ⟧ᵇ s ≡ false) → ¬ᶠ (proof (⟦ toFormulaₚ b ⟧ s))
-      bIsTrueFollows  {s} {trueʷ} p = tt
-      bIsFalseFollows {s} {trueʷ} ()
-      bIsTrueFollows  {s} {¬ʷ b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
+      bIsTrueFollows  {s} {True} p = tt
+      bIsFalseFollows {s} {True} ()
+      bIsTrueFollows  {s} {¬' b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
       ... | false | Eq.[ eq ] = bIsFalseFollows {s} {b} eq  x
-      bIsFalseFollows {s} {¬ʷ b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
+      bIsFalseFollows {s} {¬' b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
       ... | true  | Eq.[ eq ] = x (bIsTrueFollows {s} {b} eq)
-      bIsTrueFollows  {s} {b₁ ∧ʷ b₂} x with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
+      bIsTrueFollows  {s} {b₁ ∧' b₂} x with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
       ... | true  | true  | Eq.[ eq₁ ] | Eq.[ eq₂ ] = bIsTrueFollows {s} {b₁} eq₁ , bIsTrueFollows {s} {b₂} eq₂
-      bIsFalseFollows {s} {b₁ ∧ʷ b₂} x x' with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
+      bIsFalseFollows {s} {b₁ ∧' b₂} x x' with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
       ... | false | false | Eq.[ eq₁ ] | _          = bIsFalseFollows {s} {b₁} eq₁ (proj₁ x')
       ... | false | true  | Eq.[ eq₁ ] | _          = bIsFalseFollows {s} {b₁} eq₁ (proj₁ x')
       ... | true  | false | _          | Eq.[ eq₂ ] = bIsFalseFollows {s} {b₂} eq₂ (proj₂ x')
-      bIsTrueFollows  {s} {b₁ ∨ʷ b₂} x with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
+      bIsTrueFollows  {s} {b₁ ∨' b₂} x with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
       ... | false | true  | _          | Eq.[ eq₂ ] = ∣ inj₂ (bIsTrueFollows {s} {b₂} eq₂) ∣
       ... | true  | false | Eq.[ eq₁ ] | _          = ∣ inj₁ (bIsTrueFollows {s} {b₁} eq₁) ∣
       ... | true  | true  | Eq.[ eq₁ ] | _          = ∣ inj₁ (bIsTrueFollows {s} {b₁} eq₁) ∣
-      bIsFalseFollows {s} {b₁ ∨ʷ b₂} x x' with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
+      bIsFalseFollows {s} {b₁ ∨' b₂} x x' with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
       ... | false | false | Eq.[ eq₁ ] | Eq.[ eq₂ ] =
         ∥∥-elim (λ x ())
           (λ { (inj₁ y) → bIsFalseFollows {s} {b₁} eq₁ y
              ; (inj₂ y) →  bIsFalseFollows {s} {b₂} eq₂ y } ) x'
-      bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x = x
-      bIsFalseFollows {S} {x₂ ≤ʷ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
+      bIsTrueFollows  {S} {x₁ ≤' x₂} x = x
+      bIsFalseFollows {S} {x₂ ≤' x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
 
     -- Show how is substitution related to a state.
 
     subR2StateA : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
          →  (⟦ a [ b / l ]ᵃ ⟧ᵃ s) ≡ (⟦ a ⟧ᵃ (toSt l (⟦ b ⟧ᵃ s) s))
-    subR2StateA {intʷ x} {b} {l} {s} = refl
-    subR2StateA {locʷ l'} {b} {l} {s} with does (l ≟ℕ l')
+    subR2StateA {Int x} {b} {l} {s} = refl
+    subR2StateA {Loc l'} {b} {l} {s} with does (l ≟ℕ l')
     ... | false = refl
     ... | true = refl
-    subR2StateA { -ʷ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
-    subR2StateA {a₁ +ʷ a₂} {b} {l} {s} = cong₂ _+_
+    subR2StateA { -' a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
+    subR2StateA {a₁ +' a₂} {b} {l} {s} = cong₂ _+_
       {⟦ a₁ [ b / l ]ᵃ ⟧ᵃ s}
       {⟦ a₁ ⟧ᵃ (toSt l (⟦ b ⟧ᵃ s) s)}
         (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
@@ -190,34 +190,34 @@ module DemonicSoundness where
                 → proof (dcondition P ls)
                 → proof (dcondition Q (apply-and-fold C ls))
 
-    gdsoundness {P} {Q} {_ |ʷ _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) [] pPs = tt
-    gdsoundness {P} {Q} {_ |ʷ _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
+    gdsoundness {P} {Q} {_ ； _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) [] pPs = tt
+    gdsoundness {P} {Q} {_ ； _} (composition {_} {_} {_} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
       dc-++-eq-∧ʰ {⊤ᶠ} {Q} {foldr _++_ [] (map (λ { (_ , s') → ⟦ c₂ ⟧ᶜ s' }) (⟦ c₁ ⟧ᶜ (proj₂ x)))} 
          (gdsoundness h₂ (⟦ c₁ ⟧ᶜ (proj₂ x)) (dc-++-[]  {_} {c₁} {x} (gdsoundness h₁ (x ∷ []) ((proj₁ pPs) , tt))) ,
           gdsoundness (composition h₁ h₂) ls (proj₂ pPs))
 
-    gdsoundness {.(Q [ _ / _ ]ᶠ)} {Q} {_ :=ʷ _} assignment [] pPs = tt
-    gdsoundness {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {P} {a}) (x ∷ ls) pPs =
+    gdsoundness {.(Q [ _ / _ ]ᶠ)} {Q} {_ ≔ _} assignment [] pPs = tt
+    gdsoundness {.(Q [ _ / _ ]ᶠ)} {Q} {l ≔ a} (assignment {P} {a}) (x ∷ ls) pPs =
       subR2State {Q} {a} {l} {proj₂ x} ((proj₁ pPs)) ,
       gdsoundness (assignment {P} {a}) ls (proj₂ pPs)
 
-    gdsoundness {P} {Q} {ifʷ b then _ else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) [] pPs = tt
-    gdsoundness {P} {Q} {ifʷ b then _ else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
-      dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ ifʷ b then _ else _ ⟧ᶜ (proj₂ x))}
+    gdsoundness {P} {Q} {If b Then _ Else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) [] pPs = tt
+    gdsoundness {P} {Q} {If b Then _ Else _} (if-statement {_} {_} {b} {c₁} {c₂} h₁ h₂) (x ∷ ls) pPs =
+      dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ If b Then _ Else _ ⟧ᶜ (proj₂ x))}
         (cases-b ,
          gdsoundness (if-statement {_} {_} {b} h₁ h₂) ls (proj₂ pPs))
 
       where
 
-        cases-b : proof (dcondition Q (⟦ ifʷ b then c₁ else c₂ ⟧ᶜ (proj₂ x)))
+        cases-b : proof (dcondition Q (⟦ If b Then c₁ Else c₂ ⟧ᶜ (proj₂ x)))
         cases-b with (⟦ b ⟧ᵇ (proj₂ x)) | inspect ⟦ b ⟧ᵇ (proj₂ x)
         ... | false | Eq.[ eq ] =
           dc-++-[] {Q} {c₂} (gdsoundness h₂ (x ∷ []) (((proj₁ pPs) , bIsFalseFollows {proj₂ x} {b} eq) , tt))
         ... | true | Eq.[ eq ] =
           dc-++-[] {Q} {c₁} (gdsoundness h₁ (x ∷ []) (((proj₁ pPs) , bIsTrueFollows {proj₂ x} {b} eq) , tt))
 
-    gdsoundness {P} {P} {forʷ _ doo _} (for-statement h) [] pPs = tt
-    gdsoundness {P} {P} {forʷ _ doo _} (for-statement {_} {_} {a} {c} h) (x ∷ ls) pPs = 
+    gdsoundness {P} {P} {For _ Do _} (for-statement h) [] pPs = tt
+    gdsoundness {P} {P} {For _ Do _} (for-statement {_} {_} {a} {c} h) (x ∷ ls) pPs = 
       dc-++-eq-∧ʰ {⊤ᶠ} {P} {forDooAux (abs (⟦ a ⟧ᵃ (proj₂ x))) ⟦ c ⟧ᶜ (proj₂ x)}
         ( cases-m (abs (⟦ a ⟧ᵃ (proj₂ x))) x (proj₁ pPs) ,
          gdsoundness (for-statement {P} {P} {a} {c} h) ls (proj₂ pPs))
@@ -263,8 +263,8 @@ module DemonicSoundness where
           auxAppToCond {[]} iQ h = tt
           auxAppToCond {x' ∷ ls'} iQ h = (⟦ iQ ⟧ₓ tt ((proj₁ h))) , (auxAppToCond {ls'} iQ (proj₂ h))
 
-    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ orʷ cᵣ)} (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) [] pPs = tt
-    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ orʷ cᵣ)} (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs =
+    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ Or cᵣ)} (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) [] pPs = tt
+    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ Or cᵣ)} (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs =
       dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ cₗ ⟧ᶜ (proj₂ x) ++ ⟦ cᵣ ⟧ᶜ (proj₂ x))}
         (dc-++-eq-∧ʰ {⊤ᶠ} {Q}  {⟦ cₗ ⟧ᶜ (proj₂ x)}
           (dc-++-[] {Q} {cₗ} (gdsoundness h₁ (x ∷ []) ((proj₁ (proj₁ pPs) , tt))) ,

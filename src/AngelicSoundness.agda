@@ -52,40 +52,40 @@ module AngelicSoundness where
       bIsTrueFollows  : {s : State} → {b : BExprₕ} → (⟦ b ⟧ᵇ s ≡ true) → (proof (⟦ toFormulaₚ b ⟧ s))
       -- If `b` evaluates to false, then there does NOT exist a witness of `⟦ toFormulaₚ b ⟧ s`.
       bIsFalseFollows : {s : State} → {b : BExprₕ} → (⟦ b ⟧ᵇ s ≡ false) → ¬ᶠ (proof (⟦ toFormulaₚ b ⟧ s))
-      bIsTrueFollows  {s} {trueʷ} p = tt
-      bIsFalseFollows {s} {trueʷ} ()
-      bIsTrueFollows  {s} {¬ʷ b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
+      bIsTrueFollows  {s} {True} p = tt
+      bIsFalseFollows {s} {True} ()
+      bIsTrueFollows  {s} {¬' b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
       ... | false | Eq.[ eq ] = bIsFalseFollows {s} {b} eq  x
-      bIsFalseFollows {s} {¬ʷ b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
+      bIsFalseFollows {s} {¬' b} p x with ⟦ b ⟧ᵇ s | inspect ⟦ b ⟧ᵇ s
       ... | true  | Eq.[ eq ] = x (bIsTrueFollows {s} {b} eq)
-      bIsTrueFollows  {s} {b₁ ∧ʷ b₂} x with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
+      bIsTrueFollows  {s} {b₁ ∧' b₂} x with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
       ... | true  | true  | Eq.[ eq₁ ] | Eq.[ eq₂ ] = bIsTrueFollows {s} {b₁} eq₁ , bIsTrueFollows {s} {b₂} eq₂
-      bIsFalseFollows {s} {b₁ ∧ʷ b₂} x x' with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
+      bIsFalseFollows {s} {b₁ ∧' b₂} x x' with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
       ... | false | false | Eq.[ eq₁ ] | _          = bIsFalseFollows {s} {b₁} eq₁ (proj₁ x')
       ... | false | true  | Eq.[ eq₁ ] | _          = bIsFalseFollows {s} {b₁} eq₁ (proj₁ x')
       ... | true  | false | _          | Eq.[ eq₂ ] = bIsFalseFollows {s} {b₂} eq₂ (proj₂ x')
-      bIsTrueFollows  {s} {b₁ ∨ʷ b₂} x with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
+      bIsTrueFollows  {s} {b₁ ∨' b₂} x with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
       ... | false | true  | _          | Eq.[ eq₂ ] = ∣ inj₂ (bIsTrueFollows {s} {b₂} eq₂) ∣
       ... | true  | false | Eq.[ eq₁ ] | _          = ∣ inj₁ (bIsTrueFollows {s} {b₁} eq₁) ∣
       ... | true  | true  | Eq.[ eq₁ ] | _          = ∣ inj₁ (bIsTrueFollows {s} {b₁} eq₁) ∣
-      bIsFalseFollows {s} {b₁ ∨ʷ b₂} x x' with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
+      bIsFalseFollows {s} {b₁ ∨' b₂} x x' with ⟦ b₁ ⟧ᵇ s | ⟦ b₂ ⟧ᵇ s |  inspect ⟦ b₁ ⟧ᵇ s | inspect ⟦ b₂ ⟧ᵇ s
       ... | false | false | Eq.[ eq₁ ] | Eq.[ eq₂ ] =
         ∥∥-elim (λ x ())
           (λ { (inj₁ y) → bIsFalseFollows {s} {b₁} eq₁ y
              ; (inj₂ y) →  bIsFalseFollows {s} {b₂} eq₂ y } ) x'
-      bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x = x
-      bIsFalseFollows {S} {x₂ ≤ʷ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
+      bIsTrueFollows  {S} {x₁ ≤' x₂} x = x
+      bIsFalseFollows {S} {x₂ ≤' x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
 
     -- Show how is substitution related to a state.
 
     subR2StateA : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
          →  (⟦ a [ b / l ]ᵃ ⟧ᵃ s) ≡ (⟦ a ⟧ᵃ (toSt l (⟦ b ⟧ᵃ s) s))
-    subR2StateA {intʷ x} {b} {l} {s} = refl
-    subR2StateA {locʷ l'} {b} {l} {s} with does (l ≟ℕ l')
+    subR2StateA {Int x} {b} {l} {s} = refl
+    subR2StateA {Loc l'} {b} {l} {s} with does (l ≟ℕ l')
     ... | false = refl
     ... | true = refl
-    subR2StateA { -ʷ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
-    subR2StateA {a₁ +ʷ a₂} {b} {l} {s} = cong₂ _+_
+    subR2StateA { -' a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
+    subR2StateA {a₁ +' a₂} {b} {l} {s} = cong₂ _+_
       {⟦ a₁ [ b / l ]ᵃ ⟧ᵃ s}
       {⟦ a₁ ⟧ᵃ (toSt l (⟦ b ⟧ᵃ s) s)}
         (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
@@ -195,20 +195,20 @@ module AngelicSoundness where
               → proof (⟦ P ⟧ s)
               → proof (angelic Q C {s})
 
-    soundness {P} {Q} {.(_ |ʷ _)} (composition {P} {R} {Q} {C₁} {C₂} h₁ h₂) {s} pP 
+    soundness {P} {Q} {.(_ ； _)} (composition {P} {R} {Q} {C₁} {C₂} h₁ h₂) {s} pP 
       = ∥∥-to-∥∥ (soundness h₁ pP) (λ {(s₁ , i₁ , p₁) 
         → ∥∥-to-∥∥ (soundness h₂ p₁) (λ {(s₂ , i₂ , p₂) 
           → ∣ s₂ , (∥∥-to-∥∥ i₁ (λ i¹ 
             → ∥∥-to-∥∥ i₂ λ i² → ∣ ∈-to-∈-list-× (⟦ C₁ ⟧ᶜ s) i¹ ⟦ C₂ ⟧ᶜ i² ∣) , p₂) ∣})})
     
-    soundness {.(Q [ _ / _ ]ᶠ)} {Q} {l :=ʷ a} (assignment {Q} {a}) {s} pP
+    soundness {.(Q [ _ / _ ]ᶠ)} {Q} {l ≔ a} (assignment {Q} {a}) {s} pP
       = ∣ toSt l (⟦ a ⟧ᵃ s) s , (∣ ∈-here ∣ , subR2State {Q} {a} {l} {s} pP) ∣
     
-    soundness {P} {Q} {.(ifʷ _ then _ else _)} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ᵇ s) | inspect ⟦ b ⟧ᵇ s
+    soundness {P} {Q} {.(If _ Then _ Else _)} (if-statement {P} {Q} {b} h₁ h₂) {s} pP with (⟦ b ⟧ᵇ s) | inspect ⟦ b ⟧ᵇ s
     ... | false | Eq.[ eq ] = soundness h₂ (pP , bIsFalseFollows {s} {b} eq)
     ... | true | Eq.[ eq ] = soundness h₁ (pP , bIsTrueFollows {s} {b} eq)
     
-    soundness {P} {.P} {(forʷ a doo C)} (for-statement h) {s} pP
+    soundness {P} {.P} {(For a Do C)} (for-statement h) {s} pP
       = sound-for {P} {C} h pP (abs (⟦ a ⟧ᵃ s))
         where 
           sound-for : {P : Formula} 
@@ -230,10 +230,10 @@ module AngelicSoundness where
     soundness {P} {Q} {C} (implied iP iQ h) {s} pP
       = ∥∥-to-∥∥ (soundness h ((⟦ iP ⟧ₓ tt pP))) (λ {(s₁ , i₁ , p₁) → ∣ s₁ , i₁ , (⟦ iQ ⟧ₓ tt p₁) ∣})
     
-    soundness {P} {Q} {C₁ orʷ C₂} (or-statement h₁ h₂) {s} pP
+    soundness {P} {Q} {C₁ Or C₂} (or-statement h₁ h₂) {s} pP
       = ∥∥-to-∥∥ pP (λ {(inj₁ p) → sound-to-or {C₁} {C₂} (∨ʰ-inj₁ (angelic Q C₁) (angelic Q C₂) (soundness h₁ p))
                     ; (inj₂ p) → sound-to-or {C₁} {C₂} (∨ʰ-inj₂ (angelic Q C₁) (angelic Q C₂) (soundness h₂ p))})
       where
-        sound-to-or : {C C' : Cmdₕ} → proof ((angelic Q C {s}) ∨ʰ angelic Q C' {s})→ proof (angelic Q (C orʷ C'))
+        sound-to-or : {C C' : Cmdₕ} → proof ((angelic Q C {s}) ∨ʰ angelic Q C' {s})→ proof (angelic Q (C Or C'))
         sound-to-or {C} {C'} S = ∥∥-to-∥∥ S (λ {(inj₁ x) → ∥∥-to-∥∥ x (λ {(i , j , k) → ∣ i , (∥∥-to-∥∥ j (λ i → ∣ ∈-++l (⟦ C ⟧ᶜ s) i ∣) , k) ∣})
                                             ; (inj₂ x') → ∥∥-to-∥∥ x' (λ {(i , j , k) → ∣ i , (∥∥-to-∥∥ j (λ i → ∣ ∈-++r (⟦ C ⟧ᶜ s) i ∣) , k) ∣})})

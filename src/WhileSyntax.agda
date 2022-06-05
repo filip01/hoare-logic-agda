@@ -8,43 +8,41 @@ module WhileSyntax (L : Set) where
 
     -- arithmetic expressions
 
-    infixl 4 -ʷ_
-    infix 3 intʷ
-    infix 3 locʷ
-    infixl 5 _+ʷ_
+    infixl 10 -'_
+    infix 8 Int
+    infix 8 Loc
+    infixl 5 _+'_
 
     data AExprₕ : Set where
-        intʷ : ℤ → AExprₕ
-        locʷ : L → AExprₕ
-        -ʷ_ : AExprₕ → AExprₕ
-        _+ʷ_ : AExprₕ → AExprₕ → AExprₕ
-
-    test = (intʷ (+ 10)) +ʷ (intʷ (+ 20))
+        Int : ℤ → AExprₕ
+        Loc : L → AExprₕ
+        -'_ : AExprₕ → AExprₕ
+        _+'_ : AExprₕ → AExprₕ → AExprₕ
 
     -- boolean expressions
 
-    infixl 4 ¬ʷ_
-    infixl 5 _∧ʷ_
-    infixl 6 _∨ʷ_
-    -- ∨ʷ
+    infixl 10 ¬'_
+    infixl 5 _∧'_
+    infixl 4 _∨'_
 
     data BExprₕ : Set where
-        trueʷ : BExprₕ
-        falseʷ : BExprₕ
-        ¬ʷ_ : BExprₕ → BExprₕ
-        _∧ʷ_ : BExprₕ → BExprₕ → BExprₕ
-        _∨ʷ_ : BExprₕ → BExprₕ → BExprₕ
-        _≤ʷ_ : AExprₕ → AExprₕ → BExprₕ
+        True : BExprₕ
+        False : BExprₕ
+        ¬'_ : BExprₕ → BExprₕ
+        _∧'_ : BExprₕ → BExprₕ → BExprₕ
+        _∨'_ : BExprₕ → BExprₕ → BExprₕ
+        _≤'_ : AExprₕ → AExprₕ → BExprₕ
 
     -- commands
 
-    infixl 10 _|ʷ_
-    infixl 11 _:=ʷ_
+    infix  10 _≔_
+    infixl 6 _Or_
+    infixl 2 _；_
 
     data Cmdₕ : Set where
-        passʷ : Cmdₕ
-        _|ʷ_ : Cmdₕ → Cmdₕ → Cmdₕ
-        _:=ʷ_ : L → AExprₕ → Cmdₕ
-        ifʷ_then_else_ : BExprₕ → Cmdₕ → Cmdₕ → Cmdₕ
-        forʷ_doo_ : AExprₕ → Cmdₕ → Cmdₕ
-        _orʷ_ : Cmdₕ → Cmdₕ → Cmdₕ  
+        Skip : Cmdₕ
+        _；_ : Cmdₕ → Cmdₕ → Cmdₕ
+        _≔_ : L → AExprₕ → Cmdₕ
+        If_Then_Else_ : BExprₕ → Cmdₕ → Cmdₕ → Cmdₕ
+        For_Do_ : AExprₕ → Cmdₕ → Cmdₕ
+        _Or_ : Cmdₕ → Cmdₕ → Cmdₕ  

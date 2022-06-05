@@ -39,22 +39,22 @@ module WhileSemantics where
     infix 4 ⟦_⟧ᵃ
 
     ⟦_⟧ᵃ : AExprₕ → state → ℤ
-    ⟦ intʷ x ⟧ᵃ Γ = x
-    ⟦ locʷ l ⟧ᵃ Γ = Γ l
-    ⟦ -ʷ a ⟧ᵃ Γ = - (⟦ a ⟧ᵃ Γ)
-    ⟦ a₁ +ʷ a₂ ⟧ᵃ Γ = (⟦ a₁ ⟧ᵃ Γ) + (⟦ a₂ ⟧ᵃ Γ) 
+    ⟦ Int x ⟧ᵃ Γ = x
+    ⟦ Loc l ⟧ᵃ Γ = Γ l
+    ⟦ -' a ⟧ᵃ Γ = - (⟦ a ⟧ᵃ Γ)
+    ⟦ a₁ +' a₂ ⟧ᵃ Γ = (⟦ a₁ ⟧ᵃ Γ) + (⟦ a₂ ⟧ᵃ Γ) 
 
     -- Interpretation of Boolean expressions
 
     infix 5 ⟦_⟧ᵇ
 
     ⟦_⟧ᵇ : BExprₕ → state → Bool
-    ⟦ trueʷ ⟧ᵇ _ = true
-    ⟦ falseʷ ⟧ᵇ _ = false
-    ⟦ ¬ʷ b ⟧ᵇ Γ = not (⟦ b ⟧ᵇ Γ)
-    ⟦ b₁ ∧ʷ b₂ ⟧ᵇ Γ = ⟦ b₁ ⟧ᵇ Γ ∧ ⟦ b₂ ⟧ᵇ Γ
-    ⟦ b₁ ∨ʷ b₂ ⟧ᵇ Γ = ⟦ b₁ ⟧ᵇ Γ ∨ ⟦ b₂ ⟧ᵇ Γ
-    ⟦ a₁ ≤ʷ a₂ ⟧ᵇ Γ = (⟦ a₁ ⟧ᵃ Γ) ≤ᵇ (⟦ a₂ ⟧ᵃ Γ)
+    ⟦ True ⟧ᵇ _ = true
+    ⟦ False ⟧ᵇ _ = false
+    ⟦ ¬' b ⟧ᵇ Γ = not (⟦ b ⟧ᵇ Γ)
+    ⟦ b₁ ∧' b₂ ⟧ᵇ Γ = ⟦ b₁ ⟧ᵇ Γ ∧ ⟦ b₂ ⟧ᵇ Γ
+    ⟦ b₁ ∨' b₂ ⟧ᵇ Γ = ⟦ b₁ ⟧ᵇ Γ ∨ ⟦ b₂ ⟧ᵇ Γ
+    ⟦ a₁ ≤' a₂ ⟧ᵇ Γ = (⟦ a₁ ⟧ᵃ Γ) ≤ᵇ (⟦ a₂ ⟧ᵃ Γ)
 
 
     open Monad NDS-Monad
@@ -71,12 +71,12 @@ module WhileSemantics where
     -- Interpretation of commands
 
     ⟦_⟧ : Cmdₕ → (Monad.T NDS-Monad) ⊤
-    ⟦ passʷ ⟧ = η tt
-    ⟦ c₁ |ʷ c₂ ⟧ = ⟦ c₁ ⟧ >> ⟦ c₂ ⟧
-    ⟦ l :=ʷ a ⟧ s = η tt (toSt l a' s)
+    ⟦ Skip ⟧ = η tt
+    ⟦ c₁ ； c₂ ⟧ = ⟦ c₁ ⟧ >> ⟦ c₂ ⟧
+    ⟦ l ≔ a ⟧ s = η tt (toSt l a' s)
         where a' = (⟦ a ⟧ᵃ s)
-    ⟦ ifʷ b then c₁ else c₂ ⟧ s with ⟦ b ⟧ᵇ s
+    ⟦ If b Then c₁ Else c₂ ⟧ s with ⟦ b ⟧ᵇ s
     ... | true = (⟦ c₁ ⟧ s)
     ... | false = (⟦ c₂ ⟧ s)
-    ⟦ forʷ a doo c ⟧ s = forDooAux (abs (⟦ a ⟧ᵃ s)) ⟦ c ⟧ s
-    ⟦ c₁ orʷ c₂ ⟧ s = ⟦ c₁ ⟧ s ++ ⟦ c₂ ⟧ s 
+    ⟦ For a Do c ⟧ s = forDooAux (abs (⟦ a ⟧ᵃ s)) ⟦ c ⟧ s
+    ⟦ c₁ Or c₂ ⟧ s = ⟦ c₁ ⟧ s ++ ⟦ c₂ ⟧ s 

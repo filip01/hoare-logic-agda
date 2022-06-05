@@ -176,17 +176,17 @@ module PQDeduction (L : Set) where
             → {x y z : AExprₕ}
             → Δ ⊢ x ≤ₑ y
             --------------------------
-            → Δ ⊢ (x +ʷ z) ≤ₑ (y +ʷ z)
+            → Δ ⊢ (x +' z) ≤ₑ (y +' z)
 
       +ₚ-zero : {Δ : Hypotheses}
             → {x : AExprₕ}
             ------------------------
-            → Δ ⊢ x +ʷ (intʷ (+ 0)) =ₑ x
+            → Δ ⊢ x +' (Int (+ 0)) =ₑ x
 
       +ₚ-comm : {Δ : Hypotheses}
                → {x y : AExprₕ}
                ----------------------
-               → Δ ⊢ x +ʷ y =ₑ y +ʷ x
+               → Δ ⊢ x +' y =ₑ y +' x
 
 
    -- We define negation and logical equivalence as syntactic sugar.

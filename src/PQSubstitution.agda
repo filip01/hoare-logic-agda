@@ -12,12 +12,12 @@ module PQSubstitution where
     open import WhileSyntax L
 
     _[_/_]ᵃ : AExprₕ → AExprₕ → ℕ → AExprₕ
-    (intʷ x) [ e / l ]ᵃ = (intʷ x)
-    (locʷ x) [ e / l ]ᵃ with (Dec.does (l ≟ x))
-    ... | false = (locʷ x)
+    (Int x) [ e / l ]ᵃ = (Int x)
+    (Loc x) [ e / l ]ᵃ with (Dec.does (l ≟ x))
+    ... | false = (Loc x)
     ... | true = e
-    (-ʷ a) [ e / l ]ᵃ = (-ʷ (a [ e / l ]ᵃ))
-    (a₁ +ʷ a₂) [ e / l ]ᵃ = ((a₁ [ e / l ]ᵃ) +ʷ (a₂ [ e / l ]ᵃ))
+    (-' a) [ e / l ]ᵃ = (-' (a [ e / l ]ᵃ))
+    (a₁ +' a₂) [ e / l ]ᵃ = ((a₁ [ e / l ]ᵃ) +' (a₂ [ e / l ]ᵃ))
 
     _[_/_]ᶠ : Formula → AExprₕ → ℕ → Formula
     ⊤ [ e / l ]ᶠ = ⊤
