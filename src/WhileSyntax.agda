@@ -19,8 +19,6 @@ module WhileSyntax (L : Set) where
         -ʷ_ : AExprₕ → AExprₕ
         _+ʷ_ : AExprₕ → AExprₕ → AExprₕ
 
-    test = (intʷ (+ 10)) +ʷ (intʷ (+ 20))
-
     -- boolean expressions
 
     infixl 4 ¬ʷ_

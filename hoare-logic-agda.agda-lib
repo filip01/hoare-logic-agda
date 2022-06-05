@@ -3,3 +3,4 @@ include:
   agda-stdlib/src
   agda-categories/src
   src
+  src/examples

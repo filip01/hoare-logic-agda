@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-} -- TODO: Remove
+
 open import Data.Product
 
 import Relation.Binary.PropositionalEquality as Eq
@@ -152,3 +154,5 @@ module PQSemantics where
    ⟦ +ₚ-zero {Δ} {x} ⟧ₓ {s} p = +-identityʳ (⟦ x ⟧ᵃ s)
 
    ⟦ +ₚ-comm {Δ} {x} {y} ⟧ₓ {s} p = +-comm (⟦ x ⟧ᵃ s) (⟦ y ⟧ᵃ s)
+
+   ⟦ a ⟧ₓ p = {!   !}

@@ -1,6 +1,6 @@
 open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
-open import Data.Integer
+open import Data.Integer using (ℤ; _+_; +_; suc; pred)
 
 open import HProp
 
@@ -13,6 +13,23 @@ module PQDeduction (L : Set) where
    open import WhileSyntax L
 
    --
+   -- Expressions of propositional logic.
+   --
+ 
+   infix 10 intᵉ
+   infix 10 locᵉ
+   infixl 9 -ᵉ_
+   infixl 8 _+ᵉ_
+      
+   data AExprᵉ : Set where
+      intᵉ : ℤ → AExprᵉ
+      locᵉ : L → AExprᵉ
+      sucᵉ : AExprᵉ → AExprᵉ
+      predᵉ : AExprᵉ → AExprᵉ
+      -ᵉ_ : AExprᵉ → AExprᵉ
+      _+ᵉ_ : AExprᵉ → AExprᵉ → AExprᵉ
+
+   --
    -- Formulae of propositional logic.
    --
 
@@ -22,8 +39,8 @@ module PQDeduction (L : Set) where
       _∧_ : Formula → Formula → Formula       -- conjunction (unicode \wedge)
       _∨_ : Formula → Formula → Formula       -- disjunction (unicode \vee)
       _⇒_ : Formula → Formula → Formula       -- implication (unicode \=>)
-      _=ₑ_ : AExprₕ → AExprₕ → Formula         -- equality
-      _≤ₑ_ : AExprₕ → AExprₕ → Formula         -- less than
+      _=ₑ_ : AExprᵉ → AExprᵉ → Formula         -- equality
+      _≤ₑ_ : AExprᵉ → AExprᵉ → Formula         -- less than
 
    infixr 6 _∧_
    infixr 5 _∨_
@@ -39,8 +56,6 @@ module PQDeduction (L : Set) where
       instance
          ∈-here  : {x : A} → {xs : List A} → x ∈ (x ∷ xs)
          ∈-there : {x y : A} {xs : List A} → {{x ∈ xs}} → x ∈ (y ∷ xs)
-
-
    --
    -- Below is a natural deduction style proof calculus for **intuitionistic**
    --  propositional logic, formalised as an inductive relation.
@@ -155,39 +170,38 @@ module PQDeduction (L : Set) where
       -- equality
 
       =ₑ-intro : {Δ : Hypotheses}
-               → {x : AExprₕ}
+               → {x : AExprᵉ}
                ------------------
                → Δ ⊢ x =ₑ x
 
       =ₑ-refl : {Δ : Hypotheses}
-            → {x y : AExprₕ}
+            → {x y : AExprᵉ}
             → Δ ⊢ x =ₑ y
             -----------------
             → Δ ⊢ y =ₑ x
 
       =ₑ-trans : {Δ : Hypotheses}
-               → {x y z : AExprₕ}
+               → {x y z : AExprᵉ}
                → Δ ⊢ x =ₑ y
                → Δ ⊢ y =ₑ z
                -----------------
                → Δ ⊢ x =ₑ z  
 
       ≤ₑ-add : {Δ : Hypotheses}
-            → {x y z : AExprₕ}
+            → {x y z : AExprᵉ}
             → Δ ⊢ x ≤ₑ y
             --------------------------
-            → Δ ⊢ (x +ʷ z) ≤ₑ (y +ʷ z)
+            → Δ ⊢ (x +ᵉ z) ≤ₑ (y +ᵉ z)
 
       +ₚ-zero : {Δ : Hypotheses}
-            → {x : AExprₕ}
+            → {x : AExprᵉ}
             ------------------------
-            → Δ ⊢ x +ʷ (intʷ (+ 0)) =ₑ x
+            → Δ ⊢ x +ᵉ (intᵉ (+ 0)) =ₑ x
 
       +ₚ-comm : {Δ : Hypotheses}
-               → {x y : AExprₕ}
-               ----------------------
-               → Δ ⊢ x +ʷ y =ₑ y +ʷ x
-
+            → {x y : AExprᵉ}
+            ----------------------
+            → Δ ⊢ x +ᵉ y =ₑ y +ᵉ x
 
    -- We define negation and logical equivalence as syntactic sugar.
    -- These definitions are standard logical encodings of `¬` and `⇔`.
@@ -224,3 +238,4 @@ module PQDeduction (L : Set) where
                → Δ ⊢ ψ
 
    cut-derivable d₁ d₂ = ⇒-elim (⇒-intro d₂) d₁  
+  
