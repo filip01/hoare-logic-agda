@@ -1,6 +1,6 @@
 open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
-open import Data.Integer using (ℤ; _+_; +_; suc; pred)
+open import Data.Integer using (ℤ; +_; _+_)
 
 open import HProp
 
@@ -16,18 +16,18 @@ module PQDeduction (L : Set) where
    -- Expressions of propositional logic.
    --
  
-   infix 10 intᵉ
-   infix 10 locᵉ
-   infixl 9 -ᵉ_
-   infixl 8 _+ᵉ_
+   infix 10 int
+   infix 10 loc
+   infixl 9 -ₑ_
+   infixl 8 _+ₑ_
       
-   data AExprᵉ : Set where
-      intᵉ : ℤ → AExprᵉ
-      locᵉ : L → AExprᵉ
-      sucᵉ : AExprᵉ → AExprᵉ
-      predᵉ : AExprᵉ → AExprᵉ
-      -ᵉ_ : AExprᵉ → AExprᵉ
-      _+ᵉ_ : AExprᵉ → AExprᵉ → AExprᵉ
+   data Expr : Set where
+      int : ℤ → Expr
+      loc : L → Expr
+      -- suc : Expr → Expr
+      -- pred : Expr → Expr
+      -ₑ_ : Expr → Expr
+      _+ₑ_ : Expr → Expr → Expr
 
    --
    -- Formulae of propositional logic.
@@ -39,8 +39,8 @@ module PQDeduction (L : Set) where
       _∧_ : Formula → Formula → Formula       -- conjunction (unicode \wedge)
       _∨_ : Formula → Formula → Formula       -- disjunction (unicode \vee)
       _⇒_ : Formula → Formula → Formula       -- implication (unicode \=>)
-      _=ₑ_ : AExprᵉ → AExprᵉ → Formula         -- equality
-      _≤ₑ_ : AExprᵉ → AExprᵉ → Formula         -- less than
+      _=ₑ_ : Expr → Expr → Formula         -- equality
+      _≤ₑ_ : Expr → Expr → Formula         -- less than
 
    infixr 6 _∧_
    infixr 5 _∨_
@@ -170,38 +170,38 @@ module PQDeduction (L : Set) where
       -- equality
 
       =ₑ-intro : {Δ : Hypotheses}
-               → {x : AExprᵉ}
+               → {x : Expr}
                ------------------
                → Δ ⊢ x =ₑ x
 
       =ₑ-refl : {Δ : Hypotheses}
-            → {x y : AExprᵉ}
+            → {x y : Expr}
             → Δ ⊢ x =ₑ y
             -----------------
             → Δ ⊢ y =ₑ x
 
       =ₑ-trans : {Δ : Hypotheses}
-               → {x y z : AExprᵉ}
+               → {x y z : Expr}
                → Δ ⊢ x =ₑ y
                → Δ ⊢ y =ₑ z
                -----------------
                → Δ ⊢ x =ₑ z  
 
       ≤ₑ-add : {Δ : Hypotheses}
-            → {x y z : AExprᵉ}
+            → {x y z : Expr}
             → Δ ⊢ x ≤ₑ y
             --------------------------
-            → Δ ⊢ (x +ᵉ z) ≤ₑ (y +ᵉ z)
+            → Δ ⊢ (x +ₑ z) ≤ₑ (y +ₑ z)
 
       +ₚ-zero : {Δ : Hypotheses}
-            → {x : AExprᵉ}
+            → {x : Expr}
             ------------------------
-            → Δ ⊢ x +ᵉ (intᵉ (+ 0)) =ₑ x
+            → Δ ⊢ x +ₑ (int (+ 0)) =ₑ x
 
       +ₚ-comm : {Δ : Hypotheses}
-            → {x y : AExprᵉ}
+            → {x y : Expr}
             ----------------------
-            → Δ ⊢ x +ᵉ y =ₑ y +ᵉ x
+            → Δ ⊢ x +ₑ y =ₑ y +ₑ x
 
    -- We define negation and logical equivalence as syntactic sugar.
    -- These definitions are standard logical encodings of `¬` and `⇔`.

@@ -62,6 +62,13 @@ module DemonicSoundness where
     trueIsNotEqToFalse : (true ≡ false) → ⊥ᶠ
     trueIsNotEqToFalse ()
 
+    -- Show that the interpretation of Expr and AExprₕ are equivalent.
+    itr-are-equal : (a : AExprₕ) → ⟦ toExprₚ a ⟧ₑ ≡ ⟦ a ⟧ᵃ
+    itr-are-equal (intʷ x) = refl
+    itr-are-equal (locʷ x) = refl
+    itr-are-equal (-ʷ a) = cong ((λ e Γ → - e Γ )) (itr-are-equal a)
+    itr-are-equal (a₁ +ʷ a₂) = cong₂ (λ e₁ e₂ Γ → e₁ Γ + e₂ Γ) (itr-are-equal a₁) (itr-are-equal a₂)
+
     -- Relate how the boolean expressions are interpreted in WHILE language and how they are interpreted in the
     -- PQ logic.
 
@@ -92,33 +99,36 @@ module DemonicSoundness where
         ∥∥-elim (λ x ())
           (λ { (inj₁ y) → bIsFalseFollows {s} {b₁} eq₁ y
              ; (inj₂ y) →  bIsFalseFollows {s} {b₂} eq₂ y } ) x'
-      bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x = x
-      bIsFalseFollows {S} {x₂ ≤ʷ x₃} x x' rewrite x = trueIsNotEqToFalse (sym x')
+      bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x rewrite itr-are-equal x₁ rewrite itr-are-equal x₂ = x
+      bIsFalseFollows {S} {x₁ ≤ʷ x₂} x x' rewrite itr-are-equal x₁ rewrite itr-are-equal x₂
+        rewrite x = trueIsNotEqToFalse (sym x')
 
     -- Show how is substitution related to a state.
 
-    subR2StateA : {a : AExprₕ} → {b : AExprₕ} → {l : ℕ} → {s : state}
-         →  (⟦ a [ b / l ]ᵃ ⟧ᵃ s) ≡ (⟦ a ⟧ᵃ (toSt l (⟦ b ⟧ᵃ s) s))
-    subR2StateA {intʷ x} {b} {l} {s} = refl
-    subR2StateA {locʷ l'} {b} {l} {s} with does (l ≟ℕ l')
+    -- subR2StateA : {a : Expr} → {b : Expr} → {l : ℕ} → {s : state}
+    --      →  (⟦ a [ b / l ]ᵃ ⟧ₑ s) ≡ (⟦ a ⟧ₑ (toSt l (⟦ b ⟧ₑ s) s))
+    subR2StateA : {a : Expr} → {b : AExprₕ} → {l : ℕ} → {s : state}
+         →  (⟦ a [ (toExprₚ b) / l ]ᵃ ⟧ₑ s) ≡ (⟦ a ⟧ₑ (toSt l (⟦ b ⟧ᵃ s) s))
+    subR2StateA {int x} {b} {l} {s} = refl
+    subR2StateA {loc l'} {b} {l} {s} with does (l ≟ℕ l')
     ... | false = refl
-    ... | true = refl
-    subR2StateA { -ʷ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
-    subR2StateA {a₁ +ʷ a₂} {b} {l} {s} = cong₂ _+_
-      {⟦ a₁ [ b / l ]ᵃ ⟧ᵃ s}
-      {⟦ a₁ ⟧ᵃ (toSt l (⟦ b ⟧ᵃ s) s)}
-        (subR2StateA {a₁} {b} {l} {s}) (subR2StateA {a₂} {b} {l} {s})
+    ... | true rewrite itr-are-equal b = refl
+    subR2StateA { -ₑ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
+    subR2StateA {a₁ +ₑ a₂} {b} {l} {s} = cong₂ _+_
+      {⟦ a₁ [ (toExprₚ b) / l ]ᵃ ⟧ₑ s}
+      {⟦ a₁ ⟧ₑ (toSt l (⟦ b ⟧ᵃ s) s)}
+      ((subR2StateA {a₁} {b} {l} {s})) ((subR2StateA {a₂} {b} {l} {s}))
 
     interleaved mutual
 
       -- A proof of substitution of 'a' for 'l' in 'Q' and then evaluating its interpretation at state 's' implies
-      --    a proof of interpreting 'Q' evaluated at state where 'l' has a value '⟦ a ⟧ᵃ s'.
+      --    a proof of interpreting 'Q' evaluated at state where 'l' has a value '⟦ a ⟧ₑ s'.
       subR2State  : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
-                      → proof (⟦ Q [ a / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s))
-      -- A proof of interpreting 'Q' evaluated at state where 'l' has a value '⟦ a ⟧ᵃ s' implies
+                      → proof (⟦ Q [ (toExprₚ a) / l ]ᶠ ⟧ s) → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s))
+      -- A proof of interpreting 'Q' evaluated at state where 'l' has a value '⟦ a ⟧ₑ s' implies
       --    a proof of substitution of 'a' for 'l' in 'Q' and then evaluating its interpretation at state 's'.
       subR2State' : {Q : Formula} → {a : AExprₕ} → {l : ℕ} → {s : state}
-                      → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) → proof (⟦ Q [ a / l ]ᶠ ⟧ s)
+                      → proof (⟦ Q ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) → proof (⟦ Q [ (toExprₚ a) / l ]ᶠ ⟧ s)
       subR2State  {⊤} {a} {l} {s} _ = tt
       subR2State' {⊤} {a} {l} {s} _ = tt
       subR2State {⊥} {a} {l} {s} p = p
@@ -129,52 +139,53 @@ module DemonicSoundness where
         subR2State' {Q₂} {a} {l} {s} (p (subR2State {Q₁} {a} {l} {s} pQ₁))
       subR2State {x₁ =ₑ x₂} {a} {l} {s} p =
         begin
-          ⟦ x₁ ⟧ᵃ (toSt l (⟦ a ⟧ᵃ s) s)
+          ⟦ x₁ ⟧ₑ (toSt l (⟦ a ⟧ᵃ s) s)
         ≡⟨ sym (subR2StateA {x₁} {a} {l} {s}) ⟩
-          ⟦ x₁ [ a / l ]ᵃ ⟧ᵃ s
+          ⟦ x₁ [ (toExprₚ a) / l ]ᵃ ⟧ₑ s
         ≡⟨ p ⟩
-          ⟦ x₂ [ a / l ]ᵃ ⟧ᵃ s
+          ⟦ x₂ [ (toExprₚ a) / l ]ᵃ ⟧ₑ s
         ≡⟨ subR2StateA {x₂} {a} {l} {s} ⟩
-          ⟦ x₂ ⟧ᵃ (toSt l (⟦ a ⟧ᵃ s) s)
+          ⟦ x₂ ⟧ₑ (toSt l (⟦ a ⟧ᵃ s) s)
         ∎
+      
       subR2State' {x₁ =ₑ x₂} {a} {l} {s} p =
         begin
-          ⟦ x₁ [ a / l ]ᵃ ⟧ᵃ s
+          ⟦ x₁ [ (toExprₚ a) / l ]ᵃ ⟧ₑ s
         ≡⟨ subR2StateA {x₁} {a} {l} {s} ⟩
-          ⟦ x₁ ⟧ᵃ (toSt l (⟦ a ⟧ᵃ s) s)
+          ⟦ x₁ ⟧ₑ (toSt l (⟦ a ⟧ᵃ s) s)
         ≡⟨ p ⟩
-          ⟦ x₂ ⟧ᵃ (toSt l (⟦ a ⟧ᵃ s) s)
+          ⟦ x₂ ⟧ₑ (toSt l (⟦ a ⟧ᵃ s) s)
         ≡⟨ sym ( subR2StateA {x₂} {a} {l} {s}) ⟩
-          ⟦ x₂ [ a / l ]ᵃ ⟧ᵃ s
+          ⟦ x₂ [ (toExprₚ a) / l ]ᵃ ⟧ₑ s
         ∎
       subR2State {Q₁ ∧ Q₂} {a} {l} {s} p =
-        (subR2State {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p)) ,
-        (subR2State {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s) p))
+        (subR2State {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ [ (toExprₚ a) / l ]ᶠ ⟧ s) (⟦ Q₂ [ (toExprₚ a) / l ]ᶠ ⟧ s) p)) ,
+        (subR2State {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ [ (toExprₚ a)/ l ]ᶠ ⟧ s) (⟦ Q₂ [ (toExprₚ a) / l ]ᶠ ⟧ s) p))
       subR2State' {Q₁ ∧ Q₂} {a} {l} {s} p =
         (subR2State' {Q₁} {a} {l} {s} (∧ʰ-proj₁ (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) p)) ,
         (subR2State' {Q₂} {a} {l} {s} (∧ʰ-proj₂ (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) p))
       subR2State {Q₁ ∨ Q₂} {a} {l} {s} p = 
         ∨ʰ-cong
-          (⟦ Q₁ [ a / l ]ᶠ ⟧ s) (⟦ Q₂ [ a / l ]ᶠ ⟧ s)
+          (⟦ Q₁ [ (toExprₚ a) / l ]ᶠ ⟧ s) (⟦ Q₂ [ (toExprₚ a) / l ]ᶠ ⟧ s)
           {⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ᵃ s) s)} {⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ᵃ s) s)}
           (subR2State {Q₁}) (subR2State {Q₂}) p
       subR2State' {Q₁ ∨ Q₂} {a} {l} {s} p = ∨ʰ-cong
         (⟦ Q₁ ⟧ (toSt l (⟦ a ⟧ᵃ s) s)) (⟦ Q₂ ⟧ (toSt l (⟦ a ⟧ᵃ s) s))
-        {⟦ Q₁ [ a / l ]ᶠ ⟧ s} {⟦ Q₂ [ a / l ]ᶠ ⟧ s}
+        {⟦ Q₁ [ (toExprₚ a) / l ]ᶠ ⟧ s} {⟦ Q₂ [ (toExprₚ a) / l ]ᶠ ⟧ s}
         (subR2State' {Q₁}) (subR2State' {Q₂}) p
       subR2State {x₁ ≤ₑ x₂} {a} {l} {s} p =
         begin
-          ⟦ x₁ ⟧ᵃ (toSt l (⟦ a ⟧ᵃ s) s) ≤ᵇ ⟦ x₂ ⟧ᵃ (toSt l (⟦ a ⟧ᵃ s) s)
+          ⟦ x₁ ⟧ₑ (toSt l (⟦ a ⟧ᵃ s) s) ≤ᵇ ⟦ x₂ ⟧ₑ (toSt l (⟦ a ⟧ᵃ s) s)
         ≡⟨ cong₂ _≤ᵇ_ (sym (subR2StateA {x₁} {a} {l} {s})) (sym (subR2StateA {x₂} {a} {l} {s})) ⟩
-          ⟦ x₁ [ a / l ]ᵃ ⟧ᵃ s ≤ᵇ ⟦ x₂ [ a / l ]ᵃ ⟧ᵃ s
+          ⟦ x₁ [ (toExprₚ a) / l ]ᵃ ⟧ₑ s ≤ᵇ ⟦ x₂ [ (toExprₚ a) / l ]ᵃ ⟧ₑ s
         ≡⟨ p ⟩
           true
         ∎
-      subR2State' {x₁ ≤ₑ x₂} {a} {l} {s} p = 
+      subR2State' {x₁ ≤ₑ x₂} {a} {l} {s} p =
         begin
-          ⟦ x₁ [ a / l ]ᵃ ⟧ᵃ s ≤ᵇ ⟦ x₂ [ a / l ]ᵃ ⟧ᵃ s
+          ⟦ x₁ [ (toExprₚ a) / l ]ᵃ ⟧ₑ s ≤ᵇ ⟦ x₂ [ (toExprₚ a) / l ]ᵃ ⟧ₑ s
         ≡⟨ cong₂ _≤ᵇ_ (subR2StateA {x₁} {a} {l} {s}) (subR2StateA {x₂} {a} {l} {s}) ⟩
-          ⟦ x₁ ⟧ᵃ (toSt l (⟦ a ⟧ᵃ s) s) ≤ᵇ ⟦ x₂ ⟧ᵃ (toSt l (⟦ a ⟧ᵃ s) s)
+          ⟦ x₁ ⟧ₑ (toSt l (⟦ a ⟧ᵃ s) s) ≤ᵇ ⟦ x₂ ⟧ₑ (toSt l (⟦ a ⟧ᵃ s) s)
         ≡⟨ p ⟩
           true
         ∎ 
@@ -220,7 +231,7 @@ module DemonicSoundness where
     gdsoundness {P} {P} {forʷ _ doo _} (for-statement {_} {_} {a} {c} h) (x ∷ ls) pPs = 
       dc-++-eq-∧ʰ {⊤ᶠ} {P} {forDooAux (abs (⟦ a ⟧ᵃ (proj₂ x))) ⟦ c ⟧ᶜ (proj₂ x)}
         ( cases-m (abs (⟦ a ⟧ᵃ (proj₂ x))) x (proj₁ pPs) ,
-         gdsoundness (for-statement {P} {P} {a} {c} h) ls (proj₂ pPs))
+          gdsoundness (for-statement {P} {P} {a} {c} h) ls (proj₂ pPs))
 
       where
       
@@ -278,3 +289,4 @@ module DemonicSoundness where
                 → proof (⟦ P ⟧ s)
                 → proof (dcondition Q (⟦ C ⟧ᶜ s))
     dsoundness {P} {Q} {C} h s pPs = dc-++-[] {_} {C} {tt , s} (gdsoundness {P} {Q} {C} h ((tt , s) ∷ []) (pPs , tt)) 
+  

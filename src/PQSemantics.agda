@@ -42,6 +42,15 @@ module PQSemantics where
          ≤ᵇ≡true-is-prop x y p q with x ≤ᵇ y
          ≤ᵇ≡true-is-prop x y refl refl | true = refl
 
+   --
+   -- The recursively defined interpretation function for expressions.
+   --
+
+   ⟦_⟧ₑ : Expr → State → ℤ
+   ⟦ int x ⟧ₑ Γ = x
+   ⟦ loc l ⟧ₑ Γ = Γ l
+   ⟦ -ₑ a ⟧ₑ Γ = - (⟦ a ⟧ₑ Γ)
+   ⟦ a₁ +ₑ a₂ ⟧ₑ Γ = (⟦ a₁ ⟧ₑ Γ) + (⟦ a₂ ⟧ₑ Γ) 
 
    --
    -- The recursively defined interpretation function for formulae.
@@ -53,8 +62,8 @@ module PQSemantics where
    ⟦ P₁ ∧ P₂ ⟧ S = ⟦ P₁ ⟧ S ∧ʰ ⟦ P₂ ⟧ S
    ⟦ P₁ ∨ P₂ ⟧ S = ⟦ P₁ ⟧ S ∨ʰ ⟦ P₂ ⟧ S
    ⟦ P₁ ⇒ P₂ ⟧ S = ⟦ P₁ ⟧ S ⇒ʰ ⟦ P₂ ⟧ S
-   ⟦ x₁ =ₑ x₂ ⟧ S = (⟦ x₁ ⟧ᵃ S) =ₑₕ (⟦ x₂ ⟧ᵃ S)
-   ⟦ x₁ ≤ₑ x₂ ⟧ S = (⟦ x₁ ⟧ᵃ S) <ₑₕ (⟦ x₂ ⟧ᵃ S)
+   ⟦ x₁ =ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₑ S) =ₑₕ (⟦ x₂ ⟧ₑ S)
+   ⟦ x₁ ≤ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₑ S) <ₑₕ (⟦ x₂ ⟧ₑ S)
 
 
    --
@@ -143,7 +152,7 @@ module PQSemantics where
 
    ⟦ =ₑ-trans h₁ h₂ ⟧ₓ {s} p = trans (⟦ h₁ ⟧ₓ p) (⟦ h₂ ⟧ₓ p)
 
-   ⟦ ≤ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = T-≡true (≤⇒≤ᵇ( +-monoˡ-≤ (⟦ z ⟧ᵃ s) (≤ᵇ⇒≤ {⟦ x ⟧ᵃ s } (≡true-T (⟦ h ⟧ₓ p)))))
+   ⟦ ≤ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = T-≡true (≤⇒≤ᵇ( +-monoˡ-≤ (⟦ z ⟧ₑ s) (≤ᵇ⇒≤ {⟦ x ⟧ₑ s } (≡true-T (⟦ h ⟧ₓ p)))))
       where
          ≡true-T : {a : Bool} → a ≡ true → T a
          ≡true-T {true} _ = tt
@@ -151,8 +160,8 @@ module PQSemantics where
          T-≡true : {a : Bool} → T a → a ≡ true
          T-≡true {true} _ = refl
 
-   ⟦ +ₚ-zero {Δ} {x} ⟧ₓ {s} p = +-identityʳ (⟦ x ⟧ᵃ s)
+   ⟦ +ₚ-zero {Δ} {x} ⟧ₓ {s} p = +-identityʳ (⟦ x ⟧ₑ s)
 
-   ⟦ +ₚ-comm {Δ} {x} {y} ⟧ₓ {s} p = +-comm (⟦ x ⟧ᵃ s) (⟦ y ⟧ᵃ s)
+   ⟦ +ₚ-comm {Δ} {x} {y} ⟧ₓ {s} p = +-comm (⟦ x ⟧ₑ s) (⟦ y ⟧ₑ s)
 
-   ⟦ a ⟧ₓ p = {!   !}
+   -- ⟦ a ⟧ₓ p = {!   !}

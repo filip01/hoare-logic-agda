@@ -31,6 +31,20 @@ module DemonicHoareLogic where
     toₚ false = ⊥
     toₚ true = ⊤
 
+    -- Covert AExprₕ to Expr.
+    toExprₚ : AExprₕ → Expr
+    toExprₚ (intʷ x) = int x
+    toExprₚ (locʷ x) = loc x
+    toExprₚ (-ʷ e) = -ₑ (toExprₚ e)
+    toExprₚ (e₁ +ʷ e₂) = ((toExprₚ e₁) +ₑ (toExprₚ e₂))
+
+    -- Covert Expr to AExprₕ.
+    toAExprₚ : Expr → AExprₕ
+    toAExprₚ (int x) = intʷ x
+    toAExprₚ (loc x) = locʷ x
+    toAExprₚ (-ₑ e) = -ʷ (toAExprₚ e)
+    toAExprₚ (e₁ +ₑ e₂) = ((toAExprₚ e₁) +ʷ (toAExprₚ e₂))
+
     -- Covert BExprₕ to Formula.
     toFormulaₚ : BExprₕ → Formula
     toFormulaₚ trueʷ = ⊤
@@ -38,7 +52,7 @@ module DemonicHoareLogic where
     toFormulaₚ (¬ʷ b) = ¬ (toFormulaₚ b)
     toFormulaₚ (b₁ ∧ʷ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂ -- TODO: Wrong conversion.
+    toFormulaₚ (a₁ ≤ʷ a₂) = (toExprₚ a₁) ≤ₑ (toExprₚ a₂)
 
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where
@@ -55,7 +69,7 @@ module DemonicHoareLogic where
                       → {a : AExprₕ}
                       → {l : L}
                       ------------------
-                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l :=ʷ a ⟪ ϕ ⟫
+                      → ⟪ ϕ [ (toExprₚ a) / l ]ᶠ ⟫ l :=ʷ a ⟪ ϕ ⟫
 
         if-statement  : {ϕ ψ : Formula}
                       → {b : BExprₕ}

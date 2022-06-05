@@ -11,15 +11,15 @@ module PQSubstitution where
 
     open import WhileSyntax L
 
-    _[_/_]ᵃ : AExprₕ → AExprₕ → ℕ → AExprₕ
-    (intʷ x) [ e / l ]ᵃ = (intʷ x)
-    (locʷ x) [ e / l ]ᵃ with (Dec.does (l ≟ x))
-    ... | false = (locʷ x)
+    _[_/_]ᵃ : Expr → Expr → ℕ → Expr
+    (int x) [ e / l ]ᵃ = (int x)
+    (loc x) [ e / l ]ᵃ with (Dec.does (l ≟ x))
+    ... | false = (loc x)
     ... | true = e
-    (-ʷ a) [ e / l ]ᵃ = (-ʷ (a [ e / l ]ᵃ))
-    (a₁ +ʷ a₂) [ e / l ]ᵃ = ((a₁ [ e / l ]ᵃ) +ʷ (a₂ [ e / l ]ᵃ))
+    (-ₑ a) [ e / l ]ᵃ = (-ₑ (a [ e / l ]ᵃ))
+    (a₁ +ₑ a₂) [ e / l ]ᵃ = ((a₁ [ e / l ]ᵃ) +ₑ (a₂ [ e / l ]ᵃ))
 
-    _[_/_]ᶠ : Formula → AExprₕ → ℕ → Formula
+    _[_/_]ᶠ : Formula → Expr → ℕ → Formula
     ⊤ [ e / l ]ᶠ = ⊤
     ⊥ [ e / l ]ᶠ = ⊥
     (ϕ₁ ∧ ϕ₂) [ e / l ]ᶠ = ((ϕ₁ [ e / l ]ᶠ) ∧ (ϕ₂ [ e / l ]ᶠ))

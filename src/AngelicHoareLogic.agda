@@ -31,6 +31,13 @@ module AngelicHoareLogic where
     toₚ false = ⊥
     toₚ true = ⊤
 
+    -- Covert AExprₕ to Expr.
+    toExprₚ : AExprₕ → Expr
+    toExprₚ (intʷ x) = int x
+    toExprₚ (locʷ x) = loc x
+    toExprₚ (-ʷ e) = -ₑ (toExprₚ e)
+    toExprₚ (e₁ +ʷ e₂) = ((toExprₚ e₁) +ₑ (toExprₚ e₂))
+
     -- Covert BExprₕ to Formula.
     toFormulaₚ : BExprₕ → Formula
     toFormulaₚ trueʷ = ⊤
@@ -38,7 +45,7 @@ module AngelicHoareLogic where
     toFormulaₚ (¬ʷ b) = ¬ (toFormulaₚ b)
     toFormulaₚ (b₁ ∧ʷ b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨ʷ b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤ʷ a₂) = a₁ ≤ₑ a₂
+    toFormulaₚ (a₁ ≤ʷ a₂) = (toExprₚ a₁) ≤ₑ (toExprₚ a₂)
 
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where
@@ -55,7 +62,7 @@ module AngelicHoareLogic where
                       → {a : AExprₕ}
                       → {l : L}
                       ------------------
-                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l :=ʷ a ⟪ ϕ ⟫
+                      → ⟪ ϕ [ (toExprₚ a) / l ]ᶠ ⟫ l :=ʷ a ⟪ ϕ ⟫
 
         if-statement  : {ϕ ψ : Formula}
                       → {b : BExprₕ}
