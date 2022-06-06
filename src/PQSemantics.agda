@@ -7,7 +7,7 @@ open Eq using (_≡_; refl; sym; trans; cong; cong₂; subst; inspect) renaming 
 open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; step-≡˘; _∎)
 
 open import Data.Nat using (ℕ ; suc ; _≟_) renaming (_<ᵇ_ to _ℕ<ᵇ_)
-open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_; _<_) renaming (∣_∣ to abs; _≟_ to _≟ℤ_)
+open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_; _<_) renaming (∣_∣ to abs; _≟_ to _≟ℤ_; suc to ℤ-suc)
 open import Data.Integer.Properties
 open import Data.Bool renaming (_<_ to _<b_)
 open import Data.List using (List; []; _∷_; [_]; _++_)
@@ -49,6 +49,7 @@ module PQSemantics where
    ⟦_⟧ₑ : Expr → State → ℤ
    ⟦ int x ⟧ₑ Γ = x
    ⟦ loc l ⟧ₑ Γ = Γ l
+   ⟦ suc a ⟧ₑ Γ = ℤ-suc (⟦ a ⟧ₑ Γ)
    ⟦ -ₑ a ⟧ₑ Γ = - (⟦ a ⟧ₑ Γ)
    ⟦ a₁ +ₑ a₂ ⟧ₑ Γ = (⟦ a₁ ⟧ₑ Γ) + (⟦ a₂ ⟧ₑ Γ) 
 
@@ -164,4 +165,4 @@ module PQSemantics where
 
    ⟦ +ₚ-comm {Δ} {x} {y} ⟧ₓ {s} p = +-comm (⟦ x ⟧ₑ s) (⟦ y ⟧ₑ s)
 
-   -- ⟦ a ⟧ₓ p = {!   !}
+   ⟦ a ⟧ₓ p = {!   !}

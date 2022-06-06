@@ -16,6 +16,7 @@ module PQSubstitution where
     (loc x) [ e / l ]ᵃ with (Dec.does (l ≟ x))
     ... | false = (loc x)
     ... | true = e
+    (suc a) [ e / l ]ᵃ = (suc (a [ e / l ]ᵃ))
     (-ₑ a) [ e / l ]ᵃ = (-ₑ (a [ e / l ]ᵃ))
     (a₁ +ₑ a₂) [ e / l ]ᵃ = ((a₁ [ e / l ]ᵃ) +ₑ (a₂ [ e / l ]ᵃ))
 

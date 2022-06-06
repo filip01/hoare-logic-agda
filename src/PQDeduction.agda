@@ -1,6 +1,6 @@
 open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
-open import Data.Integer using (ℤ; +_; _+_)
+open import Data.Integer using (ℤ; +_; _+_) renaming (suc to ℤ-suc)
 
 open import HProp
 
@@ -18,14 +18,14 @@ module PQDeduction (L : Set) where
  
    infix 10 int
    infix 10 loc
-   infixl 9 -ₑ_
-   infixl 8 _+ₑ_
+   infixl 9 suc
+   infixl 8 -ₑ_
+   infixl 7 _+ₑ_
       
    data Expr : Set where
       int : ℤ → Expr
       loc : L → Expr
-      -- suc : Expr → Expr
-      -- pred : Expr → Expr
+      suc : Expr → Expr
       -ₑ_ : Expr → Expr
       _+ₑ_ : Expr → Expr → Expr
 
@@ -185,7 +185,23 @@ module PQDeduction (L : Set) where
                → Δ ⊢ x =ₑ y
                → Δ ⊢ y =ₑ z
                -----------------
-               → Δ ⊢ x =ₑ z  
+               → Δ ⊢ x =ₑ z 
+
+      =ₑ-cong : {Δ : Hypotheses}
+            → (f : Expr → Expr)
+            → {x y : Expr}
+            → Δ ⊢ x =ₑ y
+            -----------------
+            → Δ ⊢ f x =ₑ f y 
+
+      -- successor
+
+      suc-ℤ : {Δ : Hypotheses}
+            → {i : ℤ}
+            ------------------------
+            → Δ ⊢ suc (int i) =ₑ int (ℤ-suc i)
+
+      -- addition
 
       ≤ₑ-add : {Δ : Hypotheses}
             → {x y z : Expr}
@@ -197,6 +213,11 @@ module PQDeduction (L : Set) where
             → {x : Expr}
             ------------------------
             → Δ ⊢ x +ₑ (int (+ 0)) =ₑ x
+
+      +ₚ-carry : {Δ : Hypotheses}
+            → {x y : Expr}
+            ------------------------
+            → Δ ⊢ x +ₑ suc y =ₑ suc (x +ₑ y)
 
       +ₚ-comm : {Δ : Hypotheses}
             → {x y : Expr}

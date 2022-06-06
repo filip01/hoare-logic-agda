@@ -38,13 +38,6 @@ module DemonicHoareLogic where
     toExprₚ (-ʷ e) = -ₑ (toExprₚ e)
     toExprₚ (e₁ +ʷ e₂) = ((toExprₚ e₁) +ₑ (toExprₚ e₂))
 
-    -- Covert Expr to AExprₕ.
-    toAExprₚ : Expr → AExprₕ
-    toAExprₚ (int x) = intʷ x
-    toAExprₚ (loc x) = locʷ x
-    toAExprₚ (-ₑ e) = -ʷ (toAExprₚ e)
-    toAExprₚ (e₁ +ₑ e₂) = ((toAExprₚ e₁) +ʷ (toAExprₚ e₂))
-
     -- Covert BExprₕ to Formula.
     toFormulaₚ : BExprₕ → Formula
     toFormulaₚ trueʷ = ⊤

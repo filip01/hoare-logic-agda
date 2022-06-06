@@ -7,7 +7,7 @@ open import PQSubstitution
 open import Monads
 
 open import Data.Nat using (ℕ) renaming (_≟_ to _≟ℕ_)
-open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_∣ to abs)
+open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_∣ to abs; suc to ℤ-suc)
 open import Data.Bool using (Bool; true; false)
 open import Data.Empty renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᶠ)
 open import Data.Unit renaming (⊤ to ⊤ᶠ)
@@ -113,6 +113,7 @@ module DemonicSoundness where
     subR2StateA {loc l'} {b} {l} {s} with does (l ≟ℕ l')
     ... | false = refl
     ... | true rewrite itr-are-equal b = refl
+    subR2StateA {suc a} {b} {l} {s} = cong ℤ-suc (subR2StateA {a} {b} {l} {s})
     subR2StateA { -ₑ a} {b} {l} {s} = cong -_ (subR2StateA {a} {b} {l} {s})
     subR2StateA {a₁ +ₑ a₂} {b} {l} {s} = cong₂ _+_
       {⟦ a₁ [ (toExprₚ b) / l ]ᵃ ⟧ₑ s}

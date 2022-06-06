@@ -24,7 +24,6 @@ module WhileSyntax (L : Set) where
     infixl 4 ¬ʷ_
     infixl 5 _∧ʷ_
     infixl 6 _∨ʷ_
-    -- ∨ʷ
 
     data BExprₕ : Set where
         trueʷ : BExprₕ
