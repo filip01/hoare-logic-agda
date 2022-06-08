@@ -49,6 +49,10 @@ module DemonicHoareLogic where
 
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where
+
+        skip          : {ϕ : Formula}
+                      ------------------------
+                      → ⟪ ϕ ⟫ passʷ ⟪ ϕ ⟫
         
         composition   : {ϕ θ ψ : Formula}
                       → {c₁ c₂ : Cmdₕ}
@@ -72,7 +76,7 @@ module DemonicHoareLogic where
                       -----------------------------------
                       → ⟪ ϕ ⟫ ifʷ b then c₁ else c₂ ⟪ ψ ⟫
 
-        for-statement : {ϕ ψ : Formula}
+        for-statement : {ϕ : Formula}
                       → {a : AExprₕ}
                       → {c : Cmdₕ}
                       → ⟪ ϕ ⟫ c ⟪ ϕ ⟫

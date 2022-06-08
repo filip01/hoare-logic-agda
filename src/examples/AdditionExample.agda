@@ -12,15 +12,14 @@ open import Data.List using (List; _∷_; [])
 
 open import Data.Integer renaming (suc to ℤ-suc; pred to ℤ-pred)
 
-module SimpleExamples where
+module AdditionExample where
 
-    assignment' : ⟪ int (+ 0) =ₑ (int (+ 0)) ⟫ 1 :=ʷ (intʷ (+ 0)) ⟪ loc 1 =ₑ (int (+ 0)) ⟫
-    assignment' = assignment
-
-    l-carry-over : {Δ : Hypotheses} {e : Expr} {i : ℤ} → Δ ⊢ (e +ₑ int (ℤ-suc i)) =ₑ e +ₑ suc (int i)
+    l-carry-over : {Δ : Hypotheses} {e : Expr} {i : ℤ} →
+        Δ ⊢ (e +ₑ int (ℤ-suc i)) =ₑ e +ₑ suc (int i)
     l-carry-over {_} {e} = =ₑ-cong ((_+ₑ_ e)) (=ₑ-refl suc-ℤ)
     
-    l-carry-over' : {Δ : Hypotheses} {e : Expr} {i : ℤ} → Δ ⊢ (e +ₑ int (ℤ-suc i)) =ₑ suc (e +ₑ (int i))
+    l-carry-over' : {Δ : Hypotheses} {e : Expr} {i : ℤ} →
+        Δ ⊢ (e +ₑ int (ℤ-suc i)) =ₑ suc (e +ₑ (int i))
     l-carry-over' {_} {e} {i} = =ₑ-trans (l-carry-over {_} {e} {i}) +ₚ-carry
 
     l-eq-add : {Δ : Hypotheses} → {x y z : ℤ} →
@@ -31,8 +30,8 @@ module SimpleExamples where
             (=ₑ-refl (=ₑ-trans (l-carry-over' {_} {int y} {z})
                 (=ₑ-cong suc (=ₑ-refl h))))
     
-    addition₁ : ⟪ (int (+ 8)) =ₑ int (+ 8) ⟫ 1 :=ʷ (intʷ (+ 5) +ʷ intʷ (+ 3)) ⟪ loc 1 =ₑ int (+ 8) ⟫
-    addition₁ = implied {[]}
+    addition-examples : ⟪ (int (+ 8)) =ₑ int (+ 8) ⟫ 1 :=ʷ (intʷ (+ 5) +ʷ intʷ (+ 3)) ⟪ loc 1 =ₑ int (+ 8) ⟫
+    addition-examples = implied {[]}
         ((⇒-intro (=ₑ-refl
             ((l-eq-add {_} {+ 7} {+ 5} {+ 2})
              ((l-eq-add {_} {+ 6} {+ 5} {+ 1})

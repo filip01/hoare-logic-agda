@@ -192,7 +192,15 @@ module PQDeduction (L : Set) where
             → {x y : Expr}
             → Δ ⊢ x =ₑ y
             -----------------
-            → Δ ⊢ f x =ₑ f y 
+            → Δ ⊢ f x =ₑ f y
+      
+      =ₑ-subst : {Δ : Hypotheses}
+            → {P : Expr → Formula}
+            → {x y : Expr}
+            → Δ ⊢ x =ₑ y
+            → Δ ⊢ P x
+            -----------------
+            → Δ ⊢ P y
 
       -- successor
 
@@ -202,6 +210,23 @@ module PQDeduction (L : Set) where
             → Δ ⊢ suc (int i) =ₑ int (ℤ-suc i)
 
       -- addition
+
+      ≤ₑ-intro : {Δ : Hypotheses}
+            → {x : Expr}
+            --------------------------
+            → Δ ⊢ x ≤ₑ x
+
+      ≤ₑ-suc : {Δ : Hypotheses}
+            → {x : Expr}
+            --------------------------
+            → Δ ⊢ x ≤ₑ (suc x)
+
+      ≤ₑ-trans : {Δ : Hypotheses}
+            → {x y z : Expr}
+            → Δ ⊢ x ≤ₑ y
+            → Δ ⊢ y ≤ₑ z
+            -----------------
+            → Δ ⊢ x ≤ₑ z 
 
       ≤ₑ-add : {Δ : Hypotheses}
             → {x y z : Expr}
