@@ -17,10 +17,13 @@ open import Data.Empty renaming (⊥ to ⊥ₜ)
 open import Data.Unit
 
 open import HProp
-open import WhileSemantics using (⟦_⟧ᵃ; L)
+open import WhileSemantics using (⟦_⟧ᵃ; L; toSt)
 
-import PQDeduction
-open PQDeduction L renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᵣ; ⊤ to ⊤ᶠ) hiding (_∈_)
+open import PQSyntax ℕ renaming (⊥ to ⊥ᶠ;  ⊤ to ⊤ᶠ)
+
+open import PQDeduction renaming (⊥-elim to ⊥-elimᵣ) hiding (_∈_)
+
+open import PQSubstitution
 
 --
 -- Interpretation of PQ logic
@@ -30,13 +33,13 @@ module PQSemantics where
  
    ℙ = HProp   -- unicode \bP
 
-   State = L → ℤ
+   State = ℕ → ℤ
 
    _=ₑₕ_ : ℤ → ℤ → HProp
    x =ₑₕ y = ⟨ x ≡ y , (λ {refl refl → refl}) ⟩
 
-   _<ₑₕ_ : ℤ → ℤ → HProp
-   x <ₑₕ y = ⟨ (x ≤ᵇ y) ≡ true , ≤ᵇ≡true-is-prop x y ⟩
+   _≤ₑₕ_ : ℤ → ℤ → HProp
+   x ≤ₑₕ y = ⟨ (x ≤ᵇ y) ≡ true , ≤ᵇ≡true-is-prop x y ⟩
       where
          ≤ᵇ≡true-is-prop : (x y : ℤ) → is-proposition ((x ≤ᵇ y) ≡ true)
          ≤ᵇ≡true-is-prop x y p q with x ≤ᵇ y
@@ -54,6 +57,36 @@ module PQSemantics where
    ⟦ a₁ +ₑ a₂ ⟧ₑ Γ = (⟦ a₁ ⟧ₑ Γ) + (⟦ a₂ ⟧ₑ Γ) 
 
    --
+   -- Some useful lemmas.
+   --
+
+   n-≤ᵇ-n : {n : ℕ} → (n Data.Nat.≤ᵇ n) ≡ true
+   n-≤ᵇ-n {ℕ.zero} = refl
+   n-≤ᵇ-n {suc n} = m-ℕ<ᵇ-suc-m {n}
+      where
+         m-ℕ<ᵇ-suc-m : {m : ℕ} → (m ℕ<ᵇ suc m) ≡ true
+         m-ℕ<ᵇ-suc-m {ℕ.zero} = refl
+         m-ℕ<ᵇ-suc-m {suc m} = m-ℕ<ᵇ-suc-m {m}
+
+   n-≤ᵇ-suc-n : {n : ℕ} → (n Data.Nat.≤ᵇ (suc n)) ≡ true
+   n-≤ᵇ-suc-n {ℕ.zero} = refl
+   n-≤ᵇ-suc-n {suc n} = m-ℕ<ᵇ-suc-suc-m {n}
+      where
+         m-ℕ<ᵇ-suc-suc-m : {m : ℕ} → (m ℕ<ᵇ suc (suc m)) ≡ true
+         m-ℕ<ᵇ-suc-suc-m {ℕ.zero} = refl
+         m-ℕ<ᵇ-suc-suc-m {suc m} = m-ℕ<ᵇ-suc-suc-m {m}
+   
+   negsuc-n-≤ᵇ-1-⊖-n : {n : ℕ} → (ℤ.negsuc n ≤ᵇ 1 Data.Integer.⊖ suc n) ≡ true
+   negsuc-n-≤ᵇ-1-⊖-n {ℕ.zero} = refl
+   negsuc-n-≤ᵇ-1-⊖-n {suc n} = n-≤ᵇ-suc-n {n}
+
+   ≡true-T : {a : Bool} → a ≡ true → T a
+   ≡true-T {true} _ = tt
+
+   T-≡true : {a : Bool} → T a → a ≡ true
+   T-≡true {true} _ = refl
+
+   --
    -- The recursively defined interpretation function for formulae.
    --
 
@@ -64,7 +97,7 @@ module PQSemantics where
    ⟦ P₁ ∨ P₂ ⟧ S = ⟦ P₁ ⟧ S ∨ʰ ⟦ P₂ ⟧ S
    ⟦ P₁ ⇒ P₂ ⟧ S = ⟦ P₁ ⟧ S ⇒ʰ ⟦ P₂ ⟧ S
    ⟦ x₁ =ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₑ S) =ₑₕ (⟦ x₂ ⟧ₑ S)
-   ⟦ x₁ ≤ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₑ S) <ₑₕ (⟦ x₂ ⟧ₑ S)
+   ⟦ x₁ ≤ₑ x₂ ⟧ S = (⟦ x₁ ⟧ₑ S) ≤ₑₕ (⟦ x₂ ⟧ₑ S)
 
 
    --
@@ -153,16 +186,78 @@ module PQSemantics where
 
    ⟦ =ₑ-trans h₁ h₂ ⟧ₓ {s} p = trans (⟦ h₁ ⟧ₓ p) (⟦ h₂ ⟧ₓ p)
 
-   ⟦ ≤ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = T-≡true (≤⇒≤ᵇ( +-monoˡ-≤ (⟦ z ⟧ₑ s) (≤ᵇ⇒≤ {⟦ x ⟧ₑ s } (≡true-T (⟦ h ⟧ₓ p)))))
-      where
-         ≡true-T : {a : Bool} → a ≡ true → T a
-         ≡true-T {true} _ = tt
-
-         T-≡true : {a : Bool} → T a → a ≡ true
-         T-≡true {true} _ = refl
+   ⟦ ≤ₑ-add {Δ} {x} {y} {z} h ⟧ₓ {s} p = 
+      T-≡true (≤⇒≤ᵇ (
+         +-monoˡ-≤ (⟦ z ⟧ₑ s)
+            (≤ᵇ⇒≤ {⟦ x ⟧ₑ s } (≡true-T (⟦ h ⟧ₓ p)))))
 
    ⟦ +ₚ-zero {Δ} {x} ⟧ₓ {s} p = +-identityʳ (⟦ x ⟧ₑ s)
 
    ⟦ +ₚ-comm {Δ} {x} {y} ⟧ₓ {s} p = +-comm (⟦ x ⟧ₑ s) (⟦ y ⟧ₑ s)
 
-   ⟦ a ⟧ₓ p = {!   !}
+   ⟦ =ₑ-subst {Δ} {P} {l} {x} {y} x=y h ⟧ₓ {s} p = aux-=ₑ-subst P {x} {y} x=y (⟦ h ⟧ₓ p)
+
+      where 
+
+         aux-=ₑ-subst-expr : (e : Expr) →
+            {x y : Expr} →
+            (Δ ⊢ x =ₑ y) →
+            ⟦ e [ x / l ]ᵃ ⟧ₑ s ≡ ⟦ e [ y / l ]ᵃ ⟧ₑ s
+         aux-=ₑ-subst-expr (int x) h = refl
+         aux-=ₑ-subst-expr (loc x) h = {!   !}
+         aux-=ₑ-subst-expr (suc e) h = {!   !}
+         aux-=ₑ-subst-expr (-ₑ e) h = {!   !}
+         aux-=ₑ-subst-expr (e +ₑ e₁) h = {!   !}
+      
+         aux-=ₑ-subst : (P : Formula) →
+            {x y : Expr} →
+            (Δ ⊢ x =ₑ y) →
+            (proof (⟦ P [ x / l ]ᶠ ⟧ s)) →
+               proof (⟦ (P [ y / l ]ᶠ) ⟧ s)
+
+         aux-=ₑ-subst ⊤ᶠ x=y h = tt
+         aux-=ₑ-subst ⊥ᶠ x=y h = h
+         aux-=ₑ-subst (P₁ ∧ P₂) x=y h =
+            aux-=ₑ-subst P₁ x=y (proj₁ h) ,
+            aux-=ₑ-subst P₂ x=y (proj₂ h)
+         aux-=ₑ-subst (P₁ ∨ P₂) {x} {y} x=y  h = ∨ʰ-cong
+            (⟦ P₁ [ x / l ]ᶠ ⟧ s) (⟦ P₂ [ x / l ]ᶠ ⟧ s)
+            {⟦ P₁ [ y / l ]ᶠ ⟧ s} {⟦ P₂ [ y / l ]ᶠ ⟧ s}
+            (λ h → aux-=ₑ-subst P₁ {x} {y} x=y h)
+            (λ h → aux-=ₑ-subst P₂ {x} {y} x=y h)
+            h
+         aux-=ₑ-subst (P₁ ⇒ P₂) {x} {y} x=y h =
+            λ h' → aux-=ₑ-subst P₂ x=y (h
+               (aux-=ₑ-subst P₁ {y} {x} (=ₑ-refl x=y) h'))
+         aux-=ₑ-subst (e₁ =ₑ e₂) {x} {y} x=y h =
+            trans
+               (sym (aux-=ₑ-subst-expr e₁ {x} {y} x=y))
+               (trans h (sym (aux-=ₑ-subst-expr e₂ (=ₑ-refl x=y))))
+         aux-=ₑ-subst (x ≤ₑ x₁) x=y h = {!   !}
+
+   ⟦ PQDeduction.suc-ℤ ⟧ₓ p = refl
+
+   ⟦ PQDeduction.≤ₑ-intro {_} {x} ⟧ₓ {s} p with (⟦ x ⟧ₑ s)
+   ⟦ PQDeduction.≤ₑ-intro {_} {x} ⟧ₓ {s} p | +_ n = n-≤ᵇ-n {n}
+   ⟦ PQDeduction.≤ₑ-intro {_} {x} ⟧ₓ {s} p | ℤ.negsuc n = n-≤ᵇ-n {n}
+
+   ⟦ PQDeduction.≤ₑ-suc {_} {x} ⟧ₓ {s} p with (⟦ x ⟧ₑ s)
+   ... | +_ n = n-≤ᵇ-suc-n {n}
+   ... | ℤ.negsuc n = negsuc-n-≤ᵇ-1-⊖-n {n}
+ 
+   ⟦ PQDeduction.≤ₑ-trans {_} {x} {y} {z} a₁ a₂ ⟧ₓ {s} p =
+      T-≡true ( ≤⇒≤ᵇ {⟦ x ⟧ₑ s} {⟦ z ⟧ₑ s}
+         (≤-trans
+            (≤ᵇ⇒≤ (≡true-T (⟦ a₁ ⟧ₓ p)))
+            ((≤ᵇ⇒≤ (≡true-T (⟦ a₂ ⟧ₓ p))))))
+   
+   ⟦ PQDeduction.+ₚ-carry  {_} {x} {y} ⟧ₓ {s} p =
+      begin
+         ⟦ x ⟧ₑ s + (+ 1 + ⟦ y ⟧ₑ s)
+      ≡⟨ sym (+-assoc (⟦ x ⟧ₑ s) (+ 1) (⟦ y ⟧ₑ s)) ⟩
+         (⟦ x ⟧ₑ s + (+ 1)) + ⟦ y ⟧ₑ s
+      ≡⟨ cong (λ x → x + ⟦ y ⟧ₑ s) {⟦ x ⟧ₑ s + (+ 1)} {(+ 1) + ⟦ x ⟧ₑ s} (+-comm (⟦ x ⟧ₑ s) ((+ 1))) ⟩
+         ((+ 1) + ⟦ x ⟧ₑ s) + ⟦ y ⟧ₑ s
+      ≡⟨ +-assoc (+ 1) (⟦ x ⟧ₑ s) (⟦ y ⟧ₑ s) ⟩
+         ℤ-suc (⟦ x ⟧ₑ s + ⟦ y ⟧ₑ s)
+      ∎          

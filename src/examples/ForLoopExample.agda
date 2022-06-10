@@ -65,11 +65,12 @@ for-loop-example = composition
         (⇒-intro (hyp (_) {{∈-here}}))
         (for-statement
             (composition 
-                -- Statement '1 :=ʷ locʷ 1 +ʷ intʷ + 1' is not relevant for the conclusion.
+                -- Statement '1 :=ʷ locʷ 1 +ʷ intʷ +1' is not relevant for the conclusion.
                 --  Therfore, we do not need to carry any additional information forward.
                 --  (We set the precondition and postcondition to '⊤'.)
                 (implied {[]} {⊤} {_} {⊤} (⇒-intro ⊤-intro) (⇒-intro ⊤-intro)
                     assignment)
+                -- Show that the invariant 'loc 1 ≤ₑ int +5' holds after each iteration.
                 (if-statement
                     (implied {[]} {int (+ 1) ≤ₑ int (+ 5)} {_} {loc 1 ≤ₑ int (+ 5)}
                         (⇒-intro 1-≤ₑ-5)

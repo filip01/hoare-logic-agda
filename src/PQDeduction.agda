@@ -1,6 +1,7 @@
 open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
 open import Data.Integer using (ℤ; +_; _+_) renaming (suc to ℤ-suc)
+open import PQSubstitution
 
 open import HProp
 
@@ -8,44 +9,11 @@ open import HProp
 -- PQ logic - Predicate logic extended with basic arithmetic operations.
 --
 
-module PQDeduction (L : Set) where
+module PQDeduction where
  
-   open import WhileSyntax L
+   open import PQSyntax ℕ
 
-   --
-   -- Expressions of propositional logic.
-   --
- 
-   infix 10 int
-   infix 10 loc
-   infixl 9 suc
-   infixl 8 -ₑ_
-   infixl 7 _+ₑ_
-      
-   data Expr : Set where
-      int : ℤ → Expr
-      loc : L → Expr
-      suc : Expr → Expr
-      -ₑ_ : Expr → Expr
-      _+ₑ_ : Expr → Expr → Expr
-
-   --
-   -- Formulae of propositional logic.
-   --
-
-   data Formula : Set where
-      ⊤   : Formula                           -- truth (unicode \top)
-      ⊥   : Formula                           -- falsehood (unicode \bot)
-      _∧_ : Formula → Formula → Formula       -- conjunction (unicode \wedge)
-      _∨_ : Formula → Formula → Formula       -- disjunction (unicode \vee)
-      _⇒_ : Formula → Formula → Formula       -- implication (unicode \=>)
-      _=ₑ_ : Expr → Expr → Formula         -- equality
-      _≤ₑ_ : Expr → Expr → Formula         -- less than
-
-   infixr 6 _∧_
-   infixr 5 _∨_
-   infixr 4 _⇒_
-   infix 3 _=ₑ_
+   open import WhileSyntax ℕ
 
    -- Hypotheses are represented as a list of formulae.
 
@@ -187,20 +155,21 @@ module PQDeduction (L : Set) where
                -----------------
                → Δ ⊢ x =ₑ z 
 
-      =ₑ-cong : {Δ : Hypotheses}
-            → (f : Expr → Expr)
-            → {x y : Expr}
-            → Δ ⊢ x =ₑ y
-            -----------------
-            → Δ ⊢ f x =ₑ f y
+      -- =ₑ-cong : {Δ : Hypotheses}
+      --       → (f : Expr → Expr)
+      --       → {x y : Expr}
+      --       → Δ ⊢ x =ₑ y
+      --       -----------------
+      --       → Δ ⊢ f x =ₑ f y
       
       =ₑ-subst : {Δ : Hypotheses}
-            → {P : Expr → Formula}
+            → {P : Formula}
+            → {l : L}
             → {x y : Expr}
             → Δ ⊢ x =ₑ y
-            → Δ ⊢ P x
+            → Δ ⊢ P [ x / l ]ᶠ
             -----------------
-            → Δ ⊢ P y
+            → Δ ⊢ P [ y / l ]ᶠ
 
       -- successor
 

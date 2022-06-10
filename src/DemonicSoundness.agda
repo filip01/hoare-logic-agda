@@ -229,10 +229,10 @@ module DemonicSoundness where
           dc-++-[] {Q} {c₁} (gdsoundness h₁ (x ∷ []) (((proj₁ pPs) , bIsTrueFollows {proj₂ x} {b} eq) , tt))
 
     gdsoundness {P} {P} {forʷ _ doo _} (for-statement h) [] pPs = tt
-    gdsoundness {P} {P} {forʷ _ doo _} (for-statement {_} {_} {a} {c} h) (x ∷ ls) pPs = 
+    gdsoundness {P} {P} {forʷ _ doo _} (for-statement {_} {a} {c} h) (x ∷ ls) pPs = 
       dc-++-eq-∧ʰ {⊤ᶠ} {P} {forDooAux (abs (⟦ a ⟧ᵃ (proj₂ x))) ⟦ c ⟧ᶜ (proj₂ x)}
         ( cases-m (abs (⟦ a ⟧ᵃ (proj₂ x))) x (proj₁ pPs) ,
-          gdsoundness (for-statement {P} {P} {a} {c} h) ls (proj₂ pPs))
+          gdsoundness (for-statement {P} {a} {c} h) ls (proj₂ pPs))
 
       where
       
@@ -282,6 +282,11 @@ module DemonicSoundness where
           (dc-++-[] {Q} {cₗ} (gdsoundness h₁ (x ∷ []) ((proj₁ (proj₁ pPs) , tt))) ,
            dc-++-[] {Q} {cᵣ} (gdsoundness h₂ (x ∷ []) (proj₂ (proj₁ pPs) , tt))) ,
          gdsoundness (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) ls ((proj₂ pPs)))
+    
+    gdsoundness {P} {.P} {.passʷ} skip [] pPs = tt
+    gdsoundness {P} {.P} {.passʷ} skip (x ∷ ls) pPs =
+      (proj₁ pPs) ,
+      (gdsoundness skip ls ((proj₂ pPs)))
 
     -- Soundness
     dsoundness : {P Q : Formula} {C : Cmdₕ}

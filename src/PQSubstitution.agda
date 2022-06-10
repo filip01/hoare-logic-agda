@@ -7,7 +7,7 @@ module PQSubstitution where
 
     L = ℕ
 
-    open import PQDeduction L
+    open import PQSyntax L
 
     open import WhileSyntax L
 
