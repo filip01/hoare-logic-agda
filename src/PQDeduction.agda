@@ -1,7 +1,6 @@
 open import HProp
 
-open import Relation.Binary.Definitions using (Decidable)
-open import Agda.Builtin.Equality using (_≡_)
+open import Data.Bool using (Bool)
 open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
 open import Data.Integer using (ℤ; +_; _+_) renaming (suc to ℤ-suc)
@@ -11,13 +10,13 @@ open import Data.Integer using (ℤ; +_; _+_) renaming (suc to ℤ-suc)
 -- Deduction for PQ logic
 --
 
-module PQDeduction (L : Set) (_≟_ : Decidable {A = L} _≡_) where
+module PQDeduction (L : Set) (_==_ : L → L → Bool) where
 
    open import PQSyntax L
 
    open import WhileSyntax L
 
-   open import PQSubstitution L _≟_
+   open import PQSubstitution L _==_
 
    -- Hypotheses are represented as a list of formulae.
 
@@ -159,13 +158,12 @@ module PQDeduction (L : Set) (_≟_ : Decidable {A = L} _≡_) where
                -----------------
                → Δ ⊢ x =ₑ z 
 
-      -- TODO: Remove if not needed.
       -- =ₑ-cong : {Δ : Hypotheses}
-      --       → (f : Expr → Expr)
+      --       → {P : Formula}
       --       → {x y : Expr}
       --       → Δ ⊢ x =ₑ y
       --       -----------------
-      --       → Δ ⊢ f x =ₑ f y
+      --       → Δ ⊢ P [ x / l ]ᶠ =ₑ P [ y / l ]ᶠ
       
       =ₑ-subst : {Δ : Hypotheses}
             → {P : Formula}

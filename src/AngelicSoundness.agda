@@ -5,7 +5,7 @@ open import Level
 open import HProp
 open import Monads
 
-open import Data.Nat using (ℕ; _≟_)
+open import Data.Nat using (ℕ; _≡ᵇ_)
 open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_∣ to abs; suc to ℤ-suc)
 open import Data.Bool using (Bool; true; false)
 open import Data.Empty renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᶠ)
@@ -30,13 +30,13 @@ module AngelicSoundness where
 
     open import PQSyntax L
 
-    open import PQDeduction L _≟_ 
+    open import PQDeduction L _≡ᵇ_ 
 
-    open import PQSemantics L _≟_
+    open import PQSemantics L _≡ᵇ_
 
-    open import PQSubstitution L _≟_
+    open import PQSubstitution L _≡ᵇ_
 
-    open import WhileSemantics L _≟_ renaming (⟦_⟧ to ⟦_⟧ᶜ)
+    open import WhileSemantics L _≡ᵇ_ renaming (⟦_⟧ to ⟦_⟧ᶜ)
 
     open import WhileSyntax L
 
@@ -98,7 +98,7 @@ module AngelicSoundness where
     subR2StateA : {a : Expr} → {b : AExprₕ} → {l : ℕ} → {s : state}
          →  (⟦ a [ (toExprₚ b) / l ]ᵃ ⟧ₑ s) ≡ (⟦ a ⟧ₑ (toSt l (⟦ b ⟧ᵃ s) s))
     subR2StateA {int x} {b} {l} {s} = refl
-    subR2StateA {loc l'} {b} {l} {s} with does (l ≟ l')
+    subR2StateA {loc l'} {b} {l} {s} with l ≡ᵇ l'
     ... | false = refl
     ... | true rewrite itr-are-equal b = refl
     subR2StateA {suc a} {b} {l} {s} = cong ℤ-suc (subR2StateA {a} {b} {l} {s})

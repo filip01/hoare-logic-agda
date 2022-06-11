@@ -1,4 +1,4 @@
-open import Data.Nat using (ℕ; _≟_)
+open import Data.Nat using (ℕ; _≡ᵇ_)
 
 open import Data.Bool using (Bool; true; false)
 
@@ -20,9 +20,9 @@ module DemonicHoareLogic where
 
     open import PQSyntax L
 
-    open import PQDeduction L _≟_ 
+    open import PQDeduction L _≡ᵇ_ 
 
-    open import PQSubstitution L _≟_
+    open import PQSubstitution L _≡ᵇ_
 
     open import WhileSemantics L
 

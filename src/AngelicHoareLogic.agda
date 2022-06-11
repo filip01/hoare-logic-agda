@@ -1,4 +1,10 @@
-open import Data.Nat using (ℕ; _≟_)
+import PQSyntax
+import PQDeduction
+import PQSubstitution
+import WhileSemantics
+import WhileSyntax
+
+open import Data.Nat using (ℕ; _≡ᵇ_)
 
 open import Data.Bool using (Bool; true; false)
 
@@ -20,15 +26,20 @@ module AngelicHoareLogic where
     -- Define type for locations
     L = ℕ
 
-    open import PQSyntax L
+    module PQSyntaxℕ = PQSyntax L
+    open PQSyntaxℕ
+    
+    module PQDeductionℕ = PQDeduction L _≡ᵇ_
+    open PQDeductionℕ
 
-    open import PQDeduction L _≟_ 
+    module PQSubstitutionℕ = PQSubstitution L _≡ᵇ_
+    open PQSubstitutionℕ
 
-    open import PQSubstitution L _≟_
+    module WhileSemanticsℕ = WhileSemantics L
+    open WhileSemanticsℕ
 
-    open import WhileSemantics L
-
-    open import WhileSyntax L
+    module WhileSyntaxℕ = WhileSyntax L
+    open WhileSyntaxℕ
 
 
     toₚ : Bool → Formula

@@ -25,13 +25,13 @@ open import Data.Unit using (⊤; tt)
 -- Interpretation of PQ logic
 --
 
-module PQSemantics (L : Set) (_≟_ : Decidable {A = L} _≡_) where
+module PQSemantics (L : Set) (_==_ : L → L → Bool) where
 
    open import PQSyntax L renaming (⊥ to ⊥ᶠ;  ⊤ to ⊤ᶠ)
 
-   open import PQDeduction L _≟_ renaming (⊥-elim to ⊥-elimᵣ) hiding (_∈_)
+   open import PQDeduction L _==_ renaming (⊥-elim to ⊥-elimᵣ) hiding (_∈_)
 
-   open import PQSubstitution L _≟_
+   open import PQSubstitution L _==_
 
 
    ℙ = HProp   -- unicode \bP
@@ -211,7 +211,7 @@ module PQSemantics (L : Set) (_≟_ : Decidable {A = L} _≡_) where
             ⟦ e [ x / l ]ᵃ ⟧ₑ s ≡ ⟦ e [ y / l ]ᵃ ⟧ₑ s
 
          aux-=ₑ-subst-expr (int i) h = refl
-         aux-=ₑ-subst-expr (loc l') {x} {y} h with Dec.does (l ≟ l')
+         aux-=ₑ-subst-expr (loc l') {x} {y} h with l == l'
          ... | false = refl
          ... | true = h
          aux-=ₑ-subst-expr (suc e) h = cong ℤ-suc (aux-=ₑ-subst-expr e h)

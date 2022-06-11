@@ -1,19 +1,16 @@
 import PQSyntax
 
 open import Data.Nat using (ℕ)
-open import Agda.Builtin.Equality using (_≡_)
 open import Relation.Nullary using (Dec)
 open import Data.Integer using (ℤ)
 open import Data.Bool using (Bool; true; false)
-
-open import Relation.Binary.Definitions using (Decidable)
 
 
 --
 -- Substitution for PQ logic
 --
 
-module PQSubstitution (L : Set) (_≟_ : Decidable {A = L} _≡_) where
+module PQSubstitution (L : Set) (_==_ : L → L → Bool) where
 
     open import PQSyntax L
 
@@ -22,7 +19,7 @@ module PQSubstitution (L : Set) (_≟_ : Decidable {A = L} _≡_) where
     -- Substitution for expressions
     _[_/_]ᵃ : Expr → Expr → L → Expr
     (int x) [ e / l ]ᵃ = (int x)
-    (loc l') [ e / l ]ᵃ with (Dec.does (l ≟ l'))
+    (loc l') [ e / l ]ᵃ with l == l'
     ... | false = (loc l')
     ... | true = e
     (suc a) [ e / l ]ᵃ = (suc (a [ e / l ]ᵃ))

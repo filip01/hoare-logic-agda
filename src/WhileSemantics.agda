@@ -2,9 +2,6 @@ open import Monads
 open ListMonad
 open StateTransformer
 
-open import Relation.Binary.Definitions using (Decidable)
-open import Agda.Builtin.Equality using (_≡_)
-
 open import Level renaming (zero to lzero; suc to lsuc)
 
 open import Data.Nat using (ℕ ; suc) renaming (_<ᵇ_ to _ℕ<ᵇ_)
@@ -21,7 +18,7 @@ open import Data.Product using (_,_; _×_)
 -- Semantics of WHILE language with state and nondeterminism
 --
 
-module WhileSemantics (L : Set) (_≟_ : Decidable {A = L} _≡_) where
+module WhileSemantics (L : Set) (_==_ : L → L → Bool) where
 
     open import WhileSyntax L
 
@@ -57,7 +54,7 @@ module WhileSemantics (L : Set) (_≟_ : Decidable {A = L} _≡_) where
     open Monad NDS-Monad
 
     toSt : L → ℤ → state → state
-    toSt l a' Γ l' with (Dec.does (l ≟ l'))
+    toSt l a' Γ l' with l == l'
     ... | false = Γ l'
     ... | true = a'
 
