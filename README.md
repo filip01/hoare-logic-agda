@@ -20,11 +20,15 @@ This repository contains formalization of *Hoare logic for WHILE language extend
  - `src/DemonicSoundness.agda` - proof of soundness of the Hoare logic with demonic nondeterminism
  - `src/HProp.agda` - definition of the universe of propositions
  - `src/Monads.agda` - definition of a monad, state transformer and monad of lists
- - `src/PQDeduction.agda` - embedding of PQ logic
+ - `src/PQDeduction.agda` - definition of deduction rules for PQ logic
  - `src/PQSemantics.agda` - interpretation of PQ logic
- - `src/PQSubstitution.agda` - definition of a substitution used in the interpretation of PQ logic
+ - `src/PQSubstitution.agda` - definition of a substitution for PQ logic
+ - `src/PQSyntax.agda` - embedding of PQ logic
  - `src/WhileSemantics.agda` - embedding of the extended WHILE language
  - `src/WhileSyntax.agda` - interpretation of the extended WHILE language
+ - `examples/` - directory containig examples of how the Hoare logic can be used
+ - `examples/AdditionExample.agda` - example of how we can prove what is the result of a sum of two numbers
+ - `examples/ForLoopExample.agda` - example of how we can prove that a value of a location is never greater then some number while performing a for loop
 
 ## Getting all the related materials
 
