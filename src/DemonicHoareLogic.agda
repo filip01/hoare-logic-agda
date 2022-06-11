@@ -1,6 +1,4 @@
-import WhileSyntax
-import PQDeduction
-open import PQSubstitution using (_[_/_]ᶠ ; _[_/_]ᵃ)
+open import Data.Nat using (ℕ; _≡ᵇ_)
 
 open import Data.Bool using (Bool; true; false)
 
@@ -10,7 +8,6 @@ open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
 open import Data.List using (List; []; _∷_; [_]; _++_)
 
-open import Data.Nat using (ℕ)
 
 --
 --  Hoare logic for WHILE language with state and demonic nondeterminism
@@ -18,18 +15,30 @@ open import Data.Nat using (ℕ)
 
 module DemonicHoareLogic where
 
-    -- Define location type
+    -- Define type for locations
     L = ℕ
 
-    -- Introduce WHILE syntax that uses natural numbers as location.
-    open module WhileSyntaxNat = WhileSyntax L
+    open import PQSyntax L
 
-    -- Intrudce PQ syntax that uses natural numbers as location.
-    open module PQDeductionNat = PQDeduction L
+    open import PQDeduction L _≡ᵇ_ 
+
+    open import PQSubstitution L _≡ᵇ_
+
+    open import WhileSemantics L
+
+    open import WhileSyntax L
+
 
     toₚ : Bool → Formula
     toₚ false = ⊥
     toₚ true = ⊤
+
+    -- Covert AExprₕ to Expr.
+    toExprₚ : AExprₕ → Expr
+    toExprₚ (Int x) = int x
+    toExprₚ (Loc x) = loc x
+    toExprₚ (-' e) = -ₑ (toExprₚ e)
+    toExprₚ (e₁ +' e₂) = ((toExprₚ e₁) +ₑ (toExprₚ e₂))
 
     -- Covert BExprₕ to Formula.
     toFormulaₚ : BExprₕ → Formula
@@ -38,10 +47,14 @@ module DemonicHoareLogic where
     toFormulaₚ (¬' b) = ¬ (toFormulaₚ b)
     toFormulaₚ (b₁ ∧' b₂) = (toFormulaₚ b₁) ∧ (toFormulaₚ b₂)
     toFormulaₚ (b₁ ∨' b₂) = (toFormulaₚ b₁) ∨ (toFormulaₚ b₂)
-    toFormulaₚ (a₁ ≤' a₂) = a₁ ≤ₑ a₂
+    toFormulaₚ (a₁ ≤' a₂) = (toExprₚ a₁) ≤ₑ (toExprₚ a₂)
 
     -- Hoare triples
     data ⟪_⟫_⟪_⟫ : Formula → Cmdₕ → Formula → Set where
+
+        skip          : {ϕ : Formula}
+                      ------------------------
+                      → ⟪ ϕ ⟫ Skip ⟪ ϕ ⟫
         
         composition   : {ϕ θ ψ : Formula}
                       → {c₁ c₂ : Cmdₕ}
@@ -55,7 +68,7 @@ module DemonicHoareLogic where
                       → {a : AExprₕ}
                       → {l : L}
                       ------------------
-                      → ⟪ ϕ [ a / l ]ᶠ ⟫ l ≔ a ⟪ ϕ ⟫
+                      → ⟪ ϕ [ (toExprₚ a) / l ]ᶠ ⟫ l ≔ a ⟪ ϕ ⟫
 
         if-statement  : {ϕ ψ : Formula}
                       → {b : BExprₕ}
@@ -65,7 +78,7 @@ module DemonicHoareLogic where
                       -----------------------------------
                       → ⟪ ϕ ⟫ If b Then c₁ Else c₂ ⟪ ψ ⟫
 
-        for-statement : {ϕ ψ : Formula}
+        for-statement : {ϕ : Formula}
                       → {a : AExprₕ}
                       → {c : Cmdₕ}
                       → ⟪ ϕ ⟫ c ⟪ ϕ ⟫

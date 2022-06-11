@@ -1,34 +1,22 @@
-open import Data.List using (List; []; _∷_; [_]; _++_)
-open import Data.Nat using (ℕ)
-open import Data.Integer
-
 open import HProp
 
+open import Data.Bool using (Bool)
+open import Data.List using (List; []; _∷_; [_]; _++_)
+open import Data.Nat using (ℕ)
+open import Data.Integer using (ℤ; +_; _+_) renaming (suc to ℤ-suc)
+
+
 --
--- PQ logic - Predicate logic extended with basic arithmetic operations.
+-- Deduction for PQ logic
 --
 
-module PQDeduction (L : Set) where
- 
+module PQDeduction (L : Set) (_==_ : L → L → Bool) where
+
+   open import PQSyntax L
+
    open import WhileSyntax L
 
-   --
-   -- Formulae of propositional logic.
-   --
-
-   data Formula : Set where
-      ⊤   : Formula                           -- truth (unicode \top)
-      ⊥   : Formula                           -- falsehood (unicode \bot)
-      _∧_ : Formula → Formula → Formula       -- conjunction (unicode \wedge)
-      _∨_ : Formula → Formula → Formula       -- disjunction (unicode \vee)
-      _⇒_ : Formula → Formula → Formula       -- implication (unicode \=>)
-      _=ₑ_ : AExprₕ → AExprₕ → Formula         -- equality
-      _≤ₑ_ : AExprₕ → AExprₕ → Formula         -- less than
-
-   infixr 6 _∧_
-   infixr 5 _∨_
-   infixr 4 _⇒_
-   infix 3 _=ₑ_
+   open import PQSubstitution L _==_
 
    -- Hypotheses are represented as a list of formulae.
 
@@ -39,8 +27,6 @@ module PQDeduction (L : Set) where
       instance
          ∈-here  : {x : A} → {xs : List A} → x ∈ (x ∷ xs)
          ∈-there : {x y : A} {xs : List A} → {{x ∈ xs}} → x ∈ (y ∷ xs)
-
-
    --
    -- Below is a natural deduction style proof calculus for **intuitionistic**
    --  propositional logic, formalised as an inductive relation.
@@ -155,39 +141,87 @@ module PQDeduction (L : Set) where
       -- equality
 
       =ₑ-intro : {Δ : Hypotheses}
-               → {x : AExprₕ}
+               → {x : Expr}
                ------------------
                → Δ ⊢ x =ₑ x
 
       =ₑ-refl : {Δ : Hypotheses}
-            → {x y : AExprₕ}
+            → {x y : Expr}
             → Δ ⊢ x =ₑ y
             -----------------
             → Δ ⊢ y =ₑ x
 
       =ₑ-trans : {Δ : Hypotheses}
-               → {x y z : AExprₕ}
+               → {x y z : Expr}
                → Δ ⊢ x =ₑ y
                → Δ ⊢ y =ₑ z
                -----------------
-               → Δ ⊢ x =ₑ z  
+               → Δ ⊢ x =ₑ z 
 
-      ≤ₑ-add : {Δ : Hypotheses}
-            → {x y z : AExprₕ}
-            → Δ ⊢ x ≤ₑ y
-            --------------------------
-            → Δ ⊢ (x +' z) ≤ₑ (y +' z)
+      -- =ₑ-cong : {Δ : Hypotheses}
+      --       → {P : Formula}
+      --       → {x y : Expr}
+      --       → Δ ⊢ x =ₑ y
+      --       -----------------
+      --       → Δ ⊢ P [ x / l ]ᶠ =ₑ P [ y / l ]ᶠ
+      
+      =ₑ-subst : {Δ : Hypotheses}
+            → {P : Formula}
+            → {l : L}
+            → {x y : Expr}
+            → Δ ⊢ x =ₑ y
+            → Δ ⊢ P [ x / l ]ᶠ
+            -----------------
+            → Δ ⊢ P [ y / l ]ᶠ
+
+      -- successor
+
+      suc-ℤ : {Δ : Hypotheses}
+            → {i : ℤ}
+            ------------------------
+            → Δ ⊢ suc (int i) =ₑ int (ℤ-suc i)
+
+      -- addition
 
       +ₚ-zero : {Δ : Hypotheses}
-            → {x : AExprₕ}
+            → {x : Expr}
             ------------------------
-            → Δ ⊢ x +' (Int (+ 0)) =ₑ x
+            → Δ ⊢ x +ₑ (int (+ 0)) =ₑ x
+
+      +ₚ-carry : {Δ : Hypotheses}
+            → {x y : Expr}
+            ------------------------
+            → Δ ⊢ x +ₑ suc y =ₑ suc (x +ₑ y)
 
       +ₚ-comm : {Δ : Hypotheses}
-               → {x y : AExprₕ}
-               ----------------------
-               → Δ ⊢ x +' y =ₑ y +' x
+            → {x y : Expr}
+            ----------------------
+            → Δ ⊢ x +ₑ y =ₑ y +ₑ x
 
+      -- greater than or equal
+
+      ≤ₑ-intro : {Δ : Hypotheses}
+            → {x : Expr}
+            --------------------------
+            → Δ ⊢ x ≤ₑ x
+
+      ≤ₑ-suc : {Δ : Hypotheses}
+            → {x : Expr}
+            --------------------------
+            → Δ ⊢ x ≤ₑ (suc x)
+
+      ≤ₑ-trans : {Δ : Hypotheses}
+            → {x y z : Expr}
+            → Δ ⊢ x ≤ₑ y
+            → Δ ⊢ y ≤ₑ z
+            -----------------
+            → Δ ⊢ x ≤ₑ z 
+
+      ≤ₑ-add : {Δ : Hypotheses}
+            → {x y z : Expr}
+            → Δ ⊢ x ≤ₑ y
+            --------------------------
+            → Δ ⊢ (x +ₑ z) ≤ₑ (y +ₑ z)
 
    -- We define negation and logical equivalence as syntactic sugar.
    -- These definitions are standard logical encodings of `¬` and `⇔`.
@@ -224,3 +258,4 @@ module PQDeduction (L : Set) where
                → Δ ⊢ ψ
 
    cut-derivable d₁ d₂ = ⇒-elim (⇒-intro d₂) d₁  
+  
