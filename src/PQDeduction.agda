@@ -1,19 +1,23 @@
+open import HProp
+
+open import Relation.Binary.Definitions using (Decidable)
+open import Agda.Builtin.Equality using (_≡_)
 open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
 open import Data.Integer using (ℤ; +_; _+_) renaming (suc to ℤ-suc)
-open import PQSubstitution
 
-open import HProp
 
 --
--- PQ logic - Predicate logic extended with basic arithmetic operations.
+-- Deduction for PQ logic
 --
 
-module PQDeduction where
- 
-   open import PQSyntax ℕ
+module PQDeduction (L : Set) (_≟_ : Decidable {A = L} _≡_) where
 
-   open import WhileSyntax ℕ
+   open import PQSyntax L
+
+   open import WhileSyntax L
+
+   open import PQSubstitution L _≟_
 
    -- Hypotheses are represented as a list of formulae.
 
@@ -155,6 +159,7 @@ module PQDeduction where
                -----------------
                → Δ ⊢ x =ₑ z 
 
+      -- TODO: Remove if not needed.
       -- =ₑ-cong : {Δ : Hypotheses}
       --       → (f : Expr → Expr)
       --       → {x y : Expr}
@@ -180,6 +185,23 @@ module PQDeduction where
 
       -- addition
 
+      +ₚ-zero : {Δ : Hypotheses}
+            → {x : Expr}
+            ------------------------
+            → Δ ⊢ x +ₑ (int (+ 0)) =ₑ x
+
+      +ₚ-carry : {Δ : Hypotheses}
+            → {x y : Expr}
+            ------------------------
+            → Δ ⊢ x +ₑ suc y =ₑ suc (x +ₑ y)
+
+      +ₚ-comm : {Δ : Hypotheses}
+            → {x y : Expr}
+            ----------------------
+            → Δ ⊢ x +ₑ y =ₑ y +ₑ x
+
+      -- greater than or equal
+
       ≤ₑ-intro : {Δ : Hypotheses}
             → {x : Expr}
             --------------------------
@@ -202,21 +224,6 @@ module PQDeduction where
             → Δ ⊢ x ≤ₑ y
             --------------------------
             → Δ ⊢ (x +ₑ z) ≤ₑ (y +ₑ z)
-
-      +ₚ-zero : {Δ : Hypotheses}
-            → {x : Expr}
-            ------------------------
-            → Δ ⊢ x +ₑ (int (+ 0)) =ₑ x
-
-      +ₚ-carry : {Δ : Hypotheses}
-            → {x y : Expr}
-            ------------------------
-            → Δ ⊢ x +ₑ suc y =ₑ suc (x +ₑ y)
-
-      +ₚ-comm : {Δ : Hypotheses}
-            → {x y : Expr}
-            ----------------------
-            → Δ ⊢ x +ₑ y =ₑ y +ₑ x
 
    -- We define negation and logical equivalence as syntactic sugar.
    -- These definitions are standard logical encodings of `¬` and `⇔`.

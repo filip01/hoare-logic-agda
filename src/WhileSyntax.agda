@@ -1,7 +1,9 @@
+open import Data.Nat using (ℕ)
 open import Data.Integer using (ℤ; +_)
 
+
 --
--- Syntax of a WHILE language with state and nondeterminism
+-- Syntax of WHILE language with state and nondeterminism
 --
 
 module WhileSyntax (L : Set) where

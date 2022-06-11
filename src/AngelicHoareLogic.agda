@@ -1,6 +1,4 @@
-import WhileSyntax
-import PQDeduction
-open import PQSubstitution using (_[_/_]ᶠ ; _[_/_]ᵃ)
+open import Data.Nat using (ℕ; _≟_)
 
 open import Data.Bool using (Bool; true; false)
 
@@ -12,20 +10,26 @@ open import Data.List using (List; []; _∷_; [_]; _++_)
 
 open import Data.Nat using (ℕ)
 
+
 --
 --  Hoare logic for WHILE language with state and angelic nondeterminism
 --
 
 module AngelicHoareLogic where
 
-    -- Define location type
+    -- Define type for locations
     L = ℕ
 
-    -- Introduce WHILE syntax that uses natural numbers as location.
-    open module WhileSyntaxNat = WhileSyntax L
+    open import PQSyntax L
 
-    -- Introduce PQ syntax that uses natural numbers as location.
-    open module PQDeductionNat = PQDeduction L
+    open import PQDeduction L _≟_ 
+
+    open import PQSubstitution L _≟_
+
+    open import WhileSemantics L
+
+    open import WhileSyntax L
+
 
     toₚ : Bool → Formula
     toₚ false = ⊥

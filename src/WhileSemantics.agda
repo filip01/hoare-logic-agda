@@ -1,6 +1,13 @@
+open import Monads
+open ListMonad
+open StateTransformer
+
+open import Relation.Binary.Definitions using (Decidable)
+open import Agda.Builtin.Equality using (_≡_)
+
 open import Level renaming (zero to lzero; suc to lsuc)
 
-open import Data.Nat using (ℕ ; suc ; _≟_) renaming (_<ᵇ_ to _ℕ<ᵇ_)
+open import Data.Nat using (ℕ ; suc) renaming (_<ᵇ_ to _ℕ<ᵇ_)
 open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_∣ to abs)
 open import Data.Bool using (Bool; true; false; not; _∧_; _∨_)
 open import Data.List using (List; _∷_; []; _++_; map; foldr)
@@ -9,24 +16,14 @@ open import Relation.Nullary using (Dec)
 open import Data.Unit using (⊤; tt)
 open import Data.Product using (_,_; _×_)
 
-import WhileSyntax
-open import Monads
-open ListMonad
-open StateTransformer
 
 --
--- Semantics of a WHILE language with state and nondeterminism
+-- Semantics of WHILE language with state and nondeterminism
 --
 
-module WhileSemantics where
+module WhileSemantics (L : Set) (_≟_ : Decidable {A = L} _≡_) where
 
-    -- Location
-    L = ℕ
-
-    -- Introduce WHILE syntax that uses natural numbers as location.
-    module WhileSyntaxNat = WhileSyntax L
-
-    open WhileSyntaxNat
+    open import WhileSyntax L
 
     -- State
     state = L → ℤ

@@ -1,9 +1,16 @@
 open import Data.Nat using (ℕ)
 open import Data.Integer using (ℤ; +_; _+_) renaming (suc to ℤ-suc)
 
+
+--
+-- Syntax of PQ logic
+--
+-- PQ logic is a propositional logic extended with basic arithmetic operations.
+--
+
 module PQSyntax (L : Set) where
 
-    --
+   --
    -- Expressions of propositional logic.
    --
  
@@ -25,11 +32,11 @@ module PQSyntax (L : Set) where
    --
 
    data Formula : Set where
-      ⊤   : Formula                           -- truth (unicode \top)
-      ⊥   : Formula                           -- falsehood (unicode \bot)
-      _∧_ : Formula → Formula → Formula       -- conjunction (unicode \wedge)
-      _∨_ : Formula → Formula → Formula       -- disjunction (unicode \vee)
-      _⇒_ : Formula → Formula → Formula       -- implication (unicode \=>)
+      ⊤   : Formula                        -- truth (unicode \top)
+      ⊥   : Formula                        -- falsehood (unicode \bot)
+      _∧_ : Formula → Formula → Formula    -- conjunction (unicode \wedge)
+      _∨_ : Formula → Formula → Formula    -- disjunction (unicode \vee)
+      _⇒_ : Formula → Formula → Formula    -- implication (unicode \=>)
       _=ₑ_ : Expr → Expr → Formula         -- equality
       _≤ₑ_ : Expr → Expr → Formula         -- less than
 

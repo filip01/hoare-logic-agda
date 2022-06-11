@@ -1,22 +1,19 @@
+open import AngelicHoareLogic
+
 open import Level
 
-import PQDeduction hiding (_∈_)
-open import PQSemantics
-import WhileSemantics
-open import AngelicHoareLogic
 open import HProp
-open import PQSubstitution
 open import Monads
 
-open import Data.Nat using (ℕ) renaming (_≟_ to _≟ℕ_)
+open import Data.Nat using (ℕ; _≟_)
 open import Data.Integer using (ℤ; _+_; +_; _-_; -_; _≤ᵇ_) renaming (∣_∣ to abs; suc to ℤ-suc)
 open import Data.Bool using (Bool; true; false)
 open import Data.Empty renaming (⊥ to ⊥ᶠ; ⊥-elim to ⊥-elimᶠ)
-open import Data.Unit renaming (⊤ to ⊤ᶠ)
+open import Data.Unit using (tt) renaming (⊤ to ⊤ᶠ)
 open import Data.List using (List; []; _∷_; [_]; _++_; foldr; map)
 open import Data.List.Properties using (++-identityʳ)
 open import Data.Product using (Σ; _,_; proj₁; proj₂; Σ-syntax; _×_)
-open import Data.Sum  using (_⊎_; inj₁; inj₂; [_,_])
+open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_])
 
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; sym; trans; cong; cong₂; subst; [_]; inspect)
@@ -24,17 +21,27 @@ open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
 open import Relation.Nullary renaming (¬_ to ¬ᶠ_ )
 
+
 --
 -- Soundness of Hoar logic for WHILE with states and angelic nondeterminism
 --
 
 module AngelicSoundness where
 
-    open WhileSyntaxNat
-    open WhileSemantics renaming (⟦_⟧ to ⟦_⟧ᶜ)
-    open PQDeductionNat
-    
+    open import PQSyntax L
+
+    open import PQDeduction L _≟_ 
+
+    open import PQSemantics L _≟_
+
+    open import PQSubstitution L _≟_
+
+    open import WhileSemantics L _≟_ renaming (⟦_⟧ to ⟦_⟧ᶜ)
+
+    open import WhileSyntax L
+
     open Monad NDS-Monad
+
 
     --
     -- Some useful lemmas
@@ -91,7 +98,7 @@ module AngelicSoundness where
     subR2StateA : {a : Expr} → {b : AExprₕ} → {l : ℕ} → {s : state}
          →  (⟦ a [ (toExprₚ b) / l ]ᵃ ⟧ₑ s) ≡ (⟦ a ⟧ₑ (toSt l (⟦ b ⟧ᵃ s) s))
     subR2StateA {int x} {b} {l} {s} = refl
-    subR2StateA {loc l'} {b} {l} {s} with does (l ≟ℕ l')
+    subR2StateA {loc l'} {b} {l} {s} with does (l ≟ l')
     ... | false = refl
     ... | true rewrite itr-are-equal b = refl
     subR2StateA {suc a} {b} {l} {s} = cong ℤ-suc (subR2StateA {a} {b} {l} {s})
