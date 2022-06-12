@@ -85,8 +85,7 @@ module DemonicHoareLogic where
                       ----------------
                       → ⟪ ϕ ⟫ (For a Do c) ⟪ ϕ ⟫
 
-        implied       : {Δ : Hypotheses}
-                      → {ϕ ϕ' ψ ψ' : Formula}
+        implied       : {ϕ ϕ' ψ ψ' : Formula}
                       → {c : Cmdₕ}
                       → ([] ⊢ ϕ' ⇒ ϕ)
                       → ([] ⊢ ψ ⇒ ψ')
@@ -94,8 +93,7 @@ module DemonicHoareLogic where
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
 
-        or-statement  : {Δ : Hypotheses}
-                      → {ϕₗ ϕᵣ ψ : Formula}
+        or-statement  : {ϕₗ ϕᵣ ψ : Formula}
                       → {cₗ cᵣ : Cmdₕ}
                       → ⟪ ϕₗ ⟫ cₗ ⟪ ψ ⟫
                       → ⟪ ϕᵣ ⟫ cᵣ ⟪ ψ ⟫

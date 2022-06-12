@@ -27,6 +27,7 @@ This repository contains formalization of *Hoare logic for WHILE language extend
  - `src/WhileSemantics.agda` - an embedding of the extended WHILE language
  - `src/WhileSyntax.agda` - an interpretation of the extended WHILE language
  - `examples/` - a directory containing examples of how the Hoare logic can be used
+ - `examples/AlwaysZeroExample.agda` - an example of how we can prove that a value of a location is always 0
  - `examples/LargerThenExample.agda` - an example of how we can prove that a value of a location is not greater then some number after the program is executed
  - `examples/SumExample.agda` - an example of how we can prove what is the result of a sum of two numbers
 

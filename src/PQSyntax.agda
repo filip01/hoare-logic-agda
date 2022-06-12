@@ -31,6 +31,11 @@ module PQSyntax (L : Set) where
    -- Formulae of propositional logic.
    --
 
+   infixr 6 _∧_
+   infixr 5 _∨_
+   infixr 4 _⇒_
+   infix 3 _=ₑ_
+
    data Formula : Set where
       ⊤   : Formula                        -- truth (unicode \top)
       ⊥   : Formula                        -- falsehood (unicode \bot)
@@ -39,8 +44,3 @@ module PQSyntax (L : Set) where
       _⇒_ : Formula → Formula → Formula    -- implication (unicode \=>)
       _=ₑ_ : Expr → Expr → Formula         -- equality
       _≤ₑ_ : Expr → Expr → Formula         -- less than
-
-   infixr 6 _∧_
-   infixr 5 _∨_
-   infixr 4 _⇒_
-   infix 3 _=ₑ_

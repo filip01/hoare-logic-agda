@@ -52,10 +52,10 @@ module AngelicSoundness where
 
      -- Show that the interpretation of Expr and AExprₕ are equivalent.
     itr-are-equal : (a : AExprₕ) → ⟦ toExprₚ a ⟧ₑ ≡ ⟦ a ⟧ᵃ
-    itr-are-equal (intʷ x) = refl
-    itr-are-equal (locʷ x) = refl
-    itr-are-equal (-ʷ a) = cong ((λ e Γ → - e Γ )) (itr-are-equal a)
-    itr-are-equal (a₁ +ʷ a₂) = cong₂ (λ e₁ e₂ Γ → e₁ Γ + e₂ Γ) (itr-are-equal a₁) (itr-are-equal a₂)
+    itr-are-equal (Int x) = refl
+    itr-are-equal (Loc x) = refl
+    itr-are-equal (-' a) = cong ((λ e Γ → - e Γ )) (itr-are-equal a)
+    itr-are-equal (a₁ +' a₂) = cong₂ (λ e₁ e₂ Γ → e₁ Γ + e₂ Γ) (itr-are-equal a₁) (itr-are-equal a₂)
 
     -- Relate how the boolean expressions are interpreted in WHILE language and how they are interpreted in the
     -- PQ logic.
@@ -87,14 +87,12 @@ module AngelicSoundness where
         ∥∥-elim (λ x ())
           (λ { (inj₁ y) → bIsFalseFollows {s} {b₁} eq₁ y
              ; (inj₂ y) →  bIsFalseFollows {s} {b₂} eq₂ y } ) x'
-      bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x rewrite itr-are-equal x₁ rewrite itr-are-equal x₂ = x
-      bIsFalseFollows {S} {x₁ ≤ʷ x₂} x x' rewrite itr-are-equal x₁ rewrite itr-are-equal x₂
+      bIsTrueFollows  {S} {x₁ ≤' x₂} x rewrite itr-are-equal x₁ rewrite itr-are-equal x₂ = x
+      bIsFalseFollows {S} {x₁ ≤' x₂} x x' rewrite itr-are-equal x₁ rewrite itr-are-equal x₂
         rewrite x = trueIsNotEqToFalse (sym x')
 
     -- Show how is substitution related to a state.
 
-    -- subR2StateA : {a : Expr} → {b : Expr} → {l : ℕ} → {s : state}
-    --      →  (⟦ a [ b / l ]ᵃ ⟧ₑ s) ≡ (⟦ a ⟧ₑ (toSt l (⟦ b ⟧ₑ s) s))
     subR2StateA : {a : Expr} → {b : AExprₕ} → {l : ℕ} → {s : state}
          →  (⟦ a [ (toExprₚ b) / l ]ᵃ ⟧ₑ s) ≡ (⟦ a ⟧ₑ (toSt l (⟦ b ⟧ᵃ s) s))
     subR2StateA {int x} {b} {l} {s} = refl

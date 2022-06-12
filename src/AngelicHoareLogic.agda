@@ -94,8 +94,7 @@ module AngelicHoareLogic where
                       ----------------
                       → ⟪ ϕ ⟫ (For a Do c) ⟪ ϕ ⟫
 
-        implied       : {Δ : Hypotheses}
-                      → {ϕ ϕ' ψ ψ' : Formula}
+        implied       : {ϕ ϕ' ψ ψ' : Formula}
                       → {c : Cmdₕ}
                       → ([] ⊢ ϕ' ⇒ ϕ)
                       → ([] ⊢ ψ ⇒ ψ')
@@ -103,8 +102,7 @@ module AngelicHoareLogic where
                       ----------------
                       → ⟪ ϕ' ⟫ c ⟪ ψ' ⟫
     
-        or-statement  : {Δ : Hypotheses}
-                      → {ϕ₁ ϕ₂ ψ : Formula}
+        or-statement  : {ϕ₁ ϕ₂ ψ : Formula}
                       → {c₁ c₂ : Cmdₕ}
                       → ⟪ ϕ₁ ⟫ c₁ ⟪ ψ ⟫
                       → ⟪ ϕ₂ ⟫ c₂ ⟪ ψ ⟫

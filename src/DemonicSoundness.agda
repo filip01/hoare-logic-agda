@@ -69,10 +69,10 @@ module DemonicSoundness where
 
     -- Show that the interpretation of Expr and AExprₕ are equivalent.
     itr-are-equal : (a : AExprₕ) → ⟦ toExprₚ a ⟧ₑ ≡ ⟦ a ⟧ᵃ
-    itr-are-equal (intʷ x) = refl
-    itr-are-equal (locʷ x) = refl
-    itr-are-equal (-ʷ a) = cong ((λ e Γ → - e Γ )) (itr-are-equal a)
-    itr-are-equal (a₁ +ʷ a₂) = cong₂ (λ e₁ e₂ Γ → e₁ Γ + e₂ Γ) (itr-are-equal a₁) (itr-are-equal a₂)
+    itr-are-equal (Int x) = refl
+    itr-are-equal (Loc x) = refl
+    itr-are-equal (-' a) = cong ((λ e Γ → - e Γ )) (itr-are-equal a)
+    itr-are-equal (a₁ +' a₂) = cong₂ (λ e₁ e₂ Γ → e₁ Γ + e₂ Γ) (itr-are-equal a₁) (itr-are-equal a₂)
 
     -- Relate how the boolean expressions are interpreted in WHILE language and how they are interpreted in the
     -- PQ logic.
@@ -104,8 +104,8 @@ module DemonicSoundness where
         ∥∥-elim (λ x ())
           (λ { (inj₁ y) → bIsFalseFollows {s} {b₁} eq₁ y
              ; (inj₂ y) →  bIsFalseFollows {s} {b₂} eq₂ y } ) x'
-      bIsTrueFollows  {S} {x₁ ≤ʷ x₂} x rewrite itr-are-equal x₁ rewrite itr-are-equal x₂ = x
-      bIsFalseFollows {S} {x₁ ≤ʷ x₂} x x' rewrite itr-are-equal x₁ rewrite itr-are-equal x₂
+      bIsTrueFollows  {S} {x₁ ≤' x₂} x rewrite itr-are-equal x₁ rewrite itr-are-equal x₂ = x
+      bIsFalseFollows {S} {x₁ ≤' x₂} x x' rewrite itr-are-equal x₁ rewrite itr-are-equal x₂
         rewrite x = trueIsNotEqToFalse (sym x')
 
     -- Show how is substitution related to a state.
@@ -233,8 +233,8 @@ module DemonicSoundness where
         ... | true | Eq.[ eq ] =
           dc-++-[] {Q} {c₁} (gdsoundness h₁ (x ∷ []) (((proj₁ pPs) , bIsTrueFollows {proj₂ x} {b} eq) , tt))
 
-    gdsoundness {P} {P} {forʷ _ doo _} (for-statement h) [] pPs = tt
-    gdsoundness {P} {P} {forʷ _ doo _} (for-statement {_} {a} {c} h) (x ∷ ls) pPs = 
+    gdsoundness {P} {P} {For _ Do _} (for-statement h) [] pPs = tt
+    gdsoundness {P} {P} {For _ Do _} (for-statement {_} {a} {c} h) (x ∷ ls) pPs = 
       dc-++-eq-∧ʰ {⊤ᶠ} {P} {forDooAux (abs (⟦ a ⟧ᵃ (proj₂ x))) ⟦ c ⟧ᶜ (proj₂ x)}
         ( cases-m (abs (⟦ a ⟧ᵃ (proj₂ x))) x (proj₁ pPs) ,
           gdsoundness (for-statement {P} {a} {c} h) ls (proj₂ pPs))
@@ -266,12 +266,12 @@ module DemonicSoundness where
                    (cases-ls ls'' (proj₂ pPls)))
 
     gdsoundness {P} {Q} {C} (implied _ _ _) [] pPs = tt
-    gdsoundness {P'} {Q'} {C} (implied {Δ} {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) (x ∷ ls) pPs = 
+    gdsoundness {P'} {Q'} {C} (implied {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) (x ∷ ls) pPs = 
       dc-++-eq-∧ʰ {⊤ᶠ} {Q'} {⟦ C ⟧ᶜ (proj₂ x)}
         (auxAppToCond {⟦ C ⟧ᶜ (proj₂ x)} Q⇒Q'
             (dc-++-[] {Q} {C} (gdsoundness h (x ∷ [])
               ((⟦ P'⇒P ⟧ₓ {proj₂ x} tt ((proj₁ pPs))) , tt))) ,
-         (gdsoundness (implied {Δ} {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) ls ((proj₂ pPs))))
+         (gdsoundness (implied {P} {P'} {Q} {Q'} P'⇒P Q⇒Q' h) ls ((proj₂ pPs))))
 
         where
 
@@ -280,16 +280,16 @@ module DemonicSoundness where
           auxAppToCond {[]} iQ h = tt
           auxAppToCond {x' ∷ ls'} iQ h = (⟦ iQ ⟧ₓ tt ((proj₁ h))) , (auxAppToCond {ls'} iQ (proj₂ h))
 
-    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ Or cᵣ)} (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) [] pPs = tt
-    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ Or cᵣ)} (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs =
+    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ Or cᵣ)} (or-statement {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) [] pPs = tt
+    gdsoundness {.(Pₗ ∧ Pᵣ)} {Q} {.(cₗ Or cᵣ)} (or-statement {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) (x ∷ ls) pPs =
       dc-++-eq-∧ʰ {⊤ᶠ} {Q} {(⟦ cₗ ⟧ᶜ (proj₂ x) ++ ⟦ cᵣ ⟧ᶜ (proj₂ x))}
         (dc-++-eq-∧ʰ {⊤ᶠ} {Q}  {⟦ cₗ ⟧ᶜ (proj₂ x)}
           (dc-++-[] {Q} {cₗ} (gdsoundness h₁ (x ∷ []) ((proj₁ (proj₁ pPs) , tt))) ,
            dc-++-[] {Q} {cᵣ} (gdsoundness h₂ (x ∷ []) (proj₂ (proj₁ pPs) , tt))) ,
-         gdsoundness (or-statement {Δ} {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) ls ((proj₂ pPs)))
+         gdsoundness (or-statement {Pₗ} {Pᵣ} {Q} {cₗ} {cᵣ} h₁ h₂) ls ((proj₂ pPs)))
     
-    gdsoundness {P} {.P} {.passʷ} skip [] pPs = tt
-    gdsoundness {P} {.P} {.passʷ} skip (x ∷ ls) pPs =
+    gdsoundness {P} {.P} {Skip} skip [] pPs = tt
+    gdsoundness {P} {.P} {Skip} skip (x ∷ ls) pPs =
       (proj₁ pPs) ,
       (gdsoundness skip ls ((proj₂ pPs)))
 

@@ -16,9 +16,9 @@ open import Data.List using (List; _∷_; [])
 open import Data.Integer renaming (suc to ℤ-suc; pred to ℤ-pred)
 
 
-module AdditionExample where
+module SumExample where
 
-    -- Some useful lemmas for computing x + y.
+    -- Some useful lemmas
 
     l-carry-over-int : {Δ : Hypotheses} {x : ℤ} {i : ℤ} →
         Δ ⊢ (int x +ₑ int (ℤ-suc i)) =ₑ int x +ₑ suc (int i)
@@ -41,8 +41,8 @@ module AdditionExample where
 
     -- Proof that location 1 is equal to 8 after the assignment.
                         
-    addition-example : ⟪ ⊥ ⟫ 1 ≔ (Int (+ 5) +' Int (+ 3)) ⟪ loc 1 =ₑ int (+ 8) ⟫
-    addition-example = implied {[]}
+    sum-example : ⟪ ⊥ ⟫ 1 ≔ (Int (+ 5) +' Int (+ 3)) ⟪ loc 1 =ₑ int (+ 8) ⟫
+    sum-example = implied
         ((⇒-intro (=ₑ-refl
             ((l-eq-add {_} {+ 7} {+ 5} {+ 2})
              ((l-eq-add {_} {+ 6} {+ 5} {+ 1})

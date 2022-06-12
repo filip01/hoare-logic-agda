@@ -17,7 +17,7 @@ open import Data.List using (List; _∷_; [])
 open import Data.Integer renaming (suc to ℤ-suc; pred to ℤ-pred)
 
 
-module ForLoopExample where
+module LargerThenExample where
 
     -- Some useful lemmas
 
@@ -48,7 +48,7 @@ module ForLoopExample where
 
     -- Proof that location 1 is never greater then 5 during the for-loop.
 
-    for-loop-example :
+    larger-then-example :
         ⟪ ⊤ ⟫
             1 ≔ Int (+ 0) ；
             For Int (+ 5) Do (
@@ -57,13 +57,13 @@ module ForLoopExample where
                     Then 1 ≔ Int (+ 1)
                     Else Skip)
         ⟪ loc 1 ≤ₑ int (+ 5) ⟫ 
-    for-loop-example = composition
+    larger-then-example = composition
         -- From '1 :=ʷ (intʷ (+ 0))' follows 'loc 1 =ₑ int +0'.
-        (implied {[]} {int (+ 0) =ₑ int (+ 0)} {_} {loc 1 =ₑ int (+ 0)}
+        (implied {int (+ 0) =ₑ int (+ 0)} {_} {loc 1 =ₑ int (+ 0)}
             (⇒-intro (=ₑ-intro {_} {int (+ 0)}))
             (⇒-intro (hyp (loc 1 =ₑ int +0) {{∈-here}}))
             assignment)
-        (implied {[]} {loc 1 ≤ₑ int (+ 5)} {_} {loc 1 ≤ₑ int (+ 5)}
+        (implied {loc 1 ≤ₑ int (+ 5)} {_} {loc 1 ≤ₑ int (+ 5)}
             (⇒-intro 
                 (=ₑ-subst {_} {loc 1 ≤ₑ int (+ 5)} {1}
                     (=ₑ-refl (hyp (_) {{∈-here}}))
@@ -74,15 +74,15 @@ module ForLoopExample where
                     -- Statement '1 :=ʷ locʷ 1 +ʷ intʷ +1' is not relevant for the conclusion.
                     --  Therfore, we do not need to carry any additional information forward.
                     --  (We set the precondition and postcondition to '⊤'.)
-                    (implied {[]} {⊤} {_} {⊤} (⇒-intro ⊤-intro) (⇒-intro ⊤-intro)
+                    (implied {⊤} {_} {⊤} (⇒-intro ⊤-intro) (⇒-intro ⊤-intro)
                         assignment)
                     -- Show that the invariant 'loc 1 ≤ₑ int +5' holds after each iteration.
                     (if-statement
-                        (implied {[]} {int (+ 1) ≤ₑ int (+ 5)} {_} {loc 1 ≤ₑ int (+ 5)}
+                        (implied {int (+ 1) ≤ₑ int (+ 5)} {_} {loc 1 ≤ₑ int (+ 5)}
                             (⇒-intro 1-≤ₑ-5)
                             (⇒-intro (hyp (_) {{∈-here}}))
                             assignment)
-                        (implied {[]} {loc 1 ≤ₑ int (+ 5)} {_} {loc 1 ≤ₑ int (+ 5)}
+                        (implied {loc 1 ≤ₑ int (+ 5)} {_} {loc 1 ≤ₑ int (+ 5)}
                             (⇒-intro (⇒-elim (¬¬p⇒p)
                                 ((∧-elim₂ (hyp (⊤ ∧ ¬ (¬ (loc 1 ≤ₑ int (+ 5)))) {{∈-here}} )))))
                             (⇒-intro (hyp (_) {{∈-here}}))
