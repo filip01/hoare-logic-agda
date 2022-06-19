@@ -128,6 +128,9 @@ module PQSemantics (L : Set) (_==_ : L → L → Bool) where
    sym⟦⟧ₕ-++ [] Δ₂ {s} (_ , p) = p
    sym⟦⟧ₕ-++ (x ∷ Δ₁) Δ₂ {s} ((pₓ , p₁) , p₂) = pₓ , sym⟦⟧ₕ-++ Δ₁ Δ₂ {s} (p₁ , p₂)
 
+   ---
+   --- Soundness of PQ logic
+   ---
 
    ⟦_⟧ₓ : {Δ : Hypotheses} → {φ : Formula} → (Δ ⊢ φ) → 
          ∀ {s : State} → proof (⟦ Δ ⟧ₕ s) -> proof (⟦ φ ⟧ s)
