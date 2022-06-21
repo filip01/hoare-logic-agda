@@ -3,7 +3,7 @@ open import HProp
 open import Data.Bool using (Bool)
 open import Data.List using (List; []; _∷_; [_]; _++_)
 open import Data.Nat using (ℕ)
-open import Data.Integer using (ℤ; +_; _+_) renaming (suc to ℤ-suc)
+open import Data.Integer using (ℤ; +_; _+_; -_) renaming (suc to ℤ-suc; pred to ℤ-pred)
 
 
 --
@@ -181,6 +181,13 @@ module PQDeduction (L : Set) (_==_ : L → L → Bool) where
             ------------------------
             → Δ ⊢ suc (int i) =ₑ int (ℤ-suc i)
 
+      -- negation
+
+      neg-ℤ : {Δ : Hypotheses}
+            → {z : ℤ}
+            ------------------------
+            → Δ ⊢ -ₑ (int z) =ₑ int (- z)
+
       -- addition
 
       +ₚ-zero : {Δ : Hypotheses}
@@ -197,6 +204,11 @@ module PQDeduction (L : Set) (_==_ : L → L → Bool) where
             → {x y : Expr}
             ----------------------
             → Δ ⊢ x +ₑ y =ₑ y +ₑ x
+      
+      +ₚ-inverse : {Δ : Hypotheses}
+                 → {x : Expr}
+                 ------------------
+                 → Δ ⊢ (-ₑ x) +ₑ x =ₑ int (+ 0)
 
       -- greater than or equal
 
@@ -257,5 +269,4 @@ module PQDeduction (L : Set) (_==_ : L → L → Bool) where
                ------------------
                → Δ ⊢ ψ
 
-   cut-derivable d₁ d₂ = ⇒-elim (⇒-intro d₂) d₁  
-  
+   cut-derivable d₁ d₂ = ⇒-elim (⇒-intro d₂) d₁ 

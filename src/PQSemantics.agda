@@ -287,3 +287,7 @@ module PQSemantics (L : Set) (_==_ : L → L → Bool) where
       ≡⟨ +-assoc (+ 1) (⟦ x ⟧ₑ s) (⟦ y ⟧ₑ s) ⟩
          ℤ-suc (⟦ x ⟧ₑ s + ⟦ y ⟧ₑ s)
       ∎             
+
+   ⟦ neg-ℤ ⟧ₓ {s} p = refl
+   
+   ⟦ +ₚ-inverse {_} {x} ⟧ₓ {s} p = +-inverseˡ (⟦ x ⟧ₑ s)
