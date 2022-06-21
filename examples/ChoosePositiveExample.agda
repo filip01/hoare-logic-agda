@@ -16,7 +16,7 @@ open import Data.List using (List; _∷_; []; [_]; _++_)
 open import Data.Integer renaming (suc to ℤ-suc; pred to ℤ-pred)
 
 
-module angelic-or-example where
+module ChoosePositiveExample where
     0≤ₑn : (n : ℕ) → ⊤ ∷ [] ⊢ (int +0 ≤ₑ int (+ n))
     0≤ₑn 0 = ≤ₑ-intro
     0≤ₑn (ℕ.suc n) = 

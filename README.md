@@ -30,6 +30,9 @@ This repository contains formalization of *Hoare logic for WHILE language extend
  - `examples/AlwaysZeroExample.agda` - an example of how we can prove that a value of a location is always 0
  - `examples/LargerThenExample.agda` - an example of how we can prove that a value of a location is not greater then some number after the program is executed
  - `examples/SumExample.agda` - an example of how we can prove what is the result of a sum of two numbers
+ - `examples/SwapExample.agda` - an example of how we can prove that a program
+ swaps two locations
+ - `examples/ChoosePositiveExample.agda` - an example of how we can choose a positive value between an integer and its negation
 
 ## Getting all the related materials
 
